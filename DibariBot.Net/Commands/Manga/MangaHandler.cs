@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using DibariBot.Mangas;
+using Discord;
 
 namespace DibariBot.Commands.Manga;
 
@@ -43,22 +44,24 @@ public class MangaHandler
         }
     }
 
-    private readonly CubariApi cubariApi;
+    private readonly MangaFactory mangaFactory;
 
-    public MangaHandler(CubariApi cubariApi)
+    public MangaHandler(MangaFactory mangaFactory)
     {
-        this.cubariApi = cubariApi;
+        this.mangaFactory = mangaFactory;
     }
 
     public async Task<MessageContents> GetNewMessageContents(State state)
     {
-        var manga = await cubariApi.GetManga(state.identifier);
+        var manga = await mangaFactory.GetManga(state.identifier) ?? throw new NotImplementedException($"Platform \"{state.identifier.platform}\" not implemented!");
+
+        var chapterNames = await manga.GetChapterNames();
 
         var bookmark = new Bookmark(
-            state.bookmark.chapter ?? manga.chapters.First().Key,
+            state.bookmark.chapter ?? chapterNames.First(),
             state.bookmark.page);
 
-        if (!manga.chapters.ContainsKey(bookmark.chapter!))
+        if (!chapterNames.Contains(bookmark.chapter))
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("Chapter not found.")
@@ -72,22 +75,26 @@ public class MangaHandler
             case MangaAction.Open:
                 break;
             case MangaAction.BackPage:
-                bookmark = await cubariApi.Navigate(manga, bookmark, 0, -1);
+                bookmark = await MangaNavigation.Navigate(manga, bookmark, 0, -1);
                 break;
             case MangaAction.ForwardPage:
-                bookmark = await cubariApi.Navigate(manga, bookmark, 0, 1);
+                bookmark = await MangaNavigation.Navigate(manga, bookmark, 0, 1);
                 break;
             case MangaAction.BackChapter:
-                bookmark = await cubariApi.Navigate(manga, bookmark, -1, 0);
+                bookmark = await MangaNavigation.Navigate(manga, bookmark, -1, 0);
+                bookmark.NullCheck();
                 break;
             case MangaAction.ForwardChapter:
-                bookmark = await cubariApi.Navigate(manga, bookmark, 1, 0);
+                bookmark = await MangaNavigation.Navigate(manga, bookmark, 1, 0);
                 break;
             default:
                 throw new NotImplementedException($"{nameof(state.action)} not implemented!");
         }
 
-        var pages = await cubariApi.GetImageSrcs(manga, bookmark.chapter!);
+        // not needed but compiler complains and i hate putting bookmark.chapter!
+        bookmark.NullCheck();
+
+        var pages = await manga.GetImageSrcs(bookmark.chapter);
 
         if (bookmark.page > pages.srcs.Length - 1 || bookmark.page < 0)
         {
@@ -102,25 +109,26 @@ public class MangaHandler
 
         // TODO: Proxy image implementation
 
-        var author = manga.Author;
+        var metadata = manga.GetMetadata();
+        string author = metadata.author;
         // TODO: Mangadex author grabbing
 
-        var disableLeftChapter = manga.chapters.First().Key == bookmark.chapter;
-        var disableRightChapter = manga.chapters.Last().Key == bookmark.chapter;
+        var disableLeftChapter = chapterNames.First() == bookmark.chapter;
+        var disableRightChapter = chapterNames.Last() == bookmark.chapter;
 
         var disableLeftPage = disableLeftChapter && bookmark.page <= 0;
         var disableRightPage = disableRightChapter && bookmark.page >= pages.srcs.Length;
 
-        var chapterData = manga.chapters[bookmark.chapter!];
+        var chapterData = manga.GetChapterMetadata(bookmark.chapter);
 
         var embed = new EmbedBuilder()
             .WithTitle(chapterData.title ?? $"Chapter {bookmark.chapter}")
-            .WithUrl(cubariApi.GetUrl(manga, bookmark))
+            .WithUrl(manga.GetUrl(bookmark))
             .WithDescription($"Chapter {bookmark.chapter} | Page {bookmark.page + 1}/{pages.srcs.Length}")
             .WithImageUrl(pageSrc)
             .WithFooter(
                 new EmbedFooterBuilder()
-                .WithText($"{manga.Title.Truncate(50, true)}, by {author}.\n" +
+                .WithText($"{metadata.title.Truncate(50, true)}, by {author}.\n" +
                 $"Group: {pages.group}")
             )
             .Build();

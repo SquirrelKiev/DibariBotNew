@@ -1,4 +1,6 @@
-﻿namespace DibariBot;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace DibariBot;
 
 public struct SeriesIdentifier
 {
@@ -13,6 +15,7 @@ public struct SeriesIdentifier
         this.series = series;
     }
 
+    [MemberNotNull(nameof(platform), nameof(series))]
     /// <exception cref="ArgumentNullException">if platform or series are null</exception>
     public readonly void ThrowIfInvalid()
     {

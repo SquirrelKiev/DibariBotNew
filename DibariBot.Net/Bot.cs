@@ -1,4 +1,5 @@
 ﻿using DibariBot.Commands.Manga;
+using DibariBot.Mangas;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -38,6 +39,7 @@ public class Bot
             .AddSingleton(Client)
             .AddSingleton(Commands)
             .AddSingleton<CubariApi>()
+            .AddSingleton<MangaFactory>()
             .AddSingleton<MangaHandler>()
             ;
 
@@ -50,6 +52,15 @@ public class Bot
                 DefaultHttpClientConfig(client);
                 client.BaseAddress = new Uri("https://cubari.moe");
             });
+
+        //collection.Scan(scan => scan.FromAssemblyOf<IManga>()
+        //    .AddClasses(classes => classes.AssignableToAny(
+        //        typeof(IManga)
+        //        )
+        //    )
+        //    .AsSelfWithInterfaces()
+        //    .WithTransientLifetime()
+        //);
 
         return collection.BuildServiceProvider();
     }
@@ -74,32 +85,16 @@ public class Bot
 
     private Task Client_Log(LogMessage message)
     {
-        LogEventLevel level;
-
-        switch (message.Severity)
+        var level = message.Severity switch
         {
-            case LogSeverity.Critical:
-                level = LogEventLevel.Fatal;
-                break;
-            case LogSeverity.Error:
-                level = LogEventLevel.Error;
-                break;
-            case LogSeverity.Warning:
-                level = LogEventLevel.Warning;
-                break;
-            case LogSeverity.Info:
-                level = LogEventLevel.Information;
-                break;
-            case LogSeverity.Verbose:
-                level = LogEventLevel.Verbose;
-                break;
-            case LogSeverity.Debug:
-                level = LogEventLevel.Debug;
-                break;
-            default:
-                level = LogEventLevel.Information;
-                break;
-        }
+            LogSeverity.Critical => LogEventLevel.Fatal,
+            LogSeverity.Error => LogEventLevel.Error,
+            LogSeverity.Warning => LogEventLevel.Warning,
+            LogSeverity.Info => LogEventLevel.Information,
+            LogSeverity.Verbose => LogEventLevel.Verbose,
+            LogSeverity.Debug => LogEventLevel.Debug,
+            _ => LogEventLevel.Information,
+        };
 
         if (message.Exception is not null)
         {

@@ -1,7 +1,8 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace DibariBot;
+
+#pragma warning disable SYSLIB1045
 
 public static class ParseUrl
 {
