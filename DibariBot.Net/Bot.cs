@@ -46,21 +46,14 @@ public class Bot
         collection.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName)
             .ConfigureHttpClient(DefaultHttpClientConfig);
 
-        collection.AddHttpClient(CubariApi.CUBARI_CLIENT_NAME)
-            .ConfigureHttpClient((client) =>
-            {
-                DefaultHttpClientConfig(client);
-                client.BaseAddress = new Uri("https://cubari.moe");
-            });
-
-        //collection.Scan(scan => scan.FromAssemblyOf<IManga>()
-        //    .AddClasses(classes => classes.AssignableToAny(
-        //        typeof(IManga)
-        //        )
-        //    )
-        //    .AsSelfWithInterfaces()
-        //    .WithTransientLifetime()
-        //);
+        collection.Scan(scan => scan.FromAssemblyOf<IManga>()
+            .AddClasses(classes => classes.AssignableToAny(
+                typeof(IManga)
+                )
+            )
+            .AsSelfWithInterfaces()
+            .WithTransientLifetime()
+        );
 
         return collection.BuildServiceProvider();
     }
@@ -119,15 +112,24 @@ public class Bot
         await InitializeInteractionService();
     }
 
-    private Task Commands_InteractionExecuted(ICommandInfo cmdInfo, Discord.IInteractionContext ctx, IResult res)
+    private Task Commands_InteractionExecuted(ICommandInfo cmdInfo, IInteractionContext ctx, IResult res)
     {
         if (res.IsSuccess)
         {
-            Log.Information($"Command {cmdInfo.Module.Name}.{cmdInfo.MethodName} successfully executed.");
+            Log.Information("Command {ModuleName}.{MethodName} successfully executed.", cmdInfo.Module.Name, cmdInfo.MethodName);
         }
         else
         {
-            Log.Information($"Command {cmdInfo?.Module?.Name}.{cmdInfo?.MethodName} failed. {res.Error}, {res.ErrorReason}.");
+            if(res is ExecuteResult executeResult)
+            {
+                Log.Error(executeResult.Exception, "Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.", 
+                    cmdInfo?.Module?.Name, cmdInfo?.MethodName, executeResult.Error, executeResult.ErrorReason);
+            }
+            else
+            {
+                Log.Error("Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.",
+                    cmdInfo?.Module?.Name, cmdInfo?.MethodName, res.Error, res.ErrorReason);
+            }
             ctx.Interaction.ModifyOriginalResponseAsync((x) => { x.Content = $"{res.Error}, {res.ErrorReason}"; });
         }
 

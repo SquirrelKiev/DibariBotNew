@@ -6,7 +6,8 @@ namespace DibariBot;
 
 public class CubariApi
 {
-    public const string CUBARI_CLIENT_NAME = "Cubari";
+    private const string CUBARI_URL = "https://cubari.moe";
+    private readonly Uri baseUri = new(CUBARI_URL);
 
     private readonly IHttpClientFactory httpFactory;
 
@@ -15,30 +16,19 @@ public class CubariApi
         httpFactory = http;
     }
 
-    public virtual async Task<CubariManga> GetManga(SeriesIdentifier identifier)
-    {
-        ArgumentNullException.ThrowIfNull(identifier, nameof(identifier));
-        ArgumentNullException.ThrowIfNull(identifier.platform, nameof(identifier.platform));
-        ArgumentNullException.ThrowIfNull(identifier.series, nameof(identifier.series));
-
-        string url = $"read/api/{Uri.EscapeDataString(identifier.platform)}/series/{Uri.EscapeDataString(identifier.series)}";
-
-        var mangaRes = await Get<CubariMangaSchema>(url);
-
-        return new CubariManga(mangaRes, identifier.platform, this);
-    }
-
     /// <summary>
     /// Gets and deserializes the result from whatever url is.
     /// </summary>
     /// <typeparam name="T">the type to deserialize as</typeparam>
     /// <returns></returns>
     /// <exception cref="HttpRequestException"></exception>
-    public virtual async Task<T?> Get<T>(string url)
+    public async Task<T?> Get<T>(string url)
     {
-        using var client = httpFactory.CreateClient(CUBARI_CLIENT_NAME);
+        using var client = httpFactory.CreateClient();
 
-        var res = await client.GetAsync(url);
+        var fullUri = new Uri(baseUri, url);
+
+        var res = await client.GetAsync(fullUri);
 
         if (res.StatusCode != System.Net.HttpStatusCode.OK)
         {
@@ -51,14 +41,13 @@ public class CubariApi
         return obj;
     }
 
-    public virtual string GetUrl(SeriesIdentifier identifier, Bookmark bookmark)
+    public string GetUrl(SeriesIdentifier identifier, Bookmark bookmark)
     {
         identifier.ThrowIfInvalid();
 
-        // TODO: Not this
-        using var client = httpFactory.CreateClient(CUBARI_CLIENT_NAME);
+        var fullUri = new Uri(baseUri, 
+            $"/read/{Uri.EscapeDataString(identifier.platform!)}/{Uri.EscapeDataString(identifier.series!)}/{Uri.EscapeDataString(bookmark.chapter!)}/{bookmark.page + 1}");
 
-        return $"{client.BaseAddress}read/" +
-            $"{Uri.EscapeDataString(identifier.platform!)}/{Uri.EscapeDataString(identifier.series!)}/{Uri.EscapeDataString(bookmark.chapter!)}/{bookmark.page + 1}";
+        return fullUri.ToString();
     }
 }

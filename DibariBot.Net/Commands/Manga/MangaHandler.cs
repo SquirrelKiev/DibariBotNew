@@ -55,13 +55,11 @@ public class MangaHandler
     {
         var manga = await mangaFactory.GetManga(state.identifier) ?? throw new NotImplementedException($"Platform \"{state.identifier.platform}\" not implemented!");
 
-        var chapterNames = await manga.GetChapterNames();
-
         var bookmark = new Bookmark(
-            state.bookmark.chapter ?? chapterNames.First(),
+            state.bookmark.chapter ?? await manga.DefaultChapter(),
             state.bookmark.page);
 
-        if (!chapterNames.Contains(bookmark.chapter))
+        if (!await manga.HasChapter(bookmark.chapter))
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("Chapter not found.")
@@ -69,6 +67,10 @@ public class MangaHandler
 
             return new MessageContents(string.Empty, errorEmbed, null);
         }
+
+        var chapterData = await manga.GetChapterMetadata(bookmark.chapter);
+
+        bookmark.chapter = chapterData.id;
 
         switch (state.action)
         {
@@ -82,7 +84,6 @@ public class MangaHandler
                 break;
             case MangaAction.BackChapter:
                 bookmark = await MangaNavigation.Navigate(manga, bookmark, -1, 0);
-                bookmark.NullCheck();
                 break;
             case MangaAction.ForwardChapter:
                 bookmark = await MangaNavigation.Navigate(manga, bookmark, 1, 0);
@@ -90,9 +91,6 @@ public class MangaHandler
             default:
                 throw new NotImplementedException($"{nameof(state.action)} not implemented!");
         }
-
-        // not needed but compiler complains and i hate putting bookmark.chapter!
-        bookmark.NullCheck();
 
         var pages = await manga.GetImageSrcs(bookmark.chapter);
 
@@ -109,17 +107,17 @@ public class MangaHandler
 
         // TODO: Proxy image implementation
 
-        var metadata = manga.GetMetadata();
+        var metadata = await manga.GetMetadata();
+        
         string author = metadata.author;
         // TODO: Mangadex author grabbing
 
-        var disableLeftChapter = chapterNames.First() == bookmark.chapter;
-        var disableRightChapter = chapterNames.Last() == bookmark.chapter;
+        bool disableLeftChapter = await manga.GetPreviousChapterKey(bookmark.chapter) == null;
+        bool disableRightChapter = await manga.GetNextChapterKey(bookmark.chapter) == null;
 
-        var disableLeftPage = disableLeftChapter && bookmark.page <= 0;
-        var disableRightPage = disableRightChapter && bookmark.page >= pages.srcs.Length;
+        bool disableLeftPage = disableLeftChapter && bookmark.page <= 0;
+        bool disableRightPage = disableRightChapter && bookmark.page >= pages.srcs.Length;
 
-        var chapterData = manga.GetChapterMetadata(bookmark.chapter);
 
         var embed = new EmbedBuilder()
             .WithTitle(chapterData.title ?? $"Chapter {bookmark.chapter}")
@@ -137,25 +135,29 @@ public class MangaHandler
 
         var components = new ComponentBuilder()
             .WithButton(
-                "<<", 
-                StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackChapter), 
+                "<<",
+                StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackChapter),
                 ModulePrefixes.MANGA_MODULE_PREFIX),
-                disabled: disableLeftChapter)
+                disabled: disableLeftChapter
+                )
             .WithButton(
-                "<", 
-                StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackPage), 
+                "<",
+                StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackPage),
                 ModulePrefixes.MANGA_MODULE_PREFIX),
-                disabled: disableLeftPage)
+                disabled: disableLeftPage
+                )
             .WithButton(
-                ">", 
-                StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardPage), 
+                ">",
+                StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardPage),
                 ModulePrefixes.MANGA_MODULE_PREFIX),
-                disabled: disableRightPage)
+                disabled: disableRightPage
+                )
             .WithButton(
-                ">>", 
-                StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardChapter), 
+                ">>",
+                StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardChapter),
                 ModulePrefixes.MANGA_MODULE_PREFIX),
-                disabled: disableRightChapter)
+                disabled: disableRightChapter
+                )
             .Build();
 
         return new MessageContents(string.Empty, embed, components);

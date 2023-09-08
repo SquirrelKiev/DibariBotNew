@@ -13,8 +13,10 @@ public class MangaFactory
 
     public async Task<IManga?> GetManga(SeriesIdentifier identifier)
     {
-        // TODO: figure out from manga class itself via reflection?
-        return identifier.platform switch
+        Type? mangaType;
+
+        // TODO: ideally i dont have to change anything here to add a new manga/platform
+        mangaType = identifier.platform switch
         {
             "imgur" or
             "gist" or
@@ -22,8 +24,16 @@ public class MangaFactory
             "mangadex" or
             "mangasee" or
             "reddit" or
-            "imgchest" => await services.GetRequiredService<CubariApi>().GetManga(identifier),
+            "imgchest" => typeof(CubariManga),
+            "xkcd" => typeof(XkcdManga),
             _ => null,
         };
+
+        if(mangaType == null)
+        {
+            return null;
+        }
+
+        return await ((IManga)services.GetRequiredService(mangaType)).Initialize(identifier);
     }
 }

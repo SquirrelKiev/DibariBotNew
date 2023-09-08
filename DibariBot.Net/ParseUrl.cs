@@ -87,6 +87,11 @@ public static class ParseUrl
                 seriesIdentifier.series = split[1];
             }
         }
+        else if(url == "xkcd")
+        {
+            seriesIdentifier.platform = "xkcd";
+            seriesIdentifier.series = "";
+        }
         else
         {
             return null;

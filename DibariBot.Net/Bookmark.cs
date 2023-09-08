@@ -4,7 +4,7 @@ namespace DibariBot;
 
 public struct Bookmark
 {
-    public string? chapter;
+    public string chapter = "n/a";
     public int page = 1;
 
     public Bookmark()
@@ -14,16 +14,6 @@ public struct Bookmark
     {
         this.chapter = chapter;
         this.page = page;
-    }
-
-    // stupid
-    [MemberNotNull(nameof(chapter))]
-    public readonly void NullCheck()
-    {
-        if (chapter == null)
-        {
-            throw new NullReferenceException(nameof(chapter));
-        }
     }
 
     public override readonly string ToString()

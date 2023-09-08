@@ -10,29 +10,57 @@ public class CubariManga : IManga
     public string Artist { get; private set; }
     public string Cover { get; private set; }
     public Dictionary<string, string> Groups { get; private set; }
-    public SeriesIdentifier Identifier { get => identifier; set => identifier = value; }
     private SeriesIdentifier identifier;
-    /// <summary>
-    /// use <seealso cref="CubariApi.GetImageSrcs(Manga, string)"/> if you want to get the values from this.
-    /// </summary>
-    public readonly SortedDictionary<string, CubariChapterSchema> chapters;
+    private SortedList<string, CubariChapterSchema> chapters;
     private readonly CubariApi cubari;
 
-    public CubariManga(CubariMangaSchema cubariMangaSchema, string platform, CubariApi cubari)
+#pragma warning disable CS8618 // null error, technically true but only if Initialize() wasnt called which in that case, it should throw anyway
+    public CubariManga(CubariApi cubari)
+        => this.cubari = cubari;
+#pragma warning restore CS8618
+
+    public async Task<IManga> Initialize(SeriesIdentifier identifier)
     {
-        Title = cubariMangaSchema.title;
-        Description = cubariMangaSchema.description;
-        Author = cubariMangaSchema.author;
-        Artist = cubariMangaSchema.artist;
-        Cover = cubariMangaSchema.cover;
-        Groups = cubariMangaSchema.groups;
+        ArgumentNullException.ThrowIfNull(identifier, nameof(identifier));
+        ArgumentNullException.ThrowIfNull(identifier.platform, nameof(identifier.platform));
+        ArgumentNullException.ThrowIfNull(identifier.series, nameof(identifier.series));
 
-        chapters = new SortedDictionary<string, CubariChapterSchema>(cubariMangaSchema.chapters, new ChapterNameComparer());
+        string url = $"read/api/{Uri.EscapeDataString(identifier.platform)}/series/{Uri.EscapeDataString(identifier.series)}";
 
-        Identifier = new SeriesIdentifier(platform, cubariMangaSchema.slug);
-        this.cubari = cubari;
+        var mangaRes = await cubari.Get<CubariMangaSchema>(url);
+
+        Title = mangaRes.title;
+        Description = mangaRes.description;
+        Author = mangaRes.author;
+        Artist = mangaRes.artist;
+        Cover = mangaRes.cover;
+        Groups = mangaRes.groups;
+
+        chapters = new SortedList<string, CubariChapterSchema>(mangaRes.chapters, new ChapterNameComparer());
+
+        this.identifier = new SeriesIdentifier(identifier.platform, mangaRes.slug);
+
+        return this;
     }
 
+    public SeriesIdentifier GetIdentifier()
+    {
+        return identifier;
+    }
+    public Task<MangaMetadata> GetMetadata()
+    {
+        return Task.FromResult(new MangaMetadata()
+        {
+            author = Author,
+            title = Title
+        });
+    }
+    public string GetUrl(Bookmark bookmark)
+    {
+        return cubari.GetUrl(identifier, bookmark);
+    }
+
+    /// <exception cref="NotImplementedException">If the type we get from the api is something we don't handle</exception>
     public async Task<ChapterSrcs> GetImageSrcs(string chapter)
     {
         var chapterObj = chapters[chapter];
@@ -43,8 +71,6 @@ public class CubariManga : IManga
 
         return new(srcs, Groups[group.Key]);
     }
-
-    /// <exception cref="NotImplementedException">If the type we get from the api is something we don't handle</exception>
     private async Task<string[]> GetImageSrcsFromGroup(JToken token)
     {
         ArgumentNullException.ThrowIfNull(token, nameof(token));
@@ -77,36 +103,55 @@ public class CubariManga : IManga
         // no clue what on earth we've recieved, bail
         throw new NotImplementedException();
     }
-
-    public Task<string[]> GetChapterNames()
-    {
-        return Task.FromResult(chapters.Keys.ToArray());
-    }
-
-    public ChapterMetadata GetChapterMetadata(string chapter)
+    public Task<ChapterMetadata> GetChapterMetadata(string chapter)
     {
         var chapterData = chapters[chapter];
 
-        return new ChapterMetadata()
+        return Task.FromResult(new ChapterMetadata()
         {
+            id = chapter,
             title = chapterData.title,
             volume = chapterData.volume
-        };
+        });
     }
 
-    public MangaMetadata GetMetadata()
+    public Task<string?> GetNextChapterKey(string currentChapterKey)
     {
-        return new MangaMetadata()
+        var nextChapterIndex = chapters.IndexOfKey(currentChapterKey) + 1;
+
+        if(nextChapterIndex >= chapters.Count)
         {
-            author = Author,
-            title = Title
-        };
+            return Task.FromResult<string?>(null);
+        }
+
+        return Task.FromResult<string?>(chapters.GetKeyAtIndex(nextChapterIndex));
+    }
+    public Task<string?> GetPreviousChapterKey(string currentChapterKey)
+    {
+        var previousChapterKey = chapters.IndexOfKey(currentChapterKey) - 1;
+
+        if (previousChapterKey < 0)
+        {
+            return Task.FromResult<string?>(null);
+        }
+
+        return Task.FromResult<string?>(chapters.GetKeyAtIndex(previousChapterKey));
     }
 
-    public string GetUrl(Bookmark bookmark)
+    public Task<string?> TransformChapter(string? chapter)
     {
-        return cubari.GetUrl(identifier, bookmark);
+        return Task.FromResult(chapter);
     }
+    public Task<string> DefaultChapter()
+    {
+        return Task.FromResult(chapters.Keys.First());
+    }
+
+    public Task<bool> HasChapter(string chapter)
+    {
+        return Task.FromResult(chapters.ContainsKey(chapter));
+    }
+
 }
 
 public struct CubariMangaSchema

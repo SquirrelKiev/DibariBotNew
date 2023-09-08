@@ -1,51 +1,63 @@
 ﻿using DibariBot.Mangas;
-using System.Diagnostics.CodeAnalysis;
 
 namespace DibariBot;
 
 internal static class MangaNavigation
 {
-    // i dont usually comment this much but i keep forgetting how this works and spending 20 minutes figuring it out again
     public static async Task<Bookmark> Navigate(IManga manga, Bookmark currentLocation, int deltaChapters, int deltaPages)
     {
-        ArgumentNullException.ThrowIfNull(currentLocation, nameof(currentLocation));
-        ArgumentNullException.ThrowIfNull(currentLocation.chapter, nameof(currentLocation.chapter));
-        ArgumentNullException.ThrowIfNull(currentLocation.page, nameof(currentLocation.page));
+        string currentChapterKey = currentLocation.chapter;
+        
+        // Adjust the chapter based on deltaChapters.
+        for (int i = 0; i < Math.Abs(deltaChapters); i++)
+        {
+            string? nextChapterKey = deltaChapters > 0 ? await manga.GetNextChapterKey(currentChapterKey) : await manga.GetPreviousChapterKey(currentChapterKey);
+            if (nextChapterKey != null)
+            {
+                currentChapterKey = nextChapterKey;
+            }
+            else
+            {
+                // Reached the beginning or the end of the manga; stop adjusting chapters.
+                break;
+            }
+        }
 
-        // is sorted
-        var chapterKeys = await manga.GetChapterNames();
-        var currentChapterIndex = Array.IndexOf(chapterKeys, currentLocation.chapter);
-
-        var newChapterIndex = Math.Clamp(currentChapterIndex + deltaChapters, 0, chapterKeys.Length - 1);
+        // If chapter changed, reset page to the start of the new chapter.
         int newPage = (deltaChapters != 0) ? 0 : currentLocation.page;
 
+        // Adjust page based on deltaPages within a loop to handle cross-chapter navigation.
         while (deltaPages != 0)
         {
-            var pageUrls = await manga.GetImageSrcs(chapterKeys[newChapterIndex]);
+            var pageURLs = await manga.GetImageSrcs(currentChapterKey);
 
             if (deltaPages > 0)
             {
-                // going forward
-
-                // can we fulfil the entirety of deltaPages within this chapter
-                if (newPage + deltaPages < pageUrls.srcs.Length)
+                // Moving forward
+                if (newPage + deltaPages < pageURLs.srcs.Length)
                 {
                     newPage += deltaPages;
                     deltaPages = 0;
                 }
                 else
                 {
-                    // we cant, subtract all of this chapter's remaining pages from deltaPages and move to the next chapter
-                    deltaPages -= (pageUrls.srcs.Length - newPage);
+                    deltaPages -= (pageURLs.srcs.Length - newPage);
                     newPage = 0;
-                    newChapterIndex++;
+                    string? nextChapterKey = await manga.GetNextChapterKey(currentChapterKey);
+                    if (nextChapterKey != null)
+                    {
+                        currentChapterKey = nextChapterKey;
+                    }
+                    else
+                    {
+                        // Reached the end of the manga; stop adjusting pages.
+                        break;
+                    }
                 }
             }
             else
             {
-                // going backwards
-
-                // can we fulfil the entirety of deltaPages within this chapter
+                // Moving backward
                 if (newPage + deltaPages >= 0)
                 {
                     newPage += deltaPages;
@@ -53,31 +65,25 @@ internal static class MangaNavigation
                 }
                 else
                 {
-                    // we cant
-
-                    deltaPages += newPage + 1;
-                    newChapterIndex--;
-                    if (newChapterIndex >= 0)
+                    deltaPages += newPage + 1; // Adjusting for zero-based indexing.
+                    string? previousChapterKey = await manga.GetPreviousChapterKey(currentChapterKey);
+                    if (previousChapterKey != null)
                     {
-                        pageUrls = await manga.GetImageSrcs(chapterKeys[newChapterIndex]);
-                        newPage = pageUrls.srcs.Length - 1;
+                        currentChapterKey = previousChapterKey;
+                        pageURLs = await manga.GetImageSrcs(currentChapterKey);
+                        newPage = pageURLs.srcs.Length - 1;
                     }
                     else
                     {
-                        // beginning of manga
+                        // Reached the beginning of the manga; stop adjusting pages.
                         newPage = 0;
                         deltaPages = 0;
                     }
                 }
             }
-
-            if (newChapterIndex < 0 || newChapterIndex >= chapterKeys.Length)
-            {
-                // if we reach the beginning or end of the manga, stop adjusting
-                deltaPages = 0;
-            }
         }
 
-        return new Bookmark(chapterKeys[newChapterIndex], newPage);
+        return new Bookmark { chapter = currentChapterKey, page = newPage };
     }
+
 }

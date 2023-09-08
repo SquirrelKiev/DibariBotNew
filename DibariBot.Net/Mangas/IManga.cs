@@ -2,23 +2,32 @@
 
 public interface IManga
 {
-    public SeriesIdentifier Identifier { get; protected set; }
+    public Task<IManga> Initialize(SeriesIdentifier identifier);
 
-    Task<ChapterSrcs> GetImageSrcs(string chapter);
-    Task<string[]> GetChapterNames();
-    ChapterMetadata GetChapterMetadata(string chapter);
-    MangaMetadata GetMetadata();
-    string GetUrl(Bookmark bookmark);
+    public SeriesIdentifier GetIdentifier();
+    public Task<MangaMetadata> GetMetadata();
+    public string GetUrl(Bookmark bookmark);
+
+    public Task<ChapterSrcs> GetImageSrcs(string chapter);
+    public Task<ChapterMetadata> GetChapterMetadata(string chapter);
+
+    public Task<string?> GetNextChapterKey(string currentChapterKey);
+    public Task<string?> GetPreviousChapterKey(string currentChapterKey);
+
+    public Task<string> DefaultChapter();
+
+    public Task<bool> HasChapter(string chapter);
 }
 
 public struct ChapterMetadata
 {
-    internal string title;
-    internal string volume;
+    public string id;
+    public string title;
+    public string volume;
 }
 
 public struct MangaMetadata
 {
-    internal string title;
-    internal string author;
+    public string title;
+    public string author;
 }
