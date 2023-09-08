@@ -138,10 +138,6 @@ public class CubariManga : IManga
         return Task.FromResult<string?>(chapters.GetKeyAtIndex(previousChapterKey));
     }
 
-    public Task<string?> TransformChapter(string? chapter)
-    {
-        return Task.FromResult(chapter);
-    }
     public Task<string> DefaultChapter()
     {
         return Task.FromResult(chapters.Keys.First());
