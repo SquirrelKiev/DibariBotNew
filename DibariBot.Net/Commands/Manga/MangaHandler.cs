@@ -92,6 +92,10 @@ public class MangaHandler
                 throw new NotImplementedException($"{nameof(state.action)} not implemented!");
         }
 
+        chapterData = await manga.GetChapterMetadata(bookmark.chapter);
+
+        bookmark.chapter = chapterData.id;
+
         var pages = await manga.GetImageSrcs(bookmark.chapter);
 
         if (bookmark.page > pages.srcs.Length - 1 || bookmark.page < 0)
