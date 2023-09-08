@@ -12,7 +12,7 @@ public enum MangaAction
     ForwardChapter,
 }
 
-public class MangaHandler
+public class MangaService 
 {
     public struct State
     {
@@ -45,10 +45,12 @@ public class MangaHandler
     }
 
     private readonly MangaFactory mangaFactory;
+    private readonly BotConfig botConfig;
 
-    public MangaHandler(MangaFactory mangaFactory)
+    public MangaService(MangaFactory mangaFactory, BotConfig botConfig)
     {
         this.mangaFactory = mangaFactory;
+        this.botConfig = botConfig;
     }
 
     public async Task<MessageContents> GetNewMessageContents(State state)
@@ -63,6 +65,7 @@ public class MangaHandler
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("Chapter not found.")
+                .WithColor(botConfig)
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
@@ -102,6 +105,7 @@ public class MangaHandler
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription($"page {bookmark.page + 1} doesn't exist in chapter {bookmark.chapter}!")
+                .WithColor(botConfig)
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
@@ -133,6 +137,7 @@ public class MangaHandler
                 .WithText($"{metadata.title.Truncate(50, true)}, by {author}.\n" +
                 $"Group: {pages.group}")
             )
+            .WithColor(botConfig)
             .Build();
 
         var newState = new State(MangaAction.Open, state.identifier, bookmark);

@@ -5,9 +5,9 @@ namespace DibariBot.Commands.Manga;
 
 public class MangaModule : DibariModule
 {
-    private readonly MangaHandler mangaHandler;
+    private readonly MangaService mangaHandler;
 
-    public MangaModule(MangaHandler mangaHandler)
+    public MangaModule(MangaService mangaHandler)
     {
         this.mangaHandler = mangaHandler;
     }
@@ -29,7 +29,7 @@ public class MangaModule : DibariModule
             return;
         }
 
-        var state = new MangaHandler.State(MangaAction.Open, series.Value, new Bookmark(chapter, page - 1));
+        var state = new MangaService.State(MangaAction.Open, series.Value, new Bookmark(chapter, page - 1));
 
         var contents = await mangaHandler.GetNewMessageContents(state);
 
@@ -41,7 +41,7 @@ public class MangaModule : DibariModule
     {
         await DeferAsync();
 
-        var state = StateSerializer.DeserializeObject<MangaHandler.State>(rawState);
+        var state = StateSerializer.DeserializeObject<MangaService.State>(rawState);
 
         var contents = await mangaHandler.GetNewMessageContents(state);
 

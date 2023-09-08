@@ -2,7 +2,7 @@
 
 namespace DibariBot;
 
-internal static class MangaNavigation
+public static class MangaNavigation
 {
     public static async Task<Bookmark> Navigate(IManga manga, Bookmark currentLocation, int deltaChapters, int deltaPages)
     {

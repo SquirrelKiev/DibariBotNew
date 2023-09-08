@@ -28,4 +28,20 @@ public static class StringExtensions
 
         return subString + '…';
     }
+
+    public static IEnumerable<string> SplitToLines(this string input)
+    {
+        if (input == null)
+        {
+            yield break;
+        }
+
+        using StringReader reader = new StringReader(input);
+
+        string? line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            yield return line;
+        }
+    }
 }

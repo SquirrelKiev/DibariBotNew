@@ -13,6 +13,7 @@ public class Bot
 {
     public DiscordSocketClient Client { get; }
     public InteractionService Commands { get; }
+    public BotConfig Config { get; }
 
     private readonly IServiceProvider services;
 
@@ -24,7 +25,19 @@ public class Bot
         });
         Commands = new(Client, new());
 
+        if (!new BotConfigFactory().GetConfig(out var botConfig))
+        {
+            Environment.Exit(1);
+        }
+        if (!botConfig.IsValid())
+        {
+            Environment.Exit(1);
+        }
+        Config = botConfig;
+        Log.Information("Bot config loaded.");
+
         services = CreateServices();
+        Log.Information("Services created.");
     }
 
     private IServiceProvider CreateServices()
@@ -36,11 +49,12 @@ public class Bot
         }
 
         var collection = new ServiceCollection()
+            .AddSingleton(Config)
             .AddSingleton(Client)
             .AddSingleton(Commands)
             .AddSingleton<CubariApi>()
             .AddSingleton<MangaFactory>()
-            .AddSingleton<MangaHandler>()
+            .AddSingleton<MangaService>()
             ;
 
         collection.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName)
@@ -60,6 +74,7 @@ public class Bot
 
     public async Task RunAndBlockAsync()
     {
+        Log.Information("Starting bot...");
         await RunAsync();
         await Task.Delay(Timeout.Infinite);
     }
@@ -72,7 +87,7 @@ public class Bot
         Client.InteractionCreated += Client_InteractionCreated;
         Commands.InteractionExecuted += Commands_InteractionExecuted;
 
-        await Client.LoginAsync(Discord.TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN"));
+        await Client.LoginAsync(TokenType.Bot, Config.BotToken);
         await Client.StartAsync();
     }
 
@@ -142,4 +157,3 @@ public class Bot
         await Commands.RegisterCommandsGloballyAsync(true);
     }
 }
-
