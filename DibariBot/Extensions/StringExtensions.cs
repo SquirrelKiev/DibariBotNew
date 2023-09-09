@@ -30,7 +30,7 @@ public static class StringExtensions
             yield break;
         }
 
-        using StringReader reader = new StringReader(input);
+        using StringReader reader = new(input);
 
         string? line;
         while ((line = reader.ReadLine()) != null)
