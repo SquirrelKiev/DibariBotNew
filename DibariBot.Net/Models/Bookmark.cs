@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace DibariBot;
+﻿namespace DibariBot;
 
 public struct Bookmark
 {

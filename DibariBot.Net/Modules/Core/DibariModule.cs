@@ -1,7 +1,4 @@
-﻿using Discord;
-using Discord.Interactions;
-
-namespace DibariBot;
+﻿namespace DibariBot.Modules;
 
 public class DibariModule : InteractionModuleBase
 {

@@ -1,6 +1,4 @@
-﻿using DibariBot.Mangas;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
 
 namespace DibariBot;
 

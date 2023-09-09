@@ -1,10 +1,5 @@
-﻿using Serilog;
-using Serilog.Sinks.SystemConsole.Themes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Serilog.Sinks.SystemConsole.Themes;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DibariBot;
 

@@ -1,7 +1,4 @@
-﻿using DibariBot.Mangas;
-using Discord;
-
-namespace DibariBot.Commands.Manga;
+﻿namespace DibariBot.Modules.Manga;
 
 public enum MangaAction
 {

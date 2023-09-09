@@ -1,6 +1,4 @@
-﻿using Discord;
-using Serilog;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.Json.Serialization;
 using Tomlyn;
 using Tomlyn.Helpers;
@@ -51,7 +49,7 @@ public class BotConfig : ITomlMetadataProvider
 
             var tpMetadata = new TomlPropertyMetadata
             {
-                LeadingTrivia = new List<TomlSyntaxTriviaMetadata>(),
+                LeadingTrivia = new(),
                 TrailingTrivia = new(),
                 DisplayKind = attr.DisplayKind
             };
@@ -101,7 +99,7 @@ public class BotConfig : ITomlMetadataProvider
     }
 }
 
-[System.AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
 sealed class TomlMetadataAttribute : Attribute
 {
     public string Comment { get; set; } = string.Empty;

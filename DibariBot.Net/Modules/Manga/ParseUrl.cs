@@ -1,8 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace DibariBot;
+namespace DibariBot.Modules.Manga;
 
-#pragma warning disable SYSLIB1045
+#pragma warning disable SYSLIB1045 // Too much regex to be reasonable, performance hit is probably nothing too big. probably
 
 public static class ParseUrl
 {
@@ -34,7 +34,7 @@ public static class ParseUrl
             seriesIdentifier.series = b64.Replace('+', '-').Replace('/', '_').Replace("=", "");
         }
         else if (Regex.IsMatch(url, @"^[0-9]{5}[0-9]?$") ||
-                (Regex.IsMatch(url, "nhentai") && Regex.IsMatch(url, @"/\b[0-9]+\b")))
+                Regex.IsMatch(url, "nhentai") && Regex.IsMatch(url, @"/\b[0-9]+\b"))
         {
             seriesIdentifier.platform = "nhentai";
             seriesIdentifier.series = Regex.Match(url, @"(\/?)(\b[0-9]+\b)")?.Groups[2].Value;
@@ -87,7 +87,7 @@ public static class ParseUrl
                 seriesIdentifier.series = split[1];
             }
         }
-        else if(url == "xkcd")
+        else if (url == "xkcd")
         {
             seriesIdentifier.platform = "xkcd";
             seriesIdentifier.series = "";

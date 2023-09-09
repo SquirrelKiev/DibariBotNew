@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace DibariBot.Mangas;
+namespace DibariBot.Modules.Manga;
 
-// not a manga
+// not a manga but "book" or "comic" sounds less
 public class XkcdManga : IManga
 {
     private const string XKCD_URL = "https://xkcd.com";

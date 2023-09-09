@@ -1,6 +1,4 @@
-﻿using DibariBot.Mangas;
-
-namespace DibariBot;
+﻿namespace DibariBot.Modules.Manga;
 
 public static class MangaNavigation
 {

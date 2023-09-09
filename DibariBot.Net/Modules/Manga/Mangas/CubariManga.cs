@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace DibariBot.Mangas;
+namespace DibariBot.Modules.Manga;
 
 public class CubariManga : IManga
 {
@@ -119,7 +119,7 @@ public class CubariManga : IManga
     {
         var nextChapterIndex = chapters.IndexOfKey(currentChapterKey) + 1;
 
-        if(nextChapterIndex >= chapters.Count)
+        if (nextChapterIndex >= chapters.Count)
         {
             return Task.FromResult<string?>(null);
         }

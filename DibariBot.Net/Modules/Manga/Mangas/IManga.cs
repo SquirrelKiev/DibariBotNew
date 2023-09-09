@@ -1,4 +1,4 @@
-﻿namespace DibariBot.Mangas;
+﻿namespace DibariBot.Modules.Manga;
 
 public interface IManga
 {

@@ -1,5 +1,4 @@
-﻿using Serilog;
-using Serilog.Events;
+﻿using Serilog.Events;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Tomlyn;

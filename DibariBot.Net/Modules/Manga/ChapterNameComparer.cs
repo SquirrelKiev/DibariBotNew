@@ -1,4 +1,4 @@
-﻿namespace DibariBot;
+﻿namespace DibariBot.Modules.Manga;
 
 public class ChapterNameComparer : IComparer<string>
 {

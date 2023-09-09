@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace DibariBot.Mangas;
+namespace DibariBot.Modules.Manga;
 
 public class MangaFactory
 {
@@ -29,7 +29,7 @@ public class MangaFactory
             _ => null,
         };
 
-        if(mangaType == null)
+        if (mangaType == null)
         {
             return null;
         }

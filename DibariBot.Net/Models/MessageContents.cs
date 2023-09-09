@@ -1,6 +1,4 @@
-﻿using Discord;
-
-namespace DibariBot;
+﻿namespace DibariBot;
 
 public struct MessageContents
 {

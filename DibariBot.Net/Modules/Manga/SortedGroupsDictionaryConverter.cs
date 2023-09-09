@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace DibariBot;
+namespace DibariBot.Modules.Manga;
 
 public class SortedGroupsDictionaryConverter<TValue> : JsonConverter
 {

@@ -1,7 +1,4 @@
-﻿using Discord;
-using Discord.Interactions;
-
-namespace DibariBot.Commands.Manga;
+﻿namespace DibariBot.Modules.Manga;
 
 public class MangaModule : DibariModule
 {

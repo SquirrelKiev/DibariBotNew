@@ -1,10 +1,6 @@
-﻿using DibariBot.Commands.Manga;
-using DibariBot.Mangas;
-using Discord;
-using Discord.Interactions;
+﻿using DibariBot.Modules.Manga;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 using Serilog.Events;
 
 namespace DibariBot;
