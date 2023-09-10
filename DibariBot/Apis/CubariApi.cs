@@ -1,17 +1,22 @@
 ﻿using Newtonsoft.Json;
+using System.Buffers.Text;
+using System.Text;
 
 namespace DibariBot;
 
+[Inject(ServiceLifetime.Singleton)]
 public class CubariApi
 {
     private const string CUBARI_URL = "https://cubari.moe";
     private readonly Uri baseUri = new(CUBARI_URL);
 
     private readonly IHttpClientFactory httpFactory;
+    private readonly ICacheProvider cache;
 
-    public CubariApi(IHttpClientFactory http)
+    public CubariApi(IHttpClientFactory http, ICacheProvider cache)
     {
         httpFactory = http;
+        this.cache = cache;
     }
 
     /// <summary>
@@ -22,21 +27,24 @@ public class CubariApi
     /// <exception cref="HttpRequestException"></exception>
     public async Task<T?> Get<T>(string url)
     {
-        using var client = httpFactory.CreateClient();
-
-        var fullUri = new Uri(baseUri, url);
-
-        var res = await client.GetAsync(fullUri);
-
-        if (res.StatusCode != System.Net.HttpStatusCode.OK)
+        return await cache.GetOrCreateAsync($"cubari:{Convert.ToBase64String(Encoding.UTF8.GetBytes(url))}", async () =>
         {
-            throw new HttpRequestException($"{res.StatusCode}");
-        }
+            using var client = httpFactory.CreateClient();
 
-        var json = await res.Content.ReadAsStringAsync();
-        var obj = JsonConvert.DeserializeObject<T>(json);
+            var fullUri = new Uri(baseUri, url);
 
-        return obj;
+            var res = await client.GetAsync(fullUri);
+
+            if (res.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                throw new HttpRequestException($"{res.StatusCode}");
+            }
+
+            var json = await res.Content.ReadAsStringAsync();
+            var obj = JsonConvert.DeserializeObject<T>(json);
+
+            return obj;
+        }, new CacheValueSettings());
     }
 
     public string GetUrl(SeriesIdentifier identifier, Bookmark bookmark)

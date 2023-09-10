@@ -2,7 +2,7 @@
 
 public struct Bookmark
 {
-    public string chapter = "n/a";
+    public string chapter = "";
     public int page = 1;
 
     public Bookmark()

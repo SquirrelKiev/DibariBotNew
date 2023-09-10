@@ -2,6 +2,7 @@
 
 namespace DibariBot.Modules.Manga;
 
+[Inject(ServiceLifetime.Singleton)]
 public class MangaFactory
 {
     private readonly IServiceProvider services;

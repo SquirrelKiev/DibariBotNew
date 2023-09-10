@@ -3,6 +3,7 @@
 namespace DibariBot.Modules.Manga;
 
 // not a manga but "book" or "comic" sounds less
+[Inject(ServiceLifetime.Transient)]
 public class XkcdManga : IManga
 {
     private const string XKCD_URL = "https://xkcd.com";
@@ -11,9 +12,13 @@ public class XkcdManga : IManga
     private SeriesIdentifier identifier;
 
     private readonly IHttpClientFactory httpFactory;
+    private readonly ICacheProvider cache;
 
-    public XkcdManga(IHttpClientFactory factory)
-        => httpFactory = factory;
+    public XkcdManga(IHttpClientFactory factory, ICacheProvider cache)
+    {
+        httpFactory = factory;
+        this.cache = cache;
+    }
 
     public Task<IManga> Initialize(SeriesIdentifier identifier)
     {
@@ -110,11 +115,13 @@ public class XkcdManga : IManga
 
     public Task<string> DefaultChapter()
     {
-        throw new NotImplementedException();
+        return Task.FromResult("random");
     }
 
     public async Task<bool> HasChapter(string chapter)
     {
+        if (chapter == "latest" || chapter == "random") return true;
+
         var comic = await GetComic(chapter);
 
         if (comic == null)
@@ -135,18 +142,26 @@ public class XkcdManga : IManga
                 return await GetComic((await GetRandomComicId()).ToString());
         };
 
-        var client = httpFactory.CreateClient();
-
-        var req = await client.GetAsync(new Uri(xkcdUri, $"/{num}/info.0.json"));
-
-        if (!req.IsSuccessStatusCode)
+        if(!int.TryParse(num, out int asInt))
         {
             return null;
         }
 
-        var comicInfo = JsonConvert.DeserializeObject<XkcdComic>(await req.Content.ReadAsStringAsync());
+        return await cache.GetOrCreateAsync<XkcdComic?>($"xkcd:comic-{num}", async () =>
+        {
+            var client = httpFactory.CreateClient();
 
-        return comicInfo;
+            var req = await client.GetAsync(new Uri(xkcdUri, $"/{asInt}/info.0.json"));
+
+            if (!req.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var comicInfo = JsonConvert.DeserializeObject<XkcdComic>(await req.Content.ReadAsStringAsync());
+
+            return comicInfo;
+        }, new CacheValueSettings());
     }
 
     private async Task<XkcdComic> GetLatestComic()

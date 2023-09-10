@@ -2,6 +2,7 @@
 
 namespace DibariBot.Modules.Manga;
 
+[Inject(ServiceLifetime.Transient)]
 public class CubariManga : IManga
 {
     public string Title { get; private set; }
@@ -10,13 +11,19 @@ public class CubariManga : IManga
     public string Artist { get; private set; }
     public string Cover { get; private set; }
     public Dictionary<string, string> Groups { get; private set; }
+
     private SeriesIdentifier identifier;
     private SortedList<string, CubariChapterSchema> chapters;
+
     private readonly CubariApi cubari;
+    private readonly ICacheProvider cache;
 
 #pragma warning disable CS8618 // null error, technically true but only if Initialize() wasnt called which in that case, it should throw anyway
-    public CubariManga(CubariApi cubari)
-        => this.cubari = cubari;
+    public CubariManga(CubariApi cubari, ICacheProvider cache)
+    {
+        this.cubari = cubari;
+        this.cache = cache;
+    }
 #pragma warning restore CS8618
 
     public async Task<IManga> Initialize(SeriesIdentifier identifier)

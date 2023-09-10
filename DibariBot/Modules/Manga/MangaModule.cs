@@ -10,7 +10,7 @@ public class MangaModule : DibariModule
     }
 
     [SlashCommand("manga", "Gets a page from a chapter of a manga.")]
-    public async Task MangaSlash(string url, string chapter = "1", int page = 1)
+    public async Task MangaSlash(string url, string chapter = "", int page = 1)
     {
         await DeferAsync();
 

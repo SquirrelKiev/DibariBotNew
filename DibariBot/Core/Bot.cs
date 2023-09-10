@@ -45,21 +45,26 @@ public class Bot
         }
 
         var collection = new ServiceCollection()
+            .AddCache(Config)
             .AddSingleton(Config)
             .AddSingleton(Client)
             .AddSingleton(Commands)
-            .AddSingleton<CubariApi>()
-            .AddSingleton<MangaFactory>()
-            .AddSingleton<MangaService>()
             ;
 
         collection.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName)
             .ConfigureHttpClient(DefaultHttpClientConfig);
 
         collection.Scan(scan => scan.FromAssemblyOf<IManga>()
-            .AddClasses(classes => classes.AssignableToAny(
-                typeof(IManga)
-                )
+            .AddClasses(classes => classes.WithAttribute<InjectAttribute>(x =>
+                x.ServiceLifetime == ServiceLifetime.Singleton)
+            )
+            .AsSelfWithInterfaces()
+            .WithSingletonLifetime()
+        );
+        
+        collection.Scan(scan => scan.FromAssemblyOf<IManga>()
+            .AddClasses(classes => classes.WithAttribute<InjectAttribute>(x =>
+                x.ServiceLifetime == ServiceLifetime.Transient)
             )
             .AsSelfWithInterfaces()
             .WithTransientLifetime()
@@ -131,9 +136,9 @@ public class Bot
         }
         else
         {
-            if(res is ExecuteResult executeResult)
+            if (res is ExecuteResult executeResult)
             {
-                Log.Error(executeResult.Exception, "Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.", 
+                Log.Error(executeResult.Exception, "Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.",
                     cmdInfo?.Module?.Name, cmdInfo?.MethodName, executeResult.Error, executeResult.ErrorReason);
             }
             else

@@ -1,5 +1,6 @@
 ﻿namespace DibariBot.Modules.Manga;
 
+// Should this be Task or ValueTask?
 public interface IManga
 {
     public Task<IManga> Initialize(SeriesIdentifier identifier);

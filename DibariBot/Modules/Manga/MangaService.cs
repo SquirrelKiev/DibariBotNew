@@ -9,6 +9,7 @@ public enum MangaAction
     ForwardChapter,
 }
 
+[Inject(ServiceLifetime.Singleton)]
 public class MangaService 
 {
     public struct State
@@ -55,7 +56,7 @@ public class MangaService
         var manga = await mangaFactory.GetManga(state.identifier) ?? throw new NotImplementedException($"Platform \"{state.identifier.platform}\" not implemented!");
 
         var bookmark = new Bookmark(
-            state.bookmark.chapter ?? await manga.DefaultChapter(),
+            state.bookmark.chapter == "" ? await manga.DefaultChapter() : state.bookmark.chapter,
             state.bookmark.page);
 
         if (!await manga.HasChapter(bookmark.chapter))

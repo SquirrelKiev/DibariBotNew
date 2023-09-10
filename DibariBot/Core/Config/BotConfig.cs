@@ -20,6 +20,14 @@ public class BotConfig : ITomlMetadataProvider
     [TomlMetadata(Comment = @"What color should be used in all embeds. In the format 0x00rrggbb, e.g. 0x00ffffff being white.", DisplayKind = TomlPropertyDisplayKind.IntegerHexadecimal)]
     public uint DefaultEmbedColor { get; set; } = 0xFBEED9;
 
+    [TomlMetadata(Comment = "The type of cache to use. Currently only MemoryCache.")]
+    public CacheType Cache { get; set; } = CacheType.MemoryCache;
+
+    public enum CacheType
+    {
+        MemoryCache
+    }
+
     public static string GetDefaultToml()
     {
         var botConfig = new BotConfig();
@@ -97,13 +105,4 @@ public class BotConfig : ITomlMetadataProvider
 
         return true;
     }
-}
-
-[AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
-sealed class TomlMetadataAttribute : Attribute
-{
-    public string Comment { get; set; } = string.Empty;
-    public bool NewlineBefore { get; set; } = false;
-    public bool NewlineAfter { get; set; } = false;
-    public TomlPropertyDisplayKind DisplayKind { get; set; } = TomlPropertyDisplayKind.Default;
 }

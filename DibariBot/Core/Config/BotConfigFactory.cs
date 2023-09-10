@@ -17,6 +17,24 @@ public class BotConfigFactory
 
     public bool GetConfig([NotNullWhen(true)] out BotConfig? botConfig)
     {
+        var options = new TomlModelOptions()
+        {
+            ConvertToModel = (obj, type) =>
+            {
+                if (!type.IsEnum) return null;
+
+                if (obj is not string str) return null;
+
+                return Enum.Parse(type, str);
+            },
+            ConvertToToml = (x) =>
+            {
+                if (!x.GetType().IsEnum) return x;
+
+                return x.ToString();
+            }
+        };
+
         if (!File.Exists(configPath))
         {
             botConfig = new BotConfig();
@@ -24,11 +42,11 @@ public class BotConfigFactory
 
             Log.Fatal("Config not found. Created new config at {ConfigPath}. Please edit this file and restart the bot.", configPath);
 
-            File.WriteAllText(configPath, Toml.FromModel(botConfig));
+            File.WriteAllText(configPath, Toml.FromModel(botConfig, options: options));
 
             return false;
         }
-        else if (Toml.TryToModel(File.ReadAllText(configPath), out botConfig, out var diagnostics))
+        else if (Toml.TryToModel(File.ReadAllText(configPath), out botConfig, out var diagnostics, options: options))
         {
             return true;
         }
