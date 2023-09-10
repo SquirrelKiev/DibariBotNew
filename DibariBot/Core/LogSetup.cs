@@ -18,6 +18,8 @@ public static class LogSetup
 
         Console.OutputEncoding = Encoding.UTF8;
 
-        Log.Debug("Test");
+#if DEBUG
+        Log.Debug("This is a development build! Verbose logs are enabled.");
+#endif
     }
 }

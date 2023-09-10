@@ -11,17 +11,24 @@ public class BotConfig : ITomlMetadataProvider
     [JsonIgnore]
     public TomlPropertiesMetadata? PropertiesMetadata { get; set; }
 
-    [TomlMetadata(Comment = @"DON'T CHANGE!", NewlineAfter = true)]
+    [TomlMetadata(Comment = "DON'T CHANGE!", NewlineAfter = true)]
     public int Version { get; set; } = 1;
 
-    [TomlMetadata(Comment = @"Your bot token. Don't share!", NewlineAfter = true)]
+    [TomlMetadata(Comment = @"Your bot token from https://discord.com/developers/applications. Don't share!", NewlineAfter = true)]
     public string BotToken { get; set; } = "BOT_TOKEN_HERE";
 
-    [TomlMetadata(Comment = @"What color should be used in all embeds. In the format 0x00rrggbb, e.g. 0x00ffffff being white.", DisplayKind = TomlPropertyDisplayKind.IntegerHexadecimal)]
+    [TomlMetadata(Comment = @"What color should be used in all embeds. In the format 0x00rrggbb, e.g. 0x00ffffff being white.", 
+        DisplayKind = TomlPropertyDisplayKind.IntegerHexadecimal, 
+        NewlineAfter = true)]
     public uint DefaultEmbedColor { get; set; } = 0xFBEED9;
 
-    [TomlMetadata(Comment = "The type of cache to use. Currently only MemoryCache.")]
+    [TomlMetadata(Comment = "The type of cache to use. Currently only MemoryCache.",
+        NewlineAfter = true)]
     public CacheType Cache { get; set; } = CacheType.MemoryCache;
+
+    [TomlMetadata(Comment = "The base URL for Cubari requests. \nOnly really should be changed if you're using a self-hosted instance for whatever reason."
+        )]
+    public string CubariUrl { get; set; } = "https://cubari.moe";
 
     public enum CacheType
     {
@@ -97,9 +104,9 @@ public class BotConfig : ITomlMetadataProvider
         {
             TokenUtils.ValidateToken(TokenType.Bot, BotToken);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Log.Fatal(e, "Supplied bot token is invalid.");
+            Log.Fatal(ex, "Supplied bot token is invalid.");
             return false;
         }
 

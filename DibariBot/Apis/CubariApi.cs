@@ -7,16 +7,18 @@ namespace DibariBot;
 [Inject(ServiceLifetime.Singleton)]
 public class CubariApi
 {
-    private const string CUBARI_URL = "https://cubari.moe";
-    private readonly Uri baseUri = new(CUBARI_URL);
+    private readonly Uri baseUri;
 
     private readonly IHttpClientFactory httpFactory;
     private readonly ICacheProvider cache;
+    //private readonly BotConfig botConfig;
 
-    public CubariApi(IHttpClientFactory http, ICacheProvider cache)
+    public CubariApi(IHttpClientFactory http, ICacheProvider cache, BotConfig botConfig)
     {
         httpFactory = http;
         this.cache = cache;
+        //this.botConfig = botConfig;
+        baseUri = new(botConfig.CubariUrl);
     }
 
     /// <summary>
