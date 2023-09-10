@@ -10,7 +10,7 @@ public enum MangaAction
 }
 
 [Inject(ServiceLifetime.Singleton)]
-public class MangaService 
+public class MangaService
 {
     public struct State
     {
@@ -109,12 +109,10 @@ public class MangaService
             return new MessageContents(string.Empty, errorEmbed, null);
         }
 
-        var pageSrc = pages.srcs[bookmark.page];
-
-        // TODO: Proxy image implementation
+        var pageSrc = GetProxiedUrl(pages.srcs[bookmark.page], state.identifier.platform!);
 
         var metadata = await manga.GetMetadata();
-        
+
         string author = metadata.author;
         // TODO: Mangadex author grabbing
 
@@ -126,7 +124,7 @@ public class MangaService
 
 
         var embed = new EmbedBuilder()
-            .WithTitle(chapterData.title ?? $"Chapter {bookmark.chapter}")
+            .WithTitle(string.IsNullOrWhiteSpace(chapterData.title) ? $"Chapter {bookmark.chapter}" : chapterData.title)
             .WithUrl(manga.GetUrl(bookmark))
             .WithDescription($"Chapter {bookmark.chapter} | Page {bookmark.page + 1}/{pages.srcs.Length}")
             .WithImageUrl(pageSrc)
@@ -168,5 +166,21 @@ public class MangaService
             .Build();
 
         return new MessageContents(string.Empty, embed, components);
+    }
+
+    /// <remarks>
+    /// Will only return a proxied url if told to by <see cref="BotConfig"/>.
+    /// </remarks>
+    private string GetProxiedUrl(string url, string platform)
+    {
+        if (!botConfig.PlatformsToProxy.Contains(platform.ToLower()))
+            return url;
+
+        return botConfig.ProxyUrlEncoding switch
+        {
+            BotConfig.ProxyUrlEncodingFormat.UrlEncoded => botConfig.ProxyUrl.Replace("{{URL}}", System.Web.HttpUtility.UrlEncode(url)),
+            BotConfig.ProxyUrlEncodingFormat.Base64Encoded => botConfig.ProxyUrl.Replace("{{URL}}", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url))),
+            _ => throw new NotImplementedException(),
+        };
     }
 }

@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.Buffers.Text;
-using System.Text;
 
 namespace DibariBot;
 
@@ -29,7 +27,7 @@ public class CubariApi
     /// <exception cref="HttpRequestException"></exception>
     public async Task<T?> Get<T>(string url)
     {
-        return await cache.GetOrCreateAsync($"cubari:{Convert.ToBase64String(Encoding.UTF8.GetBytes(url))}", async () =>
+        return await cache.GetOrCreateAsync($"cubari:{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url))}", async () =>
         {
             using var client = httpFactory.CreateClient();
 

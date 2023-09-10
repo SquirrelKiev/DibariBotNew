@@ -26,21 +26,33 @@ public class BotConfig : ITomlMetadataProvider
         NewlineAfter = true)]
     public CacheType Cache { get; set; } = CacheType.MemoryCache;
 
-    [TomlMetadata(Comment = "The base URL for Cubari requests. \nOnly really should be changed if you're using a self-hosted instance for whatever reason."
-        )]
+    [TomlMetadata(Comment = "The base URL for Cubari requests.\n" +
+        "Only really should be changed if you're using a self-hosted instance for whatever reason.",
+        NewlineAfter = true)]
     public string CubariUrl { get; set; } = "https://cubari.moe";
+
+    [TomlMetadata(Comment = "Specifies how the URL to proxy should be encoded.\n" +
+        "Options are:\n" +
+        "* \"UrlEncoded\"\n" +
+        "* \"Base64Encoded\"")]
+    public ProxyUrlEncodingFormat ProxyUrlEncoding { get; set; } = ProxyUrlEncodingFormat.Base64Encoded;
+
+    [TomlMetadata(Comment = "The URL pattern to use for proxying images (will only be used if the platform requires it.\n" +
+        "{{URL}} will be replaced with the url in the encoding specified above.")]
+    public string ProxyUrl { get; set; } = "https://services.f-ck.me/v1/image/{{URL}}?source=dibari_bot";
+
+    [TomlMetadata(Comment = "What platforms should have their images proxied.", NewlineAfter = true)]
+    public string[] PlatformsToProxy { get; set; } = new string[] { "mangadex" };
 
     public enum CacheType
     {
         MemoryCache
     }
 
-    public static string GetDefaultToml()
+    public enum ProxyUrlEncodingFormat
     {
-        var botConfig = new BotConfig();
-        botConfig.GenerateMetadata();
-
-        return Toml.FromModel(botConfig);
+        UrlEncoded,
+        Base64Encoded
     }
 
     public void GenerateMetadata()
