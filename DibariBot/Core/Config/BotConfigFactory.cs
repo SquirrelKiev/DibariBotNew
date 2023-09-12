@@ -31,7 +31,7 @@ public class BotConfigFactory
             {
                 if (!x.GetType().IsEnum) return x;
 
-                return x.ToString();
+                return x.ToString()?.ToLowerInvariant();
             }
         };
 
@@ -48,6 +48,11 @@ public class BotConfigFactory
         }
         else if (Toml.TryToModel(File.ReadAllText(configPath), out botConfig, out var diagnostics, options: options))
         {
+#if DEBUG
+            botConfig.GenerateMetadata();
+            File.WriteAllText(configPath, Toml.FromModel(botConfig, options: options));
+#endif
+
             return true;
         }
         else

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using DibariBot.Database;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DibariBot;
 
@@ -8,7 +9,7 @@ public static class ServiceCollectionExtensions
     {
         switch (config.Cache)
         {
-            case BotConfig.CacheType.MemoryCache:
+            case BotConfig.CacheType.Memory:
                 services.AddSingleton<ICacheProvider, MemoryCacheProvider>();
                 break;
         }

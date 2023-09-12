@@ -3,7 +3,7 @@
 namespace DibariBot.Modules.Manga;
 
 // not a manga but "book" or "comic" sounds less
-[Inject(ServiceLifetime.Transient)]
+[Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Transient)]
 public class XkcdManga : IManga
 {
     private const string XKCD_URL = "https://xkcd.com";

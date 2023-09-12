@@ -2,7 +2,7 @@
 
 namespace DibariBot;
 
-[Inject(ServiceLifetime.Singleton)]
+[Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
 public class CubariApi
 {
     private readonly Uri baseUri;

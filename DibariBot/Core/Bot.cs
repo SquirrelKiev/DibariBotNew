@@ -1,4 +1,5 @@
-﻿using DibariBot.Modules.Manga;
+﻿using DibariBot.Database;
+using DibariBot.Modules.Manga;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Events;
@@ -47,10 +48,12 @@ public class Bot
         var collection = new ServiceCollection()
             .AddCache(Config)
             .AddSingleton(Config)
+            .AddSingleton<DbService>()
             .AddSingleton(Client)
             .AddSingleton(Commands)
             ;
 
+        // Stupid but im not sure how to do this with one scan and pass the inject option's param to WithLifetime
         collection.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName)
             .ConfigureHttpClient(DefaultHttpClientConfig);
 
@@ -82,6 +85,19 @@ public class Bot
 
     private async Task RunAsync()
     {
+        await services.GetRequiredService<DbService>().Initialize();
+
+#if DEBUG
+        if(Environment.GetCommandLineArgs().Length > 1 && Environment.GetCommandLineArgs()[1] == "doit")
+        {
+            Log.Debug("do it? Nuking the DB...");
+
+            await services.GetRequiredService<DbService>().ResetDatabase();
+
+            Log.Debug("Nuked!");
+        }
+#endif
+
         Client.Log += Client_Log;
 
         Client.Ready += Client_Ready;

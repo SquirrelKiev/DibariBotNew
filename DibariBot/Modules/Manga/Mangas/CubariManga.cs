@@ -2,7 +2,7 @@
 
 namespace DibariBot.Modules.Manga;
 
-[Inject(ServiceLifetime.Transient)]
+[Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Transient)]
 public class CubariManga : IManga
 {
     public string Title { get; private set; }
@@ -16,13 +16,11 @@ public class CubariManga : IManga
     private SortedList<string, CubariChapterSchema> chapters;
 
     private readonly CubariApi cubari;
-    private readonly ICacheProvider cache;
 
 #pragma warning disable CS8618 // null error, technically true but only if Initialize() wasnt called which in that case, it should throw anyway
-    public CubariManga(CubariApi cubari, ICacheProvider cache)
+    public CubariManga(CubariApi cubari)
     {
         this.cubari = cubari;
-        this.cache = cache;
     }
 #pragma warning restore CS8618
 

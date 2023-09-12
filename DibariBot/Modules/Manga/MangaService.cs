@@ -9,7 +9,7 @@ public enum MangaAction
     ForwardChapter,
 }
 
-[Inject(ServiceLifetime.Singleton)]
+[Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
 public class MangaService
 {
     public struct State
@@ -178,8 +178,8 @@ public class MangaService
 
         return botConfig.ProxyUrlEncoding switch
         {
-            BotConfig.ProxyUrlEncodingFormat.UrlEncoded => botConfig.ProxyUrl.Replace("{{URL}}", System.Web.HttpUtility.UrlEncode(url)),
-            BotConfig.ProxyUrlEncodingFormat.Base64Encoded => botConfig.ProxyUrl.Replace("{{URL}}", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url))),
+            BotConfig.ProxyUrlEncodingFormat.UrlEscaped => botConfig.ProxyUrl.Replace("{{URL}}", System.Web.HttpUtility.UrlEncode(url)),
+            BotConfig.ProxyUrlEncodingFormat.Base64 => botConfig.ProxyUrl.Replace("{{URL}}", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url))),
             _ => throw new NotImplementedException(),
         };
     }
