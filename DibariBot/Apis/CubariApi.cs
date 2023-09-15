@@ -32,12 +32,13 @@ public class CubariApi
             using var client = httpFactory.CreateClient();
 
             var fullUri = new Uri(baseUri, url);
+            Log.Debug("Fetching {url}", fullUri);
 
             var res = await client.GetAsync(fullUri);
 
             if (res.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                throw new HttpRequestException($"{res.StatusCode}");
+                throw new HttpRequestException($"{((int)res.StatusCode)}: {res.StatusCode}");
             }
 
             var json = await res.Content.ReadAsStringAsync();
@@ -51,7 +52,7 @@ public class CubariApi
     {
         identifier.ThrowIfInvalid();
 
-        var fullUri = new Uri(baseUri, 
+        var fullUri = new Uri(baseUri,
             $"/read/{Uri.EscapeDataString(identifier.platform!)}/{Uri.EscapeDataString(identifier.series!)}/{Uri.EscapeDataString(bookmark.chapter!)}/{bookmark.page + 1}");
 
         return fullUri.ToString();

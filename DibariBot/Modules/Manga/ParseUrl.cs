@@ -10,12 +10,12 @@ public static class ParseUrl
     {
         var seriesIdentifier = new SeriesIdentifier();
 
-        if (Regex.IsMatch(url, "imgur"))
+        if (Regex.IsMatch(url, @"imgur\."))
         {
             seriesIdentifier.platform = "imgur";
             seriesIdentifier.series = Regex.Match(url, @"(a\/|gallery\/)([A-Z0-9a-z]{5}[A-Z0-9a-z]*\b)")?.Groups[2].Value;
         }
-        else if (Regex.IsMatch(url, "git\\.io"))
+        else if (Regex.IsMatch(url, @"git\.io"))
         {
             seriesIdentifier.platform = "gist";
             seriesIdentifier.series = Regex.Match(url, @"(git.io\/)(.*)")?.Groups[2].Value;
