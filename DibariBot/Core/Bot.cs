@@ -1,4 +1,5 @@
 ﻿using DibariBot.Database;
+using DibariBot.Modules.ConfigCommand.Pages;
 using DibariBot.Modules.Manga;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -61,17 +62,22 @@ public class Bot
             .AddClasses(classes => classes.WithAttribute<InjectAttribute>(x =>
                 x.ServiceLifetime == ServiceLifetime.Singleton)
             )
-            .AsSelfWithInterfaces()
+            .AsSelf()
             .WithSingletonLifetime()
         );
-        
+
         collection.Scan(scan => scan.FromAssemblyOf<IManga>()
             .AddClasses(classes => classes.WithAttribute<InjectAttribute>(x =>
                 x.ServiceLifetime == ServiceLifetime.Transient)
             )
-            .AsSelfWithInterfaces()
+            .AsSelf()
             .WithTransientLifetime()
         );
+
+        collection.Scan(scan => scan.FromAssemblyOf<IManga>()
+            .AddClasses(classes => classes.AssignableTo<ConfigPage>())
+            .As<ConfigPage>()
+            .WithTransientLifetime());
 
         return collection.BuildServiceProvider();
     }
@@ -88,7 +94,7 @@ public class Bot
         await services.GetRequiredService<DbService>().Initialize();
 
 #if DEBUG
-        if(Environment.GetCommandLineArgs().Length > 1 && Environment.GetCommandLineArgs()[1] == "doit")
+        if (Environment.GetCommandLineArgs().Length > 1 && Environment.GetCommandLineArgs()[1] == "doit")
         {
             Log.Debug("do it? Nuking the DB...");
 
@@ -162,7 +168,7 @@ public class Bot
                 Log.Error("Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.",
                     cmdInfo?.Module?.Name, cmdInfo?.MethodName, res.Error, res.ErrorReason);
             }
-            ctx.Interaction.ModifyOriginalResponseAsync((x) => { x.Content = $"{res.Error}, {res.ErrorReason}"; });
+            ctx.Interaction.ModifyOriginalResponseAsync(new MessageContents($"{res.Error}, {res.ErrorReason}", embed: null, null));
         }
 
         return Task.CompletedTask;

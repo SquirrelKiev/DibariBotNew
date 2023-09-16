@@ -1,12 +1,9 @@
-﻿using OneOf;
-using OneOf.Types;
-
-namespace DibariBot;
+﻿namespace DibariBot;
 
 public interface ICacheProvider
 {
     ValueTask<bool> SetAsync<T>(string key, T value, CacheValueSettings settings);
-    ValueTask<OneOf<T, None>> GetAsync<T>(string key);
+    ValueTask<Optional<T>> GetAsync<T>(string key);
     ValueTask<T?> GetOrCreateAsync<T>(string key, Func<Task<T>> createFactory, CacheValueSettings settings);
     ValueTask<bool> RemoveAsync(string key);
 }

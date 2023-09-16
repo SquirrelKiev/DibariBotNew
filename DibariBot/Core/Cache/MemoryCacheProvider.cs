@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using OneOf;
-using OneOf.Types;
 
 namespace DibariBot;
 
@@ -17,12 +15,12 @@ public class MemoryCacheProvider : ICacheProvider
     }
 
     // hate how i have to do OneOf i thought Nullable was for this exact case
-    public ValueTask<OneOf<T, None>> GetAsync<T>(string key)
+    public ValueTask<Optional<T>> GetAsync<T>(string key)
     {
         if (!cache.TryGetValue(key, out var val) || val is null)
         {
             LogHitOrMiss(key, false);
-            return new ValueTask<OneOf<T, None>>(new None());
+            return new ValueTask<Optional<T>>(new Optional<T>());
         }
 
         LogHitOrMiss(key, true);

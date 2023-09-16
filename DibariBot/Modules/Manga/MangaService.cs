@@ -53,7 +53,20 @@ public class MangaService
 
     public async Task<MessageContents> GetNewMessageContents(State state)
     {
-        var manga = await mangaFactory.GetManga(state.identifier) ?? throw new NotImplementedException($"Platform \"{state.identifier.platform}\" not implemented!");
+        IManga manga;
+        try
+        {
+            manga = await mangaFactory.GetManga(state.identifier) ?? throw new NotImplementedException($"Platform \"{state.identifier.platform}\" not implemented!");
+        }
+        catch(HttpRequestException ex)
+        {
+            var errorEmbed = new EmbedBuilder()
+                .WithDescription($"Failed to get manga. `{ex.Message}`\n `{state.identifier.platform}/{state.identifier.series}`")
+                .WithColor(botConfig)
+                .Build();
+
+            return new MessageContents(string.Empty, errorEmbed, null);
+        }
 
         var bookmark = new Bookmark(
             state.bookmark.chapter == "" ? await manga.DefaultChapter() : state.bookmark.chapter,

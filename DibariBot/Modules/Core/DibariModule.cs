@@ -7,14 +7,8 @@ public class DibariModule : InteractionModuleBase
         return await FollowupAsync(text: contents.body, embeds: contents.embeds, components: contents.components);
     }
 
-    protected virtual async Task<IUserMessage> ModifyOriginalResponseAsync(MessageContents contents, RequestOptions? options = null)
+    protected virtual Task<IUserMessage> ModifyOriginalResponseAsync(MessageContents contents, RequestOptions? options = null)
     {
-        return await ModifyOriginalResponseAsync((msg) =>
-        {
-            msg.Content = contents.body;
-            msg.Embeds = contents.embeds;
-            msg.Components = contents.components;
-        },
-        options);
+        return Context.Interaction.ModifyOriginalResponseAsync(contents, options);
     }
 }

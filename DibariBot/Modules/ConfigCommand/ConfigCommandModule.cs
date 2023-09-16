@@ -4,11 +4,11 @@ namespace DibariBot.Modules.ConfigCommand;
 
 public class ConfigCommandModule : DibariModule
 {
-    private readonly DbService dbService;
+    private readonly ConfigCommandService configService;
 
-    public ConfigCommandModule(DbService dbService)
+    public ConfigCommandModule(ConfigCommandService configService)
     {
-        this.dbService = dbService;
+        this.configService = configService;
     }
 
     [SlashCommand("manga-config", "Test command")]
@@ -16,12 +16,24 @@ public class ConfigCommandModule : DibariModule
     {
         await DeferAsync();
 
-        using var context = dbService.GetDbContext();
+        await FollowupAsync(await configService.GetMessageContents(new()
+        {
+            page = Pages.ConfigPage.Page.Help,
+            data = ""
+        }));
+    }
 
-        var farts = context.GuildConfig.Add(new Database.Models.GuildConfig() { GuildId = 1074000869881823304ul });
+    [ComponentInteraction(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE)]
+    public async Task SelectInteraction(string id)
+    {
+        await DeferAsync();
 
-        await context.SaveChangesAsync();
+        var page = StateSerializer.DeserializeObject<Pages.ConfigPage.Page>(id);
 
-        await FollowupAsync(farts.Entity.GuildId.ToString());
+        await ModifyOriginalResponseAsync(await configService.GetMessageContents(new()
+        {
+            page = page,
+            data = ""
+        }));
     }
 }
