@@ -11,10 +11,10 @@ public static class ConfigPageUtility
         {
             dropdown
                 .AddOption(new SelectMenuOptionBuilder()
-                .WithLabel(page.Label)
-                .WithValue(StateSerializer.SerializeObject(page.Id))
-                .WithDefault(page.Id == id)
-                .WithDescription(page.Description));
+                    .WithLabel(page.Label)
+                    .WithValue(StateSerializer.SerializeObject(page.Id))
+                    .WithDefault(page.Id == id)
+                    .WithDescription(page.Description));
         }
 
         return dropdown;

@@ -13,23 +13,39 @@ public class ConfigCommandService
         public string data;
     }
 
-    public Dictionary<ConfigPage.Page, ConfigPage> configPages = new();
+    public Dictionary<ConfigPage.Page, ConfigPage> ConfigPages { get
+        {
+            return configPages ??= GetConfigPages(services);
+        }
+    }
+    private Dictionary<ConfigPage.Page, ConfigPage>? configPages;
+
+    private readonly IServiceProvider services;
 
     public ConfigCommandService(IServiceProvider services)
     {
-        foreach (var type in services.GetServices<ConfigPage>())
-        {
-            configPages.Add(type.Id, type.Initialize(configPages));
-        }
+        this.services = services;
     }
 
     public async Task<MessageContents> GetMessageContents(State state, IInteractionContext context)
     {
-        var page = configPages[state.page];
+        var page = ConfigPages[state.page];
 
         var method = page.GetType().GetMethod("SetContext", BindingFlags.Instance | BindingFlags.NonPublic) ?? throw new NullReferenceException("SetContext doesnt exist!");
         method.Invoke(page, new object[] { context });
 
         return await page.GetMessageContents(state);
+    }
+
+    public static Dictionary<ConfigPage.Page, ConfigPage> GetConfigPages(IServiceProvider services)
+    {
+        var configPages = new Dictionary<ConfigPage.Page, ConfigPage>();
+
+        foreach (var type in services.GetServices<ConfigPage>())
+        {
+            configPages.Add(type.Id, type);
+        }
+
+        return configPages;
     }
 }

@@ -6,21 +6,26 @@ public struct MessageContents
     public Embed[]? embeds;
     public MessageComponent? components;
 
-    public MessageContents(string body, Embed[] embeds, MessageComponent? components)
+    public MessageContents(string body, Embed[] embeds, ComponentBuilder? components)
     {
         this.body = body;
         this.embeds = embeds;
-        this.components = components;
+
+        components ??= new ComponentBuilder().WithRedButton();
+        this.components = components?.Build();
     }
 
-    public MessageContents(string body, Embed? embed, MessageComponent? components)
+    public MessageContents(string body, Embed? embed, ComponentBuilder? components)
     {
         this.body = body;
         if (embed != null)
             embeds = new Embed[] { embed };
         else
             embeds = null;
-        this.components = components;
+
+        components ??= new ComponentBuilder().WithRedButton();
+
+        this.components = components?.Build();
     }
 
     public MessageContents SetEmbed(Embed embed)

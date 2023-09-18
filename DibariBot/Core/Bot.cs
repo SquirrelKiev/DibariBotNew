@@ -54,10 +54,10 @@ public class Bot
             .AddSingleton(Commands)
             ;
 
-        // Stupid but im not sure how to do this with one scan and pass the inject option's param to WithLifetime
         collection.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName)
             .ConfigureHttpClient(DefaultHttpClientConfig);
 
+        // Stupid but im not sure how to do this with one scan and pass the inject option's param to WithLifetime
         collection.Scan(scan => scan.FromAssemblyOf<IManga>()
             .AddClasses(classes => classes.WithAttribute<InjectAttribute>(x =>
                 x.ServiceLifetime == ServiceLifetime.Singleton)

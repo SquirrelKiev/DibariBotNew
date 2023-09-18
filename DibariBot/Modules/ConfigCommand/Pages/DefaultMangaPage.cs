@@ -1,7 +1,6 @@
 ﻿using DibariBot.Database;
-using DibariBot.Modules.Common;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
 
@@ -41,10 +40,12 @@ public class DefaultMangaPage : ConfigPage
     public override string Description => "Change the manga that opens when no URL is specified. Can be per-server and per-channel.";
 
     private readonly DbService dbService;
+    private readonly ConfigCommandService configCommandService;
 
-    public DefaultMangaPage(DbService db)
+    public DefaultMangaPage(DbService db, ConfigCommandService configCommandService)
     {
         dbService = db;
+        this.configCommandService = configCommandService;
     }
 
     // step 1 - help page/modal open
@@ -72,13 +73,14 @@ public class DefaultMangaPage : ConfigPage
 
         // TODO
         var components = new ComponentBuilder()
+            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configCommandService.ConfigPages, Id))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Set")
                 .WithCustomId($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_SET}")
-                .WithStyle(ButtonStyle.Primary))
-            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(ConfigPages, Id));
+                .WithStyle(ButtonStyle.Success))
+            .WithRedButton();
 
-        return new MessageContents("", embed.Build(), components.Build());
+        return new MessageContents("", embed.Build(), components);
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET)]
@@ -119,7 +121,7 @@ public class DefaultMangaPage : ConfigPage
                 channel.Length > 0 ? channel[0].Id : 0ul)));
     }
 
-    private static MessageContents ConfirmPromptContents(ConfirmState confirmState)
+    private MessageContents ConfirmPromptContents(ConfirmState confirmState)
     {
         var embed = new EmbedBuilder()
             .WithDescription($"Set the default manga for **{(confirmState.channelId == 0ul ? "the server" : $"<#{confirmState.channelId}>")}** as {confirmState.series}?");
@@ -137,9 +139,14 @@ public class DefaultMangaPage : ConfigPage
             .WithButton(new ButtonBuilder()
                 .WithLabel("Yes!")
                 .WithCustomId(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_SUBMIT_BUTTON + StateSerializer.SerializeObject(confirmState))
-                .WithStyle(ButtonStyle.Success));
+                .WithStyle(ButtonStyle.Success))
+            .WithButton(new ButtonBuilder()
+                .WithLabel("Cancel")
+                .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
+                    StateSerializer.SerializeObject(StateSerializer.SerializeObject(Id)))
+                .WithStyle(ButtonStyle.Danger));
 
-        return new MessageContents(string.Empty, embed.Build(), components.Build());
+        return new MessageContents(string.Empty, embed.Build(), components);
     }
 
     // step 3 - we've got a submit!!
@@ -174,6 +181,10 @@ public class DefaultMangaPage : ConfigPage
             await context.SaveChangesAsync();
         }
 
-        await ModifyOriginalResponseAsync(new MessageContents("saved!", embed: null, null));
+        await ModifyOriginalResponseAsync(
+            await configCommandService.GetMessageContents(new ConfigCommandService.State()
+            {
+                page = Id
+            }, Context));
     }
 }

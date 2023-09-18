@@ -36,4 +36,10 @@ public class ConfigCommandModule : DibariModule
             data = ""
         }, Context));
     }
+
+    [ComponentInteraction(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + "*")]
+    public Task SelectInteractionButton(string id)
+    {
+        return SelectInteraction(id);
+    }
 }

@@ -1,5 +1,4 @@
 ﻿using DibariBot.Database;
-using DibariBot.Modules.Common;
 
 namespace DibariBot.Modules.Manga;
 

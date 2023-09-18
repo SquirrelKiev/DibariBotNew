@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace DibariBot.Modules.Common;
+namespace DibariBot.Modules;
 
 #pragma warning disable SYSLIB1045 // Too much regex to be reasonable, performance hit is probably nothing too big. probably
 

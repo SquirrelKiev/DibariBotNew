@@ -176,7 +176,7 @@ public class MangaService
                 ModulePrefixes.MANGA_MODULE_PREFIX),
                 disabled: disableRightChapter
                 )
-            .Build();
+            .WithRedButton();
 
         return new MessageContents(string.Empty, embed, components);
     }
