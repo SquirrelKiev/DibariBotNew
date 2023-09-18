@@ -20,7 +20,7 @@ public class ConfigCommandModule : DibariModule
         {
             page = Pages.ConfigPage.Page.Help,
             data = ""
-        }));
+        }, Context));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE)]
@@ -34,6 +34,6 @@ public class ConfigCommandModule : DibariModule
         {
             page = page,
             data = ""
-        }));
+        }, Context));
     }
 }

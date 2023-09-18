@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace DibariBot.Modules.Manga;
+namespace DibariBot.Modules.Common;
 
 #pragma warning disable SYSLIB1045 // Too much regex to be reasonable, performance hit is probably nothing too big. probably
 
@@ -90,7 +90,7 @@ public static class ParseUrl
         else if (url == "xkcd")
         {
             seriesIdentifier.platform = "xkcd";
-            seriesIdentifier.series = "";
+            seriesIdentifier.series = "none";
         }
         else
         {

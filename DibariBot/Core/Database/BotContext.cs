@@ -1,4 +1,4 @@
-﻿using DibariBot.Database.Models;
+﻿using DibariBot.Core.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DibariBot.Database;
@@ -6,7 +6,7 @@ namespace DibariBot.Database;
 public abstract class BotContext : DbContext
 {
     public DbSet<GuildConfig> GuildConfig { get; set; }
-    public DbSet<ChannelConfig> ChannelConfig { get; set; }
+    public DbSet<DefaultManga> DefaultMangas { get; set; }
 
     protected readonly string connectionString;
 
@@ -21,8 +21,8 @@ public abstract class BotContext : DbContext
             .HasIndex(x => x.GuildId)
             .IsUnique();
 
-        modelBuilder.Entity<ChannelConfig>()
-            .HasIndex(x => x.ChannelId)
+        modelBuilder.Entity<DefaultManga>()
+            .HasIndex(x => new { x.GuildId, x.ChannelId })
             .IsUnique();
     }
 }

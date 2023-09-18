@@ -1,5 +1,6 @@
 ﻿using DibariBot.Modules.ConfigCommand.Pages;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace DibariBot.Modules.ConfigCommand;
 
@@ -22,8 +23,13 @@ public class ConfigCommandService
         }
     }
 
-    public async Task<MessageContents> GetMessageContents(State state)
+    public async Task<MessageContents> GetMessageContents(State state, IInteractionContext context)
     {
-        return await configPages[state.page].GetMessageContents(state);
+        var page = configPages[state.page];
+
+        var method = page.GetType().GetMethod("SetContext", BindingFlags.Instance | BindingFlags.NonPublic) ?? throw new NullReferenceException("SetContext doesnt exist!");
+        method.Invoke(page, new object[] { context });
+
+        return await page.GetMessageContents(state);
     }
 }

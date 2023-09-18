@@ -22,4 +22,9 @@ public struct SeriesIdentifier
         ArgumentNullException.ThrowIfNull(platform, nameof(platform));
         ArgumentNullException.ThrowIfNull(series, nameof(series));
     }
+
+    public override readonly string ToString()
+    {
+        return $"{platform}/{series}";
+    }
 }

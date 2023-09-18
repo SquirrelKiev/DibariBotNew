@@ -1,6 +1,6 @@
 ﻿namespace DibariBot.Modules.ConfigCommand.Pages;
 
-public abstract class ConfigPage
+public abstract class ConfigPage : DibariModule
 {
     public enum Page
     {
@@ -13,14 +13,14 @@ public abstract class ConfigPage
     public abstract string Description { get; }
 
 #nullable disable
-    protected Dictionary<Page, ConfigPage> configPages;
+    protected Dictionary<Page, ConfigPage> ConfigPages { get; private set; }
 #nullable enable
 
     public abstract Task<MessageContents> GetMessageContents(ConfigCommandService.State state);
 
     public virtual ConfigPage Initialize(Dictionary<Page, ConfigPage> configPages)
     {
-        this.configPages = configPages;
+        ConfigPages = configPages;
 
         return this;
     }

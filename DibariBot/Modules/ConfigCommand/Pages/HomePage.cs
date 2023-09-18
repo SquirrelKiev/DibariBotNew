@@ -12,13 +12,13 @@ public class HomePage : ConfigPage
     {
         var embed = new EmbedBuilder();
 
-        foreach(var page in configPages.Values)
+        foreach(var page in ConfigPages.Values)
         {
             embed.AddField(page.Label, page.Description);
         }
 
         var components = new ComponentBuilder()
-            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configPages, Id));
+            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(ConfigPages, Id));
 
         return Task.FromResult(new MessageContents("", embed.Build(), components.Build()));
     }
