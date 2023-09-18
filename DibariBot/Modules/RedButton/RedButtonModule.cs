@@ -6,9 +6,11 @@ namespace DibariBot.Modules.RedButton
     public class RedButtonModule : DibariModule
     {
         [ComponentInteraction(ModulePrefixes.RED_BUTTON)]
-        public Task OnButton()
+        public async Task OnButton()
         {
-            return DeleteOriginalResponseAsync();
+            Log.Debug("uhm");
+            await DeferAsync();
+            await Context.Interaction.DeleteOriginalResponseAsync();
         }
     }
 }
