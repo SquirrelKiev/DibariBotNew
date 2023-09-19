@@ -4,15 +4,13 @@ namespace DibariBot;
 
 public class Api
 {
-    public readonly Uri baseUri;
     public readonly IHttpClientFactory httpFactory;
     public readonly ICacheProvider cache;
 
-    public Api(IHttpClientFactory http, ICacheProvider cache, string baseUrl)
+    public Api(IHttpClientFactory http, ICacheProvider cache)
     {
         httpFactory = http;
         this.cache = cache;
-        baseUri = new Uri(baseUrl);
     }
 
     /// <summary>
@@ -21,17 +19,15 @@ public class Api
     /// <typeparam name="T">the type to deserialize as</typeparam>
     /// <returns></returns>
     /// <exception cref="HttpRequestException"></exception>
-    public virtual async Task<T?> Get<T>(string url)
+    public virtual async Task<T?> Get<T>(Uri uri)
     {
-        var fullUri = new Uri(baseUri, url);
-
-        return await cache.GetOrCreateAsync($"apiCache:{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(fullUri.ToString()))}", async () =>
+        return await cache.GetOrCreateAsync($"apiCache:{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(uri.ToString()))}", async () =>
         {
-            Log.Debug("Fetching {url}", fullUri);
+            Log.Debug("Fetching {url}", uri);
 
             using var client = httpFactory.CreateClient();
 
-            var res = await client.GetAsync(fullUri);
+            var res = await client.GetAsync(uri);
 
             if (res.StatusCode != System.Net.HttpStatusCode.OK)
             {

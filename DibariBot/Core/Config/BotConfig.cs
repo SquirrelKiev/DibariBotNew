@@ -35,7 +35,7 @@ public class BotConfig : ITomlMetadataProvider
     public string CubariUrl { get; set; } = "https://cubari.moe";
 
     [TomlMetadata(Comment = "The base URL for MangaDex requests.")]
-    public string MangadexUrl { get; set; } = "https://api.mangadex.com";
+    public string MangaDexUrl { get; set; } = "https://api.mangadex.com";
 
     [TomlMetadata(Comment = "***** IMAGE PROXY CONFIG *****\n\n" +
         "Specifies how the URL to proxy should be encoded.")]

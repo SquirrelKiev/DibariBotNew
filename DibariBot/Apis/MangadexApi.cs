@@ -1,17 +1,22 @@
-﻿namespace DibariBot;
+﻿using DibariBot.Apis;
+
+namespace DibariBot;
 
 [Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
-public class MangadexApi
+public class MangaDexApi
 {
     private readonly Api api;
+    private readonly Uri baseUri;
 
-    public MangadexApi(IHttpClientFactory http, ICacheProvider cache, BotConfig botConfig)
+    public MangaDexApi(IHttpClientFactory http, ICacheProvider cache, BotConfig botConfig)
     {
-        api = new Api(http, cache, botConfig.CubariUrl);
+        api = new Api(http, cache);
+
+        baseUri = new Uri(botConfig.MangaDexUrl);
     }
 
-    public Task<T?> Get<T>(string url)
+    public async Task GetMangas(MangaListQueryParams queryParams)
     {
-        return api.Get<T>(url);
+        
     }
 }
