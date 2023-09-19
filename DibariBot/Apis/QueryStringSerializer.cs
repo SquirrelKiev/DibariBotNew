@@ -1,48 +1,90 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Globalization;
+using System.Text;
+using System.Web;
 
 namespace DibariBot.Apis;
 
-// why is there no existing stuff i can find that does this
-// TODO: method to serialize into a string, string dictionary.
-// nested types are serialized the same way, and are appended onto the main dict as fieldname[subfieldkey]
+// gotta be a faster way of doing this, like,, why is this not built in in some form
 public static class QueryStringSerializer
 {
-    private static IEnumerable<KeyValuePair<string, string>> SerializeToDict(
-        object obj, 
-        NullValueHandling nullValueHandling = NullValueHandling.Ignore)
+    public static string ToQueryParams(object obj)
     {
-        ArgumentNullException.ThrowIfNull(obj, nameof(obj));
+        var dict = ToUrlEncodedKeyValue(obj);
 
-        foreach(var field in obj.GetType().GetFields())
+        if (dict is null)
+            return "";
+
+        return string.Join("&", dict.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+    }
+
+    public static Dictionary<string, string>? ToUrlEncodedKeyValue(object obj)
+    {
+        if (obj == null)
         {
-            var val = field.GetValue(obj);
+            return null;
+        }
 
-            if(val == null)
+        var serializer = new JsonSerializer
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            NullValueHandling = NullValueHandling.Ignore
+        };
+
+        return ToUrlEncodedKeyValue(JObject.FromObject(obj, serializer));
+    }
+
+    public static Dictionary<string, string>? ToUrlEncodedKeyValue(JToken? token)
+    {
+        if (token == null)
+        {
+            return null;
+        }
+
+        var contentData = new Dictionary<string, string>();
+        if (token.HasValues)
+        {
+            foreach (var child in token.Children())
             {
-                switch (nullValueHandling)
+                var childContent = ToUrlEncodedKeyValue(child);
+                if (childContent != null)
                 {
-                    case NullValueHandling.Ignore:
-                        continue;
-
-                    case NullValueHandling.Include:
-                        yield return new(field.Name, "");
-                        continue;
-                    default:
-                        throw new NotImplementedException();
+                    foreach (var kv in childContent)
+                    {
+                        contentData[kv.Key] = kv.Value;
+                    }
                 }
             }
 
-            if(field.FieldType.IsPrimitive || field.FieldType == typeof(string))
-            {
-                yield return new(field.Name, val.ToString() ?? "");
-            }
+            return contentData;
+        }
+
+        var jValue = token as JValue;
+        if (jValue?.Value == null)
+        {
+            return null;
+        }
+
+        var value = jValue.Type == JTokenType.Date
+                    ? jValue.ToString("o", CultureInfo.InvariantCulture)
+                    : jValue.ToString(CultureInfo.InvariantCulture);
+
+        StringBuilder customPath = new();
+        var split = token.Path.Split('.');
+        for (int i = 0; i < split.Length; i++)
+        {
+            if (i == 0)
+                customPath.Append(split[i]);
             else
             {
-                foreach(var kvp in SerializeToDict(val, nullValueHandling))
-                {
-                    yield return new($"{field.Name}[{kvp.Key}]", kvp.Value);
-                }
+                customPath.Append('[');
+                customPath.Append(HttpUtility.UrlEncode(split[i]));
+                customPath.Append(']');
             }
         }
+
+        contentData[customPath.ToString()] = HttpUtility.UrlEncode(value) ?? "";
+        return contentData;
     }
 }

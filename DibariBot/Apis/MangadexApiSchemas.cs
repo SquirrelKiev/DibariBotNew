@@ -13,3 +13,19 @@ public class MangaListQueryOrder
 {
     public string? relevance;
 }
+
+public class MangaListSchema
+{
+    public string result;
+    public string response;
+    public MangaSchema[] data;
+        public int limit;
+        public int offset;
+        public int total;
+}
+
+public class MangaSchema
+{
+    public string id;
+    public 
+}

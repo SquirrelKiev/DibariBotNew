@@ -17,6 +17,8 @@ public class MangaDexApi
 
     public async Task GetMangas(MangaListQueryParams queryParams)
     {
-        
+        var uri = new Uri(baseUri, "manga?" + QueryStringSerializer.ToQueryParams(queryParams));
+
+        api.Get(uri);
     }
 }

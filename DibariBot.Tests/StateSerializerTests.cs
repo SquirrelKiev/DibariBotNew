@@ -1,62 +1,64 @@
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using System.Diagnostics;
 using Xunit.Abstractions;
 
 namespace DibariBot.Tests;
 
+public class TestObject
+{
+    public int id;
+    public InnerTestObject? inner;
+    public string name = "";
+
+    public TestObject()
+    { }
+
+    public TestObject(int id, string name, InnerTestObject inner)
+    {
+        ArgumentNullException.ThrowIfNull(name, nameof(name));
+
+        this.id = id;
+        this.name = name;
+        this.inner = inner;
+    }
+
+    public static TestObject CreateValid()
+    {
+        return new(1, "Test Object", InnerTestObject.CreateValid());
+    }
+}
+
+public struct InnerTestObject
+{
+    public TestEnum testEnum = TestEnum.InvalidValue;
+    public string str = "invalid";
+    public int number = -1;
+
+    public InnerTestObject()
+    {
+    }
+
+    public InnerTestObject(TestEnum testEnum, string str, int number)
+    {
+        this.testEnum = testEnum;
+        this.str = str ?? throw new ArgumentNullException(nameof(str));
+        this.number = number;
+    }
+
+    public static InnerTestObject CreateValid()
+    {
+        return new InnerTestObject(TestEnum.ValidValue, "valid", 69);
+    }
+}
+
+public enum TestEnum
+{
+    InvalidValue,
+    ValidValue
+}
+
 public class StateSerializerTests
 {
-    private class TestObject
-    {
-        public int id;
-        public InnerTestObject? inner;
-        public string name = "";
-
-        public TestObject()
-        { }
-
-        public TestObject(int id, string name, InnerTestObject inner)
-        {
-            ArgumentNullException.ThrowIfNull(name, nameof(name));
-
-            this.id = id;
-            this.name = name;
-            this.inner = inner;
-        }
-
-        public static TestObject CreateValid()
-        {
-            return new(1, "Test Object", InnerTestObject.CreateValid());
-        }
-    }
-
-    private struct InnerTestObject
-    {
-        public TestEnum testEnum = TestEnum.InvalidValue;
-        public string str = "invalid";
-        public int number = -1;
-
-        public InnerTestObject()
-        {
-        }
-
-        public InnerTestObject(TestEnum testEnum, string str, int number)
-        {
-            this.testEnum = testEnum;
-            this.str = str ?? throw new ArgumentNullException(nameof(str));
-            this.number = number;
-        }
-
-        public static InnerTestObject CreateValid()
-        {
-            return new InnerTestObject(TestEnum.ValidValue, "valid", 69);
-        }
-    }
-
-    private enum TestEnum
-    {
-        InvalidValue,
-        ValidValue
-    }
-
     private readonly ITestOutputHelper output;
 
     public StateSerializerTests(ITestOutputHelper output)
