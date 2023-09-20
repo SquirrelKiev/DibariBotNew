@@ -26,6 +26,6 @@ public class MangaDexApi
 
         var res = await api.Get<MangaListSchema>(uri);
 
-        return res == null ? throw new NullReferenceException() : res;
+        return res ?? throw new NullReferenceException();
     }
 }

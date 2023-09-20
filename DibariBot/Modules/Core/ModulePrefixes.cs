@@ -4,7 +4,8 @@ public static class ModulePrefixes
 {
     public const string RED_BUTTON = "rb:";
     public const string MANGA_MODULE_PREFIX = "m:";
-    public const string MANGADEX_SEARCH_PREFIX = "mds:";
+    public const string MANGADEX_SEARCH_BUTTON_PREFIX = "mdsb:";
+    public const string MANGADEX_SEARCH_DROPDOWN_PREFIX = "mdsd:";
     public const string CONFIG_PAGE_SELECT_PAGE = "c-s:";
     public const string CONFIG_PAGE_SELECT_PAGE_BUTTON = "c-sb:";
     public const string CONFIG_DEFAULT_MANGA_SET = "c-dms:";

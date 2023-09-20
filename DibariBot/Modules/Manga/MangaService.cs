@@ -1,4 +1,6 @@
-﻿namespace DibariBot.Modules.Manga;
+﻿using DibariBot.Database;
+
+namespace DibariBot.Modules.Manga;
 
 public enum MangaAction
 {
@@ -44,14 +46,52 @@ public class MangaService
 
     private readonly MangaFactory mangaFactory;
     private readonly BotConfig botConfig;
+    private readonly DbService dbService;
 
-    public MangaService(MangaFactory mangaFactory, BotConfig botConfig)
+    public MangaService(MangaFactory mangaFactory, BotConfig botConfig, DbService dbService)
     {
         this.mangaFactory = mangaFactory;
         this.botConfig = botConfig;
+        this.dbService = dbService;
     }
 
-    public async Task<MessageContents> GetNewMessageContents(State state)
+    public async Task<MessageContents> MangaCommand(ulong guildId, ulong channelId, string url = "", string chapter = "", int page = 1)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            using var context = dbService.GetDbContext();
+
+            var exists = context.DefaultMangas.FirstOrDefault(x => x.GuildId == guildId && x.ChannelId == channelId);
+            exists ??= context.DefaultMangas.FirstOrDefault(x => x.GuildId == guildId && x.ChannelId == 0ul);
+
+            if (exists == null)
+            {
+                return new MessageContents(string.Empty, embed:
+                    new EmbedBuilder()
+                    .WithDescription("This server hasn't set a default manga yet! Please manually specify the URL.") // TODO: l18n
+                    .Build(), null);
+            }
+
+            url = exists.Manga;
+        }
+        var series = ParseUrl.ParseMangaUrl(url);
+
+        if (series == null)
+        {
+            return new MessageContents(string.Empty, embed:
+                new EmbedBuilder()
+                .WithDescription("Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot.") // TODO: l18n
+                .Build(), null);
+        }
+
+        var state = new State(MangaAction.Open, series.Value, new Bookmark(chapter, page - 1));
+
+        var contents = await GetMangaMessage(state);
+
+        return contents;
+    }
+
+    public async Task<MessageContents> GetMangaMessage(State state)
     {
         IManga manga;
         try
@@ -143,7 +183,7 @@ public class MangaService
             .WithImageUrl(pageSrc)
             .WithFooter(
                 new EmbedFooterBuilder()
-                .WithText($"{metadata.title.Truncate(botConfig.MaxTitleLength)}, by {author}.\n" +
+                .WithText($"{metadata.title.Truncate(50, true)}, by {author}.\n" +
                 $"Group: {pages.group}")
             )
             .WithColor(botConfig)

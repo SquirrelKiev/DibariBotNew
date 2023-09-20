@@ -1,57 +1,22 @@
-﻿using DibariBot.Database;
-
-namespace DibariBot.Modules.Manga;
+﻿namespace DibariBot.Modules.Manga;
 
 public class MangaModule : DibariModule
 {
     private readonly MangaService mangaHandler;
-    private readonly DbService dbService;
 
-    public MangaModule(MangaService mangaHandler, DbService db)
+    public MangaModule(MangaService mangaHandler)
     {
         this.mangaHandler = mangaHandler;
-        dbService = db;
     }
 
+    // TODO: Too much is handled here!! move to separate func!!!
     [SlashCommand("manga", "Gets a page from a chapter of a manga.")]
     public async Task MangaSlash(string url = "", string chapter = "", int page = 1)
     {
         await DeferAsync();
 
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            using var context = dbService.GetDbContext();
-
-            var exists = context.DefaultMangas.FirstOrDefault(x => x.GuildId == Context.Guild.Id && x.ChannelId == Context.Channel.Id);
-            exists ??= context.DefaultMangas.FirstOrDefault(x => x.GuildId == Context.Guild.Id && x.ChannelId == 0ul);
-
-            if (exists == null)
-            {
-                await FollowupAsync(embed:
-                    new EmbedBuilder()
-                    .WithDescription("This server hasn't set a default manga yet! Please manually specify the URL.") // TODO: l18n
-                    .Build()
-                );
-                return;
-            }
-
-            url = exists.Manga;
-        }
-        var series = ParseUrl.ParseMangaUrl(url);
-
-        if (series == null)
-        {
-            await FollowupAsync(embed:
-                new EmbedBuilder()
-                .WithDescription("Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot.") // TODO: l18n
-                .Build()
-            );
-            return;
-        }
-
-        var state = new MangaService.State(MangaAction.Open, series.Value, new Bookmark(chapter, page - 1));
-
-        var contents = await mangaHandler.GetNewMessageContents(state);
+        var contents = await mangaHandler.MangaCommand(Context.Guild.Id, Context.Channel.Id,
+            url, chapter, page);
 
         await FollowupAsync(contents);
     }
@@ -63,7 +28,7 @@ public class MangaModule : DibariModule
 
         var state = StateSerializer.DeserializeObject<MangaService.State>(rawState);
 
-        var contents = await mangaHandler.GetNewMessageContents(state);
+        var contents = await mangaHandler.GetMangaMessage(state);
 
         await ModifyOriginalResponseAsync(contents);
     }
