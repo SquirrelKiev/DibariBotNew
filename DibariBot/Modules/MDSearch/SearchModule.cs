@@ -12,15 +12,19 @@ public class SearchModule : DibariModule
     [SlashCommand("manga-search", "Searches MangaDex for the query provided. (searches titles, sorted by relevance)")]
     public async Task SearchSlash(string query)
     {
-        await mangaDexApi.GetMangas(new Apis.MangaListQueryParams
+        await DeferAsync();
+
+        var res = await mangaDexApi.GetMangas(new Apis.MangaListQueryParams
         {
             limit = 10,
             offset = 0,
             order = new Apis.MangaListQueryOrder()
             {
-                relevance = "desc"
+                relevance = Apis.MangaListQueryOrder.QueryOrderSchema.Descending
             },
             title = query
         });
+
+        await FollowupAsync(res.data[0].attributes.title.First().Value);
     }
 }

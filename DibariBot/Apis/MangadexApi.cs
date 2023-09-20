@@ -15,10 +15,17 @@ public class MangaDexApi
         baseUri = new Uri(botConfig.MangaDexUrl);
     }
 
-    public async Task GetMangas(MangaListQueryParams queryParams)
+    public async Task<MangaListSchema> GetMangas(MangaListQueryParams queryParams)
     {
         var uri = new Uri(baseUri, "manga?" + QueryStringSerializer.ToQueryParams(queryParams));
 
-        api.Get(uri);
+        queryParams.includes = new ReferenceExpansionMangaSchema[]
+        {
+            ReferenceExpansionMangaSchema.Author
+        };
+
+        var res = await api.Get<MangaListSchema>(uri);
+
+        return res == null ? throw new NullReferenceException() : res;
     }
 }
