@@ -31,4 +31,13 @@ public struct MangaMetadata
 {
     public string title;
     public string author;
+    public string description;
+    public string artist;
+}
+
+public class Cover
+{
+    public string url = "";
+    public string volume = "";
+    public string description = "";
 }

@@ -46,6 +46,9 @@ public class BotConfig : ITomlMetadataProvider
     [TomlMetadata(Comment = "How long a manga description should be before it is truncated.")]
     public int MaxDescriptionLength { get; set; } = 200;
 
+    [TomlMetadata(Comment = "The style to use for pretty much every button that isn't a close button.")]
+    public ButtonStyle PrimaryButtonStyle { get; set; } = ButtonStyle.Secondary;
+
     [TomlMetadata(Comment = "***** IMAGE PROXY CONFIG *****\n\n" +
         "Specifies how the URL to proxy should be encoded.")]
     public ProxyUrlEncodingFormat ProxyUrlEncoding { get; set; } = ProxyUrlEncodingFormat.Base64;

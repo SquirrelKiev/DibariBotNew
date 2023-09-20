@@ -45,13 +45,13 @@ public class MangaService
     }
 
     private readonly MangaFactory mangaFactory;
-    private readonly BotConfig botConfig;
+    private readonly BotConfig config;
     private readonly DbService dbService;
 
     public MangaService(MangaFactory mangaFactory, BotConfig botConfig, DbService dbService)
     {
         this.mangaFactory = mangaFactory;
-        this.botConfig = botConfig;
+        this.config = botConfig;
         this.dbService = dbService;
     }
 
@@ -102,7 +102,7 @@ public class MangaService
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription($"Failed to get manga. `{ex.Message}`\n `{state.identifier.platform}/{state.identifier.series}`")
-                .WithColor(botConfig)
+                .WithColor(config)
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
@@ -116,7 +116,7 @@ public class MangaService
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("Chapter not found.")
-                .WithColor(botConfig)
+                .WithColor(config)
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
@@ -156,7 +156,7 @@ public class MangaService
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription($"page {bookmark.page + 1} doesn't exist in chapter {bookmark.chapter}!")
-                .WithColor(botConfig)
+                .WithColor(config)
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
@@ -186,7 +186,7 @@ public class MangaService
                 .WithText($"{metadata.title.Truncate(50, true)}, by {author}.\n" +
                 $"Group: {pages.group}")
             )
-            .WithColor(botConfig)
+            .WithColor(config)
             .Build();
 
         var newState = new State(MangaAction.Open, state.identifier, bookmark);
@@ -196,25 +196,29 @@ public class MangaService
                 "<<",
                 StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackChapter),
                 ModulePrefixes.MANGA_MODULE_PREFIX),
-                disabled: disableLeftChapter
+                disabled: disableLeftChapter,
+                style: config.PrimaryButtonStyle
                 )
             .WithButton(
                 "<",
                 StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackPage),
                 ModulePrefixes.MANGA_MODULE_PREFIX),
-                disabled: disableLeftPage
+                disabled: disableLeftPage,
+                style: config.PrimaryButtonStyle
                 )
             .WithButton(
                 ">",
                 StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardPage),
                 ModulePrefixes.MANGA_MODULE_PREFIX),
-                disabled: disableRightPage
+                disabled: disableRightPage,
+                style: config.PrimaryButtonStyle
                 )
             .WithButton(
                 ">>",
                 StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardChapter),
                 ModulePrefixes.MANGA_MODULE_PREFIX),
-                disabled: disableRightChapter
+                disabled: disableRightChapter,
+                style: config.PrimaryButtonStyle
                 )
             .WithRedButton();
 
@@ -226,13 +230,13 @@ public class MangaService
     /// </remarks>
     private string GetProxiedUrl(string url, string platform)
     {
-        if (!botConfig.PlatformsToProxy.Contains(platform.ToLower()))
+        if (!config.PlatformsToProxy.Contains(platform.ToLower()))
             return url;
 
-        return botConfig.ProxyUrlEncoding switch
+        return config.ProxyUrlEncoding switch
         {
-            BotConfig.ProxyUrlEncodingFormat.UrlEscaped => botConfig.ProxyUrl.Replace("{{URL}}", System.Web.HttpUtility.UrlEncode(url)),
-            BotConfig.ProxyUrlEncodingFormat.Base64 => botConfig.ProxyUrl.Replace("{{URL}}", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url))),
+            BotConfig.ProxyUrlEncodingFormat.UrlEscaped => config.ProxyUrl.Replace("{{URL}}", System.Web.HttpUtility.UrlEncode(url)),
+            BotConfig.ProxyUrlEncodingFormat.Base64 => config.ProxyUrl.Replace("{{URL}}", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url))),
             _ => throw new NotImplementedException(),
         };
     }

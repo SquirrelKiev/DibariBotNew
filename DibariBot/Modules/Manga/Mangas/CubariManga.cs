@@ -5,17 +5,13 @@ namespace DibariBot.Modules.Manga;
 [Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Transient)]
 public class CubariManga : IManga
 {
-    public string Title { get; private set; }
-    public string Description { get; private set; }
-    public string Author { get; private set; }
-    public string Artist { get; private set; }
-    public string Cover { get; private set; }
-    public Dictionary<string, string> Groups { get; private set; }
+    public MangaMetadata Metadata { get; protected set; }
+    public Dictionary<string, string> Groups { get; protected set; }
 
-    private SeriesIdentifier identifier;
-    private SortedList<string, CubariChapterSchema> chapters;
+    protected SeriesIdentifier identifier;
+    protected SortedList<string, CubariChapterSchema> chapters;
 
-    private readonly CubariApi cubari;
+    protected readonly CubariApi cubari;
 
 #pragma warning disable CS8618 // null error, technically true but only if Initialize() wasnt called which in that case, it should throw anyway
     public CubariManga(CubariApi cubari)
@@ -24,7 +20,7 @@ public class CubariManga : IManga
     }
 #pragma warning restore CS8618
 
-    public async Task<IManga> Initialize(SeriesIdentifier identifier)
+    public virtual async Task<IManga> Initialize(SeriesIdentifier identifier)
     {
         ArgumentNullException.ThrowIfNull(identifier, nameof(identifier));
         ArgumentNullException.ThrowIfNull(identifier.platform, nameof(identifier.platform));
@@ -34,11 +30,13 @@ public class CubariManga : IManga
 
         var mangaRes = await cubari.Get<CubariMangaSchema>(url);
 
-        Title = mangaRes.title;
-        Description = mangaRes.description;
-        Author = mangaRes.author;
-        Artist = mangaRes.artist;
-        Cover = mangaRes.cover;
+        Metadata = new MangaMetadata
+        {
+            title = mangaRes.title,
+            description = mangaRes.description,
+            author = mangaRes.author,
+            artist = mangaRes.artist
+        };
         Groups = mangaRes.groups;
 
         chapters = new SortedList<string, CubariChapterSchema>(mangaRes.chapters, new ChapterNameComparer());
@@ -48,25 +46,21 @@ public class CubariManga : IManga
         return this;
     }
 
-    public SeriesIdentifier GetIdentifier()
+    public virtual SeriesIdentifier GetIdentifier()
     {
         return identifier;
     }
-    public Task<MangaMetadata> GetMetadata()
+    public virtual Task<MangaMetadata> GetMetadata()
     {
-        return Task.FromResult(new MangaMetadata()
-        {
-            author = Author,
-            title = Title
-        });
+        return Task.FromResult(Metadata);
     }
-    public string GetUrl(Bookmark bookmark)
+    public virtual string GetUrl(Bookmark bookmark)
     {
         return cubari.GetUrl(identifier, bookmark);
     }
 
     /// <exception cref="NotImplementedException">If the type we get from the api is something we don't handle</exception>
-    public async Task<ChapterSrcs> GetImageSrcs(string chapter)
+    public virtual async Task<ChapterSrcs> GetImageSrcs(string chapter)
     {
         var chapterObj = chapters[chapter];
 
@@ -76,7 +70,7 @@ public class CubariManga : IManga
 
         return new(srcs, Groups[group.Key]);
     }
-    private async Task<string[]> GetImageSrcsFromGroup(JToken token)
+    protected virtual async Task<string[]> GetImageSrcsFromGroup(JToken token)
     {
         ArgumentNullException.ThrowIfNull(token, nameof(token));
 
@@ -108,7 +102,7 @@ public class CubariManga : IManga
         // no clue what on earth we've recieved, bail
         throw new NotImplementedException();
     }
-    public Task<ChapterMetadata> GetChapterMetadata(string chapter)
+    public virtual Task<ChapterMetadata> GetChapterMetadata(string chapter)
     {
         var chapterData = chapters[chapter];
 
@@ -120,7 +114,7 @@ public class CubariManga : IManga
         });
     }
 
-    public Task<string?> GetNextChapterKey(string currentChapterKey)
+    public virtual Task<string?> GetNextChapterKey(string currentChapterKey)
     {
         var nextChapterIndex = chapters.IndexOfKey(currentChapterKey) + 1;
 
@@ -131,7 +125,7 @@ public class CubariManga : IManga
 
         return Task.FromResult<string?>(chapters.GetKeyAtIndex(nextChapterIndex));
     }
-    public Task<string?> GetPreviousChapterKey(string currentChapterKey)
+    public virtual Task<string?> GetPreviousChapterKey(string currentChapterKey)
     {
         var previousChapterKey = chapters.IndexOfKey(currentChapterKey) - 1;
 
@@ -143,12 +137,12 @@ public class CubariManga : IManga
         return Task.FromResult<string?>(chapters.GetKeyAtIndex(previousChapterKey));
     }
 
-    public Task<string> DefaultChapter()
+    public virtual Task<string> DefaultChapter()
     {
         return Task.FromResult(chapters.Keys.First());
     }
 
-    public Task<bool> HasChapter(string chapter)
+    public virtual Task<bool> HasChapter(string chapter)
     {
         return Task.FromResult(chapters.ContainsKey(chapter));
     }

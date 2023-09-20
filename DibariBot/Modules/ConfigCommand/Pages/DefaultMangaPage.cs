@@ -41,11 +41,13 @@ public class DefaultMangaPage : ConfigPage
 
     private readonly DbService dbService;
     private readonly ConfigCommandService configCommandService;
+    private readonly BotConfig config;
 
-    public DefaultMangaPage(DbService db, ConfigCommandService configCommandService)
+    public DefaultMangaPage(DbService db, ConfigCommandService configCommandService, BotConfig config)
     {
         dbService = db;
         this.configCommandService = configCommandService;
+        this.config = config;
     }
 
     // step 1 - help page/modal open
@@ -77,7 +79,7 @@ public class DefaultMangaPage : ConfigPage
             .WithButton(new ButtonBuilder()
                 .WithLabel("Set")
                 .WithCustomId($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_SET}")
-                .WithStyle(ButtonStyle.Success))
+                .WithStyle(config.PrimaryButtonStyle))
             .WithRedButton();
 
         return new MessageContents("", embed.Build(), components);

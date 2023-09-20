@@ -22,11 +22,11 @@ public class MangaFactory
             "imgur" or
             "gist" or
             "nhentai" or
-            "mangadex" or
             "mangasee" or
             "reddit" or
             "imgchest" => typeof(CubariManga),
             "xkcd" => typeof(XkcdManga),
+            "mangadex" => typeof(MangaDexManga),
             _ => null,
         };
 

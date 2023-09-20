@@ -73,7 +73,7 @@ public class SearchService
                         query = state.query
                     }))
                     .WithDisabled(disableLeft)
-                    .WithStyle(ButtonStyle.Primary)
+                    .WithStyle(config.PrimaryButtonStyle)
                 )
             .WithButton(new ButtonBuilder()
                     .WithLabel(">")
@@ -84,7 +84,7 @@ public class SearchService
                         query = state.query
                     }))
                     .WithDisabled(disableRight)
-                    .WithStyle(ButtonStyle.Primary)
+                    .WithStyle(config.PrimaryButtonStyle)
                 )
             .WithRedButton();
 

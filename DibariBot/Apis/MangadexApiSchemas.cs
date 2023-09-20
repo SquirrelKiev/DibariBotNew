@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS8618 // shhh json will take care of it
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System.Runtime.Serialization;
 
@@ -29,6 +30,20 @@ public enum ReferenceExpansionMangaSchema
     Creator
 }
 
+[JsonConverter(typeof(StringEnumConverter), typeof(SnakeCaseNamingStrategy))]
+public enum ResultSchema
+{
+    Ok,
+    Error
+}
+
+[JsonConverter(typeof(StringEnumConverter), typeof(SnakeCaseNamingStrategy))]
+public enum ResponseSchema
+{
+    Entity,
+    Collection
+}
+
 public class MangaListQueryOrder
 {
     [JsonConverter(typeof(StringEnumConverter), typeof(SnakeCaseNamingStrategy))]
@@ -45,7 +60,7 @@ public class MangaListQueryOrder
 
 public class MangaListSchema
 {
-    public string result;
+    public ResultSchema result;
     public string response;
     public MangaSchema[] data;
     public int limit;
@@ -53,13 +68,15 @@ public class MangaListSchema
     public int total;
 }
 
-public class MangaSchema
+public class MangaResponseSchema
 {
-    public string id;
-    public TypeSchema type;
-    public MangaAttributesSchema attributes;
-    public RelationshipSchema[] relationships;
+    public ResultSchema result;
+    public ResponseSchema response;
+    public MangaSchema data;
 }
+
+public class MangaSchema : ResponseSchema<TypeSchema, MangaAttributesSchema>
+{ }
 
 public class MangaAttributesSchema
 {
@@ -122,13 +139,8 @@ public class MangaAttributesSchema
 
 }
 
-public class TagSchema
-{
-    public string id;
-    public TypeSchema type;
-    public TagAttributesSchema attributes;
-    public RelationshipSchema[] relationships;
-}
+public class TagSchema : ResponseSchema<TypeSchema, TagAttributesSchema>
+{ }
 
 [JsonConverter(typeof(StringEnumConverter), typeof(SnakeCaseNamingStrategy))]
 public enum TypeSchema
@@ -178,19 +190,75 @@ public class RelationshipSchema
     }
 
     public string id;
-    public string type;
-    public RelatedSchema related;
+    public ReferenceExpansionMangaSchema type;
+    /// <remarks>
+    /// Will only be there on Manga relateds.
+    /// </remarks>
+    public RelatedSchema? related;
 
     /// <remarks>
     /// If Reference Expansion is applied, contains objects attributes
     /// </remarks>
-    public object? attributes;
+    public JToken? attributes;
 }
 
 public class LocalizedStringSchema : Dictionary<string, string>
 {
     public override string ToString()
     {
-        return this.FirstOrDefault().Value;
+        return this.FirstOrDefault(x => x.Key == "en", this.FirstOrDefault()).Value;
     }
+}
+
+public class GetMangaIdParamsSchema
+{
+    public ReferenceExpansionMangaSchema[] includes;
+}
+
+public class AuthorSchema : ResponseSchema<ReferenceExpansionMangaSchema, AuthorAttributesSchema>
+{ }
+
+public class CoverSchema : ResponseSchema<ReferenceExpansionMangaSchema, CoverAttributesSchema> 
+{ }
+
+public class CoverAttributesSchema
+{
+    public string? volume;
+    public string fileName;
+    public string locale;
+    public string? description;
+    public int version;
+    public DateTime createdAt;
+    public DateTime updatedAt;
+}
+
+public class ResponseSchema<TType, TAttributes> where TType : Enum
+{
+    public string id;
+    public TType type;
+    public TAttributes attributes;
+    public RelationshipSchema[] relationships;
+}
+
+public class AuthorAttributesSchema
+{
+    public string name;
+    public string? imageUrl;
+    public LocalizedStringSchema biography;
+    public string? twitter;
+    public string? pixiv;
+    public string? melonBook;
+    public string? fanBox;
+    public string? booth;
+    public string? nicoVideo;
+    public string? skeb;
+    public string? fantia;
+    public string? tumblr;
+    public string? youtube;
+    public string? weibo;
+    public string? naver;
+    public string? website;
+    public int version;
+    public DateTime createdAt;
+    public DateTime updatedAt;
 }
