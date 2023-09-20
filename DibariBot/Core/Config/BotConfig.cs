@@ -34,8 +34,11 @@ public class BotConfig : ITomlMetadataProvider
         "Only really should be changed if you're using a self-hosted instance for whatever reason.")]
     public string CubariUrl { get; set; } = "https://cubari.moe";
 
-    [TomlMetadata(Comment = "The base URL for MangaDex requests.")]
-    public string MangaDexUrl { get; set; } = "https://api.mangadex.org";
+    [TomlMetadata(Comment = "The URL for MangaDex searches. Leave empty to disable.")]
+    public string MangaDexApiUrl { get; set; } = "https://api.mangadex.org";
+
+    [TomlMetadata(Comment = "The URL to link to for MangaDex searches. '{{ID}}' will be replaced with the mangadex id.")]
+    public string MangaDexSearchUrl { get; set; } = "https://mangadex.org/title/{{ID}}";
 
     [TomlMetadata(Comment = "How many results to show per page when using the search command.")]
     public int MangaDexSearchLimit { get; set; } = 5;

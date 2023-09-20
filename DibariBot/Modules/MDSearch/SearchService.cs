@@ -12,9 +12,9 @@ public class SearchService
     private readonly MangaDexApi mangaDexApi;
     private readonly BotConfig config;
 
-    public SearchService(MangaDexApi api, BotConfig config)
+    public SearchService(MangaDexApi mdapi, BotConfig config)
     {
-        mangaDexApi = api;
+        mangaDexApi = mdapi;
         this.config = config;
     }
 
@@ -33,19 +33,31 @@ public class SearchService
 
         var totalPages = res.total / config.MangaDexSearchLimit;
 
+        if(totalPages <= 0)
+        {
+            var errorEmbed = new EmbedBuilder()
+                .WithDescription("No results found!");
+
+            return new MessageContents(string.Empty, errorEmbed.Build(), null);
+        }
+
         var embed = new EmbedBuilder();
 
-        foreach(var manga in res.data)
+        foreach (var mangaSchema in res.data)
         {
+            var manga = MangaDexApi.MangaSchemaToMetadata(mangaSchema);
+
+            // why cant field titles have URLs
             embed
                 .AddField(new EmbedFieldBuilder()
-                    .WithName(manga.attributes.title.ToString()
+                    .WithName($"{manga.title
                         .StringOrDefault("No title (why?)")
-                        .Truncate(config.MaxTitleLength)
+                        .Truncate(config.MaxTitleLength)} by {manga.author.Truncate(config.MaxTitleLength)}"
                         )
-                    .WithValue(manga.attributes.description.ToString()
+                    .WithValue(manga.description
                         .StringOrDefault("No description.")
                         .Truncate(config.MaxDescriptionLength)
+                        + $" [(link)]({config.MangaDexSearchUrl.Replace("{{ID}}", mangaSchema.id)})"
                         )
                     )
                 .WithFooter(new EmbedFooterBuilder()
@@ -57,7 +69,7 @@ public class SearchService
 
         var components = new ComponentBuilder()
             .WithSelectMenu(new SelectMenuBuilder()
-                    .WithOptions(res.data.Select(x => 
+                    .WithOptions(res.data.Select(x =>
                         new SelectMenuOptionBuilder()
                             .WithValue(x.id.ToString())
                             .WithLabel(x.attributes.title.ToString())
@@ -77,7 +89,7 @@ public class SearchService
                 )
             .WithButton(new ButtonBuilder()
                     .WithLabel(">")
-                    .WithCustomId(ModulePrefixes.MANGADEX_SEARCH_BUTTON_PREFIX + 
+                    .WithCustomId(ModulePrefixes.MANGADEX_SEARCH_BUTTON_PREFIX +
                     StateSerializer.SerializeObject(new State()
                     {
                         page = state.page + 1,

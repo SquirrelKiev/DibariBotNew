@@ -8,7 +8,6 @@ namespace DibariBot.Modules.RedButton
         [ComponentInteraction(ModulePrefixes.RED_BUTTON)]
         public async Task OnButton()
         {
-            Log.Debug("uhm");
             await DeferAsync();
             await Context.Interaction.DeleteOriginalResponseAsync();
         }
