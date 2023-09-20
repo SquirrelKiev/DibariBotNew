@@ -186,4 +186,10 @@ public class RelationshipSchema
     public object? attributes;
 }
 
-public class LocalizedStringSchema : Dictionary<string, string> { }
+public class LocalizedStringSchema : Dictionary<string, string>
+{
+    public override string ToString()
+    {
+        return this.FirstOrDefault().Value;
+    }
+}

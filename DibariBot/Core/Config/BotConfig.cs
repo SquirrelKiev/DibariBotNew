@@ -37,6 +37,15 @@ public class BotConfig : ITomlMetadataProvider
     [TomlMetadata(Comment = "The base URL for MangaDex requests.")]
     public string MangaDexUrl { get; set; } = "https://api.mangadex.org";
 
+    [TomlMetadata(Comment = "How many results to show per page when using the search command.")]
+    public int MangaDexSearchLimit { get; set; } = 5;
+
+    [TomlMetadata(Comment = "How long a manga title should be before it is truncated.")]
+    public int MaxTitleLength { get; set; } = 50;
+
+    [TomlMetadata(Comment = "How long a manga description should be before it is truncated.")]
+    public int MaxDescriptionLength { get; set; } = 200;
+
     [TomlMetadata(Comment = "***** IMAGE PROXY CONFIG *****\n\n" +
         "Specifies how the URL to proxy should be encoded.")]
     public ProxyUrlEncodingFormat ProxyUrlEncoding { get; set; } = ProxyUrlEncodingFormat.Base64;

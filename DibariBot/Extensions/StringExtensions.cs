@@ -2,7 +2,7 @@
 
 public static class StringExtensions
 {
-    public static string Truncate(this string str, int limit, bool useWordBoundary)
+    public static string Truncate(this string str, int limit, bool useWordBoundary = true)
     {
         if (str.Length <= limit)
         {
@@ -36,6 +36,18 @@ public static class StringExtensions
         while ((line = reader.ReadLine()) != null)
         {
             yield return line;
+        }
+    }
+
+    public static string StringOrDefault(this string potential, string def)
+    {
+        if (string.IsNullOrWhiteSpace(potential))
+        {
+            return def;
+        }
+        else
+        {
+            return potential;
         }
     }
 }

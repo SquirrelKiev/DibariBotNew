@@ -2,11 +2,11 @@
 
 public class SearchModule : DibariModule
 {
-    private readonly MangaDexApi mangaDexApi;
+    private readonly SearchService searchService;
 
-    public SearchModule(MangaDexApi mdapi)
+    public SearchModule(SearchService search)
     {
-        mangaDexApi = mdapi;
+        searchService = search;
     }
 
     [SlashCommand("manga-search", "Searches MangaDex for the query provided. (searches titles, sorted by relevance)")]
@@ -14,17 +14,6 @@ public class SearchModule : DibariModule
     {
         await DeferAsync();
 
-        var res = await mangaDexApi.GetMangas(new Apis.MangaListQueryParams
-        {
-            limit = 10,
-            offset = 0,
-            order = new Apis.MangaListQueryOrder()
-            {
-                relevance = Apis.MangaListQueryOrder.QueryOrderSchema.Descending
-            },
-            title = query
-        });
-
-        await FollowupAsync(res.data[0].attributes.title.First().Value);
+        await FollowupAsync(await searchService.GetMessageContents(new SearchService.State() { query = query }));
     }
 }
