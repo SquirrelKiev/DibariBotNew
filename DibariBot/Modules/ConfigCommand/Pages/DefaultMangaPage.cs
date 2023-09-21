@@ -151,12 +151,23 @@ public class DefaultMangaPage : ConfigPage
             return;
         }
 
+        var options = new List<SelectMenuOptionBuilder>();
+
+        foreach(var def in defaults)
+        {
+            var channelName = def.ChannelId == 0 ?
+                    "Server-wide" :
+                    $"#{(await Context.Client.GetChannelAsync(def.ChannelId)).Name}";
+
+            options.Add(new SelectMenuOptionBuilder()
+                    .WithLabel(channelName)
+                    .WithDescription(def.Manga)
+                    .WithValue(def.ChannelId.ToString()));
+        }
+
         var components = new ComponentBuilder()
             .WithSelectMenu(new SelectMenuBuilder()
-                .WithOptions(defaults.Select(x => new SelectMenuOptionBuilder()
-                    .WithLabel(x.Manga)
-                    .WithValue(x.ChannelId.ToString())).ToList()
-                )
+                .WithOptions(options)
                 .WithCustomId(ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE_DROPDOWN)
                 )
             .WithButton(cancelButton);
@@ -205,7 +216,7 @@ public class DefaultMangaPage : ConfigPage
     private MessageContents ConfirmPromptContents(ConfirmState confirmState)
     {
         var embed = new EmbedBuilder()
-            .WithDescription($"Set the default manga for **{(confirmState.channelId == 0ul ? "the server" : $"<#{confirmState.channelId}>")}** as {confirmState.series}?");
+            .WithDescription($"Set the default manga for **{(confirmState.channelId == 0ul ? "the server" : $"<#{confirmState.channelId}>")}** as **{confirmState.series}**?");
 
         var components = new ComponentBuilder()
             .WithSelectMenu(new SelectMenuBuilder()
@@ -220,7 +231,7 @@ public class DefaultMangaPage : ConfigPage
             .WithButton(new ButtonBuilder()
                 .WithLabel("Yes!")
                 .WithCustomId(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_SUBMIT_BUTTON + StateSerializer.SerializeObject(confirmState))
-                .WithStyle(ButtonStyle.Success))
+                .WithStyle(config.PrimaryButtonStyle))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Cancel")
                 .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +

@@ -68,7 +68,7 @@ public class MangaService
             {
                 return new MessageContents(string.Empty, embed:
                     new EmbedBuilder()
-                    .WithDescription("This server hasn't set a default manga yet! Please manually specify the URL.") // TODO: l18n
+                    .WithDescription("This server hasn't set a default manga! Please manually specify the URL.") // TODO: l18n
                     .Build(), null);
             }
 
