@@ -28,7 +28,7 @@ public class CubariManga : IManga
 
         string url = $"read/api/{Uri.EscapeDataString(identifier.platform)}/series/{Uri.EscapeDataString(identifier.series)}";
 
-        var mangaRes = await cubari.Get<CubariMangaSchema>(url);
+        var mangaRes = await cubari.Get<CubariMangaSchema>(url, new CacheValueSettings(TimeSpan.FromMinutes(15)));
 
         Metadata = new MangaMetadata
         {

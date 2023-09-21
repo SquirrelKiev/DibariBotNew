@@ -17,9 +17,9 @@ public class CubariApi
     }
 
     
-    public Task<T?> Get<T>(string url)
+    public Task<T?> Get<T>(string url, CacheValueSettings? cvs = null)
     {
-        return api.Get<T>(new Uri(baseUri, url));
+        return api.Get<T>(new Uri(baseUri, url), cvs);
     }
 
     public string GetUrl(SeriesIdentifier identifier, Bookmark bookmark)

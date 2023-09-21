@@ -14,7 +14,6 @@ public class MemoryCacheProvider : ICacheProvider
         });
     }
 
-    // hate how i have to do OneOf i thought Nullable was for this exact case
     public ValueTask<Optional<T>> GetAsync<T>(string key)
     {
         if (!cache.TryGetValue(key, out var val) || val is null)
@@ -72,7 +71,7 @@ public class MemoryCacheProvider : ICacheProvider
         ArgumentNullException.ThrowIfNull(cacheEntry, nameof(cacheEntry));
 
         cacheEntry
-            .SetAbsoluteExpiration(settings.ttl ?? CacheConsts.defaultTTL)
+            .SetAbsoluteExpiration(settings.ttl)
             .SetSize(settings.size);
 
         cacheEntry.Value = value;

@@ -19,8 +19,10 @@ public class Api
     /// <typeparam name="T">the type to deserialize as</typeparam>
     /// <returns></returns>
     /// <exception cref="HttpRequestException"></exception>
-    public virtual async Task<T?> Get<T>(Uri uri)
+    public virtual async Task<T?> Get<T>(Uri uri, CacheValueSettings? cvs = null)
     {
+        cvs ??= new CacheValueSettings();
+
         return await cache.GetOrCreateAsync($"apiCache:{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(uri.ToString()))}", async () =>
         {
             Log.Debug("Fetching {url}", uri);
@@ -38,6 +40,6 @@ public class Api
             var obj = JsonConvert.DeserializeObject<T>(json);
 
             return obj;
-        }, new CacheValueSettings());
+        }, cvs);
     }
 }
