@@ -82,7 +82,7 @@ public class DefaultMangaPage : ConfigPage
         return defaults;
     }
 
-    private EmbedBuilder GetCurrentDefaultsEmbed(Core.Database.Models.DefaultManga[] defaults)
+    private static EmbedBuilder GetCurrentDefaultsEmbed(Core.Database.Models.DefaultManga[] defaults)
     {
         var embed = new EmbedBuilder();
 

@@ -1,0 +1,20 @@
+services:
+  dibari:
+    image: dibari-bot:latest
+    volumes:
+      - botdata:/data
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:latest
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=dibariuser
+      - POSTGRES_PASSWORD=supersecure
+  
+volumes:
+  botdata:
+  pgdata:

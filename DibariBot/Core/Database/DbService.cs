@@ -11,12 +11,9 @@ public class DbService
         this.botConfig = botConfig;
     }
 
-    public Task Initialize()
+    public async Task Initialize()
     {
-        // do this when not in dev
-        // await GetDbContext().Database.MigrateAsync();
-
-        return Task.CompletedTask;
+        await GetDbContext().Database.MigrateAsync();
     }
 
     public async Task ResetDatabase()

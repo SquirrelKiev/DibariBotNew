@@ -1,5 +1,4 @@
 ﻿using DibariBot.Modules;
-using System.Runtime.CompilerServices;
 
 namespace DibariBot.Modules.RedButton
 {
