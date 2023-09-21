@@ -1,6 +1,7 @@
 ﻿using DibariBot.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Runtime.InteropServices;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
 
@@ -53,12 +54,36 @@ public class DefaultMangaPage : ConfigPage
     // step 1 - help page/modal open
     public override async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
     {
+        var embed = GetCurrentDefaultsEmbed(await GetMangaDefaultsList());
+
+        var components = new ComponentBuilder()
+            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configCommandService.ConfigPages, Id))
+            .WithButton(new ButtonBuilder()
+                .WithLabel("Set")
+                .WithCustomId($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_SET}")
+                .WithStyle(config.PrimaryButtonStyle))
+            .WithButton(new ButtonBuilder()
+                .WithLabel("Remove")
+                .WithCustomId($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE}")
+                .WithStyle(config.PrimaryButtonStyle))
+            .WithRedButton();
+
+        return new MessageContents("", embed.Build(), components);
+    }
+
+    private async Task<Core.Database.Models.DefaultManga[]> GetMangaDefaultsList()
+    {
         using var dbContext = dbService.GetDbContext();
 
         var guildId = (Context.Guild?.Id) ?? throw new NullReferenceException("wtf");
 
         var defaults = await dbContext.DefaultMangas.Where(x => x.GuildId == guildId).ToArrayAsync();
 
+        return defaults;
+    }
+
+    private EmbedBuilder GetCurrentDefaultsEmbed(Core.Database.Models.DefaultManga[] defaults)
+    {
         var embed = new EmbedBuilder();
 
         if (defaults.Length > 0)
@@ -73,16 +98,70 @@ public class DefaultMangaPage : ConfigPage
             embed.WithDescription("No defaults set.");
         }
 
-        // TODO
-        var components = new ComponentBuilder()
-            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configCommandService.ConfigPages, Id))
-            .WithButton(new ButtonBuilder()
-                .WithLabel("Set")
-                .WithCustomId($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_SET}")
-                .WithStyle(config.PrimaryButtonStyle))
-            .WithRedButton();
+        return embed;
+    }
 
-        return new MessageContents("", embed.Build(), components);
+    [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE_DROPDOWN)]
+    public async Task RemoveMangaDropdown(string id)
+    {
+        await DeferAsync();
+
+        ulong channelId = ulong.Parse(id);
+
+        using var context = dbService.GetDbContext();
+
+        var farts = await context.DefaultMangas.FirstOrDefaultAsync(x =>
+        x.GuildId == Context.Guild.Id && x.ChannelId == channelId
+        );
+
+        if(farts == null)
+        {
+            await ModifyOriginalResponseAsync(new MessageContents("Couldn't find it anymore?", embed: null, null));
+            return;
+        }
+
+        context.Remove(farts);
+
+        await context.SaveChangesAsync();
+
+        await ModifyOriginalResponseAsync(await GetMessageContents(new ConfigCommandService.State(){
+            page = Page.DefaultManga
+        }));
+    }
+
+    [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE)]
+    public async Task RemoveMangaButton()
+    {
+        await DeferAsync();
+
+        var defaults = await GetMangaDefaultsList();
+
+        var embed = GetCurrentDefaultsEmbed(defaults);
+        var cancelButton = new ButtonBuilder()
+                .WithLabel("Cancel")
+                .WithStyle(config.PrimaryButtonStyle)
+                .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
+                    StateSerializer.SerializeObject(StateSerializer.SerializeObject(Id))
+                );
+
+        if (defaults.Length <= 0)
+        {
+            await ModifyOriginalResponseAsync(new MessageContents(string.Empty, embed.Build(), 
+                new ComponentBuilder().WithButton(cancelButton)));
+            return;
+        }
+
+        var components = new ComponentBuilder()
+            .WithSelectMenu(new SelectMenuBuilder()
+                .WithOptions(defaults.Select(x => new SelectMenuOptionBuilder()
+                    .WithLabel(x.Manga)
+                    .WithValue(x.ChannelId.ToString())).ToList()
+                )
+                .WithCustomId(ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE_DROPDOWN)
+                )
+            .WithButton(cancelButton);
+
+        await ModifyOriginalResponseAsync(new MessageContents(string.Empty, embed.Build(), components));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET)]
