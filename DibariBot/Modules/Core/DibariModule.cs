@@ -1,6 +1,6 @@
 ﻿namespace DibariBot.Modules;
 
-public class DibariModule : InteractionModuleBase
+public abstract class DibariModule : InteractionModuleBase
 {
     protected virtual Task<IUserMessage> FollowupAsync(MessageContents contents, bool ephemeral = false)
     {

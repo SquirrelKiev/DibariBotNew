@@ -159,6 +159,8 @@ public class Bot
 
     private async Task Client_Ready()
     {
+        Log.Information("Logged in as {user}#{discrim} ({id})", Client.CurrentUser?.Username, Client.CurrentUser?.Discriminator, Client.CurrentUser?.Id);
+
         await InitializeInteractionService();
     }
 

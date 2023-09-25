@@ -11,9 +11,8 @@ public class ConfigCommandModule : DibariModule
         this.configService = configService;
     }
 
-    [SlashCommand("manga-config", "Test command")]
-    [RequireOwner(Group = "BotManager")]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = "BotManager")]
+    [SlashCommand("manga-config", "Pulls up various options for configuring the bot to the server's needs.")]
+    [EnabledInDm(false)]
     public async Task ConfigSlash()
     {
         await DeferAsync();

@@ -11,6 +11,7 @@ public class MangaModule : DibariModule
 
     // TODO: Too much is handled here!! move to separate func!!!
     [SlashCommand("manga", "Gets a page from a chapter of a manga.")]
+    [EnabledInDm(false)]
     public async Task MangaSlash(string url = "", string chapter = "", int page = 1)
     {
         await DeferAsync();

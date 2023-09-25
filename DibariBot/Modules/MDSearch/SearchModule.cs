@@ -14,6 +14,7 @@ public class SearchModule : DibariModule
     }
 
     [SlashCommand("manga-search", "Searches MangaDex for the query provided. (searches titles, sorted by relevance)")]
+    [EnabledInDm(false)]
     public async Task SearchSlash(string query)
     {
         await DeferAsync();

@@ -1,7 +1,5 @@
 ﻿using DibariBot.Database;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using System.Runtime.InteropServices;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
 
@@ -71,7 +69,7 @@ public class DefaultMangaPage : ConfigPage
         return new MessageContents("", embed.Build(), components);
     }
 
-    private async Task<Core.Database.Models.DefaultManga[]> GetMangaDefaultsList()
+    private async Task<DibariBot.Core.Database.Models.DefaultManga[]> GetMangaDefaultsList()
     {
         using var dbContext = dbService.GetDbContext();
 
@@ -82,7 +80,7 @@ public class DefaultMangaPage : ConfigPage
         return defaults;
     }
 
-    private static EmbedBuilder GetCurrentDefaultsEmbed(Core.Database.Models.DefaultManga[] defaults)
+    private static EmbedBuilder GetCurrentDefaultsEmbed(DibariBot.Core.Database.Models.DefaultManga[] defaults)
     {
         var embed = new EmbedBuilder();
 
@@ -249,7 +247,7 @@ public class DefaultMangaPage : ConfigPage
 
         var state = StateSerializer.DeserializeObject<ConfirmState>(id);
 
-        var toAdd = new Core.Database.Models.DefaultManga()
+        var toAdd = new DibariBot.Core.Database.Models.DefaultManga()
         {
             GuildId = Context.Guild.Id,
             ChannelId = state.channelId,
