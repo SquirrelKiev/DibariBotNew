@@ -6,12 +6,14 @@ WORKDIR /source
 
 COPY DibariBot/*.csproj DibariBot/
 
-RUN dotnet restore DibariBot/
+ARG TARGETARCH
+
+RUN dotnet restore DibariBot/ -a $TARGETARCH
 
 COPY . .
 
 RUN set -xe; \
-dotnet publish -c Release -o /app; \
+dotnet publish -c Release -a $TARGETARCH -o /app; \
 chmod +x /app/DibariBot
 
 FROM mcr.microsoft.com/dotnet/runtime:7.0 as runtime
