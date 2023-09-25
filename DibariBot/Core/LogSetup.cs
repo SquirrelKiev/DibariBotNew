@@ -10,6 +10,8 @@ public static class LogSetup
         Log.Logger = new LoggerConfiguration()
 #if DEBUG
             .MinimumLevel.Verbose()
+#else
+            .MinimumLevel.Debug()
 #endif
             .Enrich.FromLogContext()
             .WriteTo.Console(Serilog.Events.LogEventLevel.Verbose,
