@@ -142,6 +142,18 @@ public class Bot
     {
         var ctx = new SocketInteractionContext(Client, arg);
 
+        if(ctx.Interaction is SocketMessageComponent componentInteraction)
+        {
+            var ogRes = componentInteraction.Message;
+
+            if (ogRes.Interaction.User.Id != ctx.Interaction.User.Id)
+            {
+                await componentInteraction.RespondAsync("You did not originally trigger this. Please run the command yourself.", ephemeral: true);
+
+                return;
+            }
+        }
+
         await Commands.ExecuteCommandAsync(ctx, services);
     }
 
@@ -168,7 +180,22 @@ public class Bot
                 Log.Error("Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.",
                     cmdInfo?.Module?.Name, cmdInfo?.MethodName, res.Error, res.ErrorReason);
             }
-            ctx.Interaction.ModifyOriginalResponseAsync(new MessageContents($"{res.Error}, {res.ErrorReason}", embed: null, null));
+
+            var messageBody = $"{res.Error}, {res.ErrorReason}";
+
+            if(res is PreconditionResult precondResult)
+            {
+                messageBody = $"Condition to use command not met. (`{precondResult.ErrorReason}`)";
+            }
+
+            if (ctx.Interaction.HasResponded)
+            {
+                ctx.Interaction.ModifyOriginalResponseAsync(new MessageContents(messageBody, embed: null, null));
+            }
+            else
+            {
+                ctx.Interaction.RespondAsync(messageBody, ephemeral: true);
+            }
         }
 
         return Task.CompletedTask;
