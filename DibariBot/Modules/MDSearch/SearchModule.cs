@@ -37,7 +37,7 @@ public class SearchModule : DibariModule
     {
         await DeferAsync();
 
-        await ModifyOriginalResponseAsync(await mangaService.MangaCommand(Context.Guild?.Id ?? 0ul, Context.Channel.Id, 
+        await ModifyOriginalResponseAsync(await mangaService.MangaCommand(Context.Guild?.Id ?? 0ul, Context.Channel.Id,
             new SeriesIdentifier("mangadex", dexId).ToString()));
     }
 }
