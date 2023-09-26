@@ -12,6 +12,7 @@ public class ConfigCommandModule : DibariModule
     }
 
     [SlashCommand("manga-config", "Pulls up various options for configuring the bot to the server's needs.")]
+    [RequireUserPermission(GuildPermission.ManageGuild)]
     [EnabledInDm(false)]
     public async Task ConfigSlash()
     {
