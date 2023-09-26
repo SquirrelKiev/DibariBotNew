@@ -16,7 +16,7 @@ public class HelpModule : DibariModule
 
     [SlashCommand("manga-help", "Help! What are all the commands?")]
     [HelpPageDescription("Pulls up this page!")]
-    [EnabledInDm(false)]
+    [EnabledInDm(true)]
     public async Task HelpSlash()
     {
         await DeferAsync();

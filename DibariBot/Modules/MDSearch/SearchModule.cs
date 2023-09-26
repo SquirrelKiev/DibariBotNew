@@ -14,7 +14,7 @@ public class SearchModule : DibariModule
     }
 
     [SlashCommand("manga-search", "Searches MangaDex for the query provided. (searches titles, sorted by relevance)")]
-    [EnabledInDm(false)]
+    [EnabledInDm(true)]
     public async Task SearchSlash(string query)
     {
         await DeferAsync();
@@ -37,7 +37,7 @@ public class SearchModule : DibariModule
     {
         await DeferAsync();
 
-        await ModifyOriginalResponseAsync(await mangaService.MangaCommand(Context.Guild.Id, Context.Channel.Id, 
+        await ModifyOriginalResponseAsync(await mangaService.MangaCommand(Context.Guild?.Id ?? 0ul, Context.Channel.Id, 
             new SeriesIdentifier("mangadex", dexId).ToString()));
     }
 }

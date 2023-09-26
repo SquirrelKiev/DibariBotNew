@@ -12,7 +12,7 @@ public class ConfigCommandModule : DibariModule
     }
 
     [SlashCommand("manga-config", "Pulls up various options for configuring the bot to the server's needs.")]
-    [EnabledInDm(false)]
+    [EnabledInDm(true)]
     public async Task ConfigSlash()
     {
         await DeferAsync();

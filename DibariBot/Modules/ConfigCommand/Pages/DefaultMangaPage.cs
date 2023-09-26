@@ -73,9 +73,17 @@ public class DefaultMangaPage : ConfigPage
     {
         using var dbContext = dbService.GetDbContext();
 
-        var guildId = (Context.Guild?.Id) ?? throw new NullReferenceException("wtf");
+        var guildId = (Context.Guild?.Id) ?? 0ul;
 
-        var defaults = await dbContext.DefaultMangas.Where(x => x.GuildId == guildId).ToArrayAsync();
+        DibariBot.Core.Database.Models.DefaultManga[] defaults;
+        if (guildId == 0ul)
+        {
+            defaults = await dbContext.DefaultMangas.Where(x => x.ChannelId == Context.Channel.Id).ToArrayAsync();
+        }
+        else
+        {
+            defaults = await dbContext.DefaultMangas.Where(x => x.GuildId == guildId).ToArrayAsync();
+        }
 
         return defaults;
     }
@@ -108,11 +116,13 @@ public class DefaultMangaPage : ConfigPage
 
         using var context = dbService.GetDbContext();
 
+        var guildId = Context.Guild?.Id ?? 0ul;
+
         var farts = await context.DefaultMangas.FirstOrDefaultAsync(x =>
-        x.GuildId == Context.Guild.Id && x.ChannelId == channelId
+            x.GuildId == guildId && x.ChannelId == channelId
         );
 
-        if(farts == null)
+        if (farts == null)
         {
             await ModifyOriginalResponseAsync(new MessageContents("Couldn't find it anymore?", embed: null, null));
             return;
@@ -122,7 +132,8 @@ public class DefaultMangaPage : ConfigPage
 
         await context.SaveChangesAsync();
 
-        await ModifyOriginalResponseAsync(await GetMessageContents(new ConfigCommandService.State(){
+        await ModifyOriginalResponseAsync(await GetMessageContents(new ConfigCommandService.State()
+        {
             page = Page.DefaultManga
         }));
     }
@@ -144,14 +155,14 @@ public class DefaultMangaPage : ConfigPage
 
         if (defaults.Length <= 0)
         {
-            await ModifyOriginalResponseAsync(new MessageContents(string.Empty, embed.Build(), 
+            await ModifyOriginalResponseAsync(new MessageContents(string.Empty, embed.Build(),
                 new ComponentBuilder().WithButton(cancelButton)));
             return;
         }
 
         var options = new List<SelectMenuOptionBuilder>();
 
-        foreach(var def in defaults)
+        foreach (var def in defaults)
         {
             var channelName = def.ChannelId == 0 ?
                     "Server-wide" :
@@ -196,7 +207,13 @@ public class DefaultMangaPage : ConfigPage
             return;
         }
 
-        await ModifyOriginalResponseAsync(ConfirmPromptContents(new ConfirmState(parsedUrl.Value, 0ul)));
+        var channelId = 0ul;
+        if (Context.Guild == null)
+        {
+            channelId = Context.Channel.Id;
+        }
+
+        await ModifyOriginalResponseAsync(ConfirmPromptContents(new ConfirmState(parsedUrl.Value, channelId)));
         return;
     }
 
@@ -216,25 +233,31 @@ public class DefaultMangaPage : ConfigPage
         var embed = new EmbedBuilder()
             .WithDescription($"Set the default manga for **{(confirmState.channelId == 0ul ? "the server" : $"<#{confirmState.channelId}>")}** as **{confirmState.series}**?");
 
-        var components = new ComponentBuilder()
-            .WithSelectMenu(new SelectMenuBuilder()
-                .WithCustomId(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_CHANNEL_INPUT + StateSerializer.SerializeObject(confirmState.series))
-                .WithType(ComponentType.ChannelSelect)
-                .WithPlaceholder("(Optional) channel.")
-                .WithMinValues(0)
-                .WithMaxValues(1)
-                .WithChannelTypes(
-                    ChannelType.Text, ChannelType.News, ChannelType.NewsThread,
-                    ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.Forum))
-            .WithButton(new ButtonBuilder()
-                .WithLabel("Yes!")
-                .WithCustomId(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_SUBMIT_BUTTON + StateSerializer.SerializeObject(confirmState))
-                .WithStyle(config.PrimaryButtonStyle))
-            .WithButton(new ButtonBuilder()
-                .WithLabel("Cancel")
-                .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
-                    StateSerializer.SerializeObject(StateSerializer.SerializeObject(Id)))
-                .WithStyle(ButtonStyle.Danger));
+        var components = new ComponentBuilder();
+
+        if (Context.Guild != null)
+        {
+            components.WithSelectMenu(new SelectMenuBuilder()
+            .WithCustomId(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_CHANNEL_INPUT + StateSerializer.SerializeObject(confirmState.series))
+            .WithType(ComponentType.ChannelSelect)
+            .WithPlaceholder("(Optional) channel.")
+            .WithMinValues(0)
+            .WithMaxValues(1)
+            .WithChannelTypes(
+                ChannelType.Text, ChannelType.News, ChannelType.NewsThread,
+                ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.Forum));
+        }
+
+        components.WithButton(new ButtonBuilder()
+            .WithLabel("Yes!")
+            .WithCustomId(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_SUBMIT_BUTTON + StateSerializer.SerializeObject(confirmState))
+            .WithStyle(config.PrimaryButtonStyle));
+
+        components.WithButton(new ButtonBuilder()
+            .WithLabel("Cancel")
+            .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
+                StateSerializer.SerializeObject(StateSerializer.SerializeObject(Id)))
+            .WithStyle(ButtonStyle.Danger));
 
         return new MessageContents(string.Empty, embed.Build(), components);
     }
@@ -249,7 +272,7 @@ public class DefaultMangaPage : ConfigPage
 
         var toAdd = new DibariBot.Core.Database.Models.DefaultManga()
         {
-            GuildId = Context.Guild.Id,
+            GuildId = Context.Guild?.Id ?? 0ul,
             ChannelId = state.channelId,
             Manga = state.series.ToString()
         };

@@ -19,7 +19,8 @@ public class Bot
     {
         Client = new(new()
         {
-            GatewayIntents = GatewayIntents.Guilds
+            GatewayIntents = GatewayIntents.Guilds,
+            LogLevel = LogSeverity.Verbose
         });
         Commands = new(Client, new());
 

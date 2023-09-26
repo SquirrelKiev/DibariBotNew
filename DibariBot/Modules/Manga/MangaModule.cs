@@ -11,12 +11,12 @@ public class MangaModule : DibariModule
 
     // TODO: Too much is handled here!! move to separate func!!!
     [SlashCommand("manga", "Gets a page from a chapter of a manga.")]
-    [EnabledInDm(false)]
+    [EnabledInDm(true)]
     public async Task MangaSlash(string url = "", string chapter = "", int page = 1)
     {
         await DeferAsync();
 
-        var contents = await mangaHandler.MangaCommand(Context.Guild.Id, Context.Channel.Id,
+        var contents = await mangaHandler.MangaCommand(Context.Guild?.Id ?? 0ul, Context.Channel.Id,
             url, chapter, page);
 
         await FollowupAsync(contents);
