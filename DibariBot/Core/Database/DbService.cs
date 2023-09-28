@@ -13,7 +13,15 @@ public class DbService
 
     public async Task Initialize()
     {
-        await GetDbContext().Database.MigrateAsync();
+        var args = Environment.GetCommandLineArgs();
+        var migrationEnabled = !(args.Contains("nomigrate") || args.Contains("nukedb"));
+
+        Log.Debug("Database migration: {migrationStatus}", migrationEnabled);
+
+        if (migrationEnabled) 
+        {
+            await GetDbContext().Database.MigrateAsync();
+        }
     }
 
     public async Task ResetDatabase()

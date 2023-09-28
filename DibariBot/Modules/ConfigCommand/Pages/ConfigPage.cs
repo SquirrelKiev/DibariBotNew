@@ -5,7 +5,8 @@ public abstract class ConfigPage : DibariModule
     public enum Page
     {
         Help,
-        DefaultManga
+        DefaultManga,
+        RegexFilters
     }
 
     public abstract Page Id { get; }

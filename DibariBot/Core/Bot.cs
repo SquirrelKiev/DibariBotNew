@@ -95,9 +95,9 @@ public class Bot
         await services.GetRequiredService<DbService>().Initialize();
 
 #if DEBUG
-        if (Environment.GetCommandLineArgs().Length > 1 && Environment.GetCommandLineArgs()[1] == "doit")
+        if (Environment.GetCommandLineArgs().Contains("nukedb"))
         {
-            Log.Debug("do it? Nuking the DB...");
+            Log.Debug("Nuking the DB...");
 
             await services.GetRequiredService<DbService>().ResetDatabase();
 

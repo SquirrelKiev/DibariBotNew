@@ -7,6 +7,7 @@ public abstract class BotContext : DbContext
 {
     public DbSet<GuildConfig> GuildConfig { get; set; }
     public DbSet<DefaultManga> DefaultMangas { get; set; }
+    public DbSet<RegexFilter> RegexFilters { get; set; }
 
     protected readonly string connectionString;
 

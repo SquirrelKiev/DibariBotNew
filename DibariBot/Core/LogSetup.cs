@@ -8,13 +8,14 @@ public static class LogSetup
     public static void SetupLogger()
     {
         Log.Logger = new LoggerConfiguration()
-#if DEBUG
             .MinimumLevel.Verbose()
-#else
-            .MinimumLevel.Debug()
-#endif
             .Enrich.FromLogContext()
-            .WriteTo.Console(Serilog.Events.LogEventLevel.Verbose,
+            .WriteTo.Console(
+#if DEBUG
+            Serilog.Events.LogEventLevel.Verbose,
+#else
+            Serilog.Events.LogEventLevel.Information,
+#endif
             theme: AnsiConsoleTheme.Literate)
             .CreateLogger();
 
