@@ -277,6 +277,7 @@ public class DefaultMangaPage : ConfigPage
             Manga = state.series.ToString()
         };
 
+        // TODO: keep an eye on this to see if they implement it
         // Why is this not a thing yet: https://github.com/dotnet/efcore/issues/4526
         using (var context = dbService.GetDbContext())
         {

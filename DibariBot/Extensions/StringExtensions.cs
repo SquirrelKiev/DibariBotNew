@@ -2,6 +2,7 @@
 
 public static class StringExtensions
 {
+    // replace with humanizer truncate?
     public static string Truncate(this string str, int limit, bool useWordBoundary = true)
     {
         if (str.Length <= limit)

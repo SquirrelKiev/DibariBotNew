@@ -1,6 +1,4 @@
-﻿using DibariBot.Database;
-
-namespace DibariBot.Modules.ConfigCommand;
+﻿namespace DibariBot.Modules.ConfigCommand;
 
 public class ConfigCommandModule : DibariModule
 {
@@ -22,7 +20,8 @@ public class ConfigCommandModule : DibariModule
 
         await FollowupAsync(await configService.GetMessageContents(new()
         {
-            page = Pages.ConfigPage.Page.Help,
+            // TODO: Change to Home before shipping!!
+            page = Pages.ConfigPage.Page.RegexFilters,
             data = ""
         }, Context));
     }

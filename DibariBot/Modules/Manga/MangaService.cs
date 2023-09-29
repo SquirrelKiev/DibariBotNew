@@ -1,4 +1,6 @@
-﻿using DibariBot.Database;
+﻿using DibariBot.Core.Database.Models;
+using DibariBot.Database;
+using Microsoft.EntityFrameworkCore;
 
 namespace DibariBot.Modules.Manga;
 
@@ -98,7 +100,7 @@ public class MangaService
         {
             manga = await mangaFactory.GetManga(state.identifier) ?? throw new NotImplementedException($"Platform \"{state.identifier.platform}\" not implemented!");
         }
-        catch(HttpRequestException ex)
+        catch (HttpRequestException ex)
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription($"Failed to get manga. `{ex.Message}`\n `{state.identifier.platform}/{state.identifier.series}`")
@@ -239,5 +241,90 @@ public class MangaService
             BotConfig.ProxyUrlEncodingFormat.Base64 => config.ProxyUrl.Replace("{{URL}}", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url))),
             _ => throw new NotImplementedException(),
         };
+    }
+
+    // Regex filter zone
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <returns>The ID of the entry added/updated. If the ID is zero, it means the ID could not be found.</returns>
+    // TODO: reasonable limits on how many regexes one server can have
+    public async Task<uint> UpdateOrAddRegexFilter(RegexFilter filter)
+    {
+        using var context = dbService.GetDbContext();
+
+        if (filter.Id != 0ul)
+        {
+            // exists?
+            var potential = await context.RegexFilters.FindAsync(filter.Id);
+
+            if (potential == null)
+            {
+                return 0;
+            }
+
+            context.RegexFilters.Update(potential);
+
+            await context.SaveChangesAsync();
+
+            return filter.Id;
+        }
+        else
+        {
+            var res = await context.AddAsync(filter);
+
+            return res.Entity.Id;
+        }
+    }
+
+    public async Task<RegexFilter?> GetFilter(uint regexKey)
+    {
+        using var context = dbService.GetDbContext();
+
+        return await context.RegexFilters.FindAsync(regexKey);
+    }
+
+    /// <param name="guildId">ID of the guild.</param>
+    /// <param name="channelId">Channel ID. will only grab the filters that apply to the current channel.</param>
+    public async Task<RegexFilter[]> GetFilters(ulong guildId, ulong channelId)
+    {
+        using var context = dbService.GetDbContext();
+
+        // been tearing my hair out about this for at least an hour. its broken me
+        // also why theres so many comments. I need this as human readable as possible for my 1am brain
+        var filterQuery = context.RegexFilters
+            .Where(rf =>
+                // The filter is for the current guild
+                rf.GuildId == guildId
+                && // AND
+                (
+                    // There's an entry that includes the current channel
+                    rf.RegexChannelEntries.Any(rce => rce.ChannelId == channelId && rce.ChannelFilterScope == ChannelFilterScope.Include)
+                    || // OR
+                    (
+                        // there isn't any entry with an Include scope
+                        !rf.RegexChannelEntries.Any(rce => rce.ChannelFilterScope == ChannelFilterScope.Include)
+                        && // AND
+                        // There isn't an entry that asks to exclude the current channel
+                        !rf.RegexChannelEntries.Any(rce => rce.ChannelId == channelId && rce.ChannelFilterScope == ChannelFilterScope.Exclude)
+                    )
+                )
+            );
+
+        // Log.Verbose("GetFilter query is: {query}", filterQuery.ToQueryString());
+
+        return await filterQuery.ToArrayAsync();
+    }
+
+    public async Task<RegexFilter[]> GetFilters(ulong guildId)
+    {
+        using var context = dbService.GetDbContext();
+
+        RegexFilter[] guildFilters = await context.RegexFilters.Where
+            (x => x.GuildId == guildId).ToArrayAsync();
+
+        return guildFilters;
     }
 }

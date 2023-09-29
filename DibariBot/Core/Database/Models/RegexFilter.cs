@@ -2,17 +2,18 @@
 
 public enum FilterType
 {
-    AllowList,
-    BlockList
+    Allow,
+    Block
 }
 
 public class RegexFilter : DbModel
 {
     public required ulong GuildId { get; set; }
 
-    public required string RegexString { get; set; }
-
-    public ICollection<RegexChannelEntry> Channels { get; } = new List<RegexChannelEntry>();
+    public required string Regex { get; set; }
+    public required string Template { get; set; }
 
     public required FilterType FilterType { get; set; }
+
+    public ICollection<RegexChannelEntry> RegexChannelEntries { get; } = new List<RegexChannelEntry>();
 }

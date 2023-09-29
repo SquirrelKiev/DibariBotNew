@@ -33,13 +33,21 @@ public static class ModulePrefixes
 
     #region Config - Regex Filters
     public const string CONFIG_REGEX_FILTERS = "c-rf";
-    public const string CONFIG_REGEX_FILTERS_ADD = $"{CONFIG_REGEX_FILTERS}a";
-    public const string CONFIG_REGEX_FILTERS_ADD_BUTTON = $"{CONFIG_REGEX_FILTERS_ADD}:";
-    public const string CONFIG_REGEX_FILTERS_MODAL = $"{CONFIG_REGEX_FILTERS_MODAL_BASE}:";
+
+    public const string CONFIG_REGEX_FILTERS_CONFIRMATION = $"{CONFIG_REGEX_FILTERS}-c";
+    public const string CONFIG_REGEX_FILTERS_CONFIRMATION_FILTER_TYPE = $"{CONFIG_REGEX_FILTERS_CONFIRMATION}-ft";
+    public const string CONFIG_REGEX_FILTERS_CONFIRMATION_ADD_BUTTON = $"{CONFIG_REGEX_FILTERS_CONFIRMATION}-a:";
+
+    public const string CONFIG_REGEX_FILTERS_ADD_BASE = $"{CONFIG_REGEX_FILTERS}a";
+    public const string CONFIG_REGEX_FILTERS_ADD_BUTTON = $"{CONFIG_REGEX_FILTERS_ADD_BASE}:";
+
     public const string CONFIG_REGEX_FILTERS_MODAL_BASE = $"{CONFIG_REGEX_FILTERS}-m";
+    public const string CONFIG_REGEX_FILTERS_MODAL = $"{CONFIG_REGEX_FILTERS_MODAL_BASE}:";
     public const string CONFIG_REGEX_FILTERS_MODAL_REGEX_TEXTBOX = $"{CONFIG_REGEX_FILTERS_MODAL_BASE}-rtb";
     public const string CONFIG_REGEX_FILTERS_MODAL_TEMPLATE_TEXTBOX = $"{CONFIG_REGEX_FILTERS_MODAL_BASE}-ttb";
+
     public const string CONFIG_REGEX_FILTERS_REMOVE = $"{CONFIG_REGEX_FILTERS}r:";
+
     public const string CONFIG_REGEX_FILTERS_EDIT = $"{CONFIG_REGEX_FILTERS}e:";
     #endregion
 }
