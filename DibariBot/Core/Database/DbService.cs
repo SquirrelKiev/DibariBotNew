@@ -18,7 +18,7 @@ public class DbService
 
         Log.Debug("Database migration: {migrationStatus}", migrationEnabled);
 
-        if (migrationEnabled) 
+        if (migrationEnabled)
         {
             await GetDbContext().Database.MigrateAsync();
         }
@@ -26,7 +26,7 @@ public class DbService
 
     public async Task ResetDatabase()
     {
-        using var dbContext = GetDbContext();
+        await using var dbContext = GetDbContext();
 
         await dbContext.Database.EnsureDeletedAsync();
         await dbContext.Database.EnsureCreatedAsync();

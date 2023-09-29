@@ -71,7 +71,7 @@ public class DefaultMangaPage : ConfigPage
 
     private async Task<DibariBot.Core.Database.Models.DefaultManga[]> GetMangaDefaultsList()
     {
-        using var dbContext = dbService.GetDbContext();
+        await using var dbContext = dbService.GetDbContext();
 
         var guildId = (Context.Guild?.Id) ?? 0ul;
 
@@ -114,7 +114,7 @@ public class DefaultMangaPage : ConfigPage
 
         ulong channelId = ulong.Parse(id);
 
-        using var context = dbService.GetDbContext();
+        await using var context = dbService.GetDbContext();
 
         var guildId = Context.Guild?.Id ?? 0ul;
 
@@ -279,7 +279,7 @@ public class DefaultMangaPage : ConfigPage
 
         // TODO: keep an eye on this to see if they implement it
         // Why is this not a thing yet: https://github.com/dotnet/efcore/issues/4526
-        using (var context = dbService.GetDbContext())
+        await using (var context = dbService.GetDbContext())
         {
             var exists = await context.DefaultMangas.FirstOrDefaultAsync(x => x.GuildId == toAdd.GuildId && x.ChannelId == toAdd.ChannelId);
 

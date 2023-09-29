@@ -61,8 +61,8 @@ public class MangaService
     {
         if (string.IsNullOrWhiteSpace(url))
         {
-            using var context = dbService.GetDbContext();
-
+            await using var context = dbService.GetDbContext();
+            
             var exists = context.DefaultMangas.FirstOrDefault(x => x.GuildId == guildId && x.ChannelId == channelId);
             exists ??= context.DefaultMangas.FirstOrDefault(x => x.GuildId == guildId && x.ChannelId == 0ul);
 
@@ -169,7 +169,6 @@ public class MangaService
         var metadata = await manga.GetMetadata();
 
         string author = metadata.author;
-        // TODO: Mangadex author grabbing
 
         bool disableLeftChapter = await manga.GetPreviousChapterKey(bookmark.chapter) == null;
         bool disableRightChapter = await manga.GetNextChapterKey(bookmark.chapter) == null;
@@ -239,7 +238,7 @@ public class MangaService
         {
             BotConfig.ProxyUrlEncodingFormat.UrlEscaped => config.ProxyUrl.Replace("{{URL}}", System.Web.HttpUtility.UrlEncode(url)),
             BotConfig.ProxyUrlEncodingFormat.Base64 => config.ProxyUrl.Replace("{{URL}}", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url))),
-            _ => throw new NotImplementedException(),
+            _ => throw new NotSupportedException(),
         };
     }
 
@@ -253,7 +252,7 @@ public class MangaService
     // TODO: reasonable limits on how many regexes one server can have
     public async Task<uint> UpdateOrAddRegexFilter(RegexFilter filter)
     {
-        using var context = dbService.GetDbContext();
+        await using var context = dbService.GetDbContext();
 
         if (filter.Id != 0ul)
         {
@@ -281,7 +280,7 @@ public class MangaService
 
     public async Task<RegexFilter?> GetFilter(uint regexKey)
     {
-        using var context = dbService.GetDbContext();
+        await using var context = dbService.GetDbContext();
 
         return await context.RegexFilters.FindAsync(regexKey);
     }
@@ -290,10 +289,10 @@ public class MangaService
     /// <param name="channelId">Channel ID. will only grab the filters that apply to the current channel.</param>
     public async Task<RegexFilter[]> GetFilters(ulong guildId, ulong channelId)
     {
-        using var context = dbService.GetDbContext();
+        await using var context = dbService.GetDbContext();
 
         // been tearing my hair out about this for at least an hour. its broken me
-        // also why theres so many comments. I need this as human readable as possible for my 1am brain
+        // also why there's so many comments. I need this as human readable as possible for my 1am brain
         var filterQuery = context.RegexFilters
             .Where(rf =>
                 // The filter is for the current guild
@@ -305,7 +304,7 @@ public class MangaService
                     || // OR
                     (
                         // there isn't any entry with an Include scope
-                        !rf.RegexChannelEntries.Any(rce => rce.ChannelFilterScope == ChannelFilterScope.Include)
+                        rf.RegexChannelEntries.All(rce => rce.ChannelFilterScope != ChannelFilterScope.Include)
                         && // AND
                         // There isn't an entry that asks to exclude the current channel
                         !rf.RegexChannelEntries.Any(rce => rce.ChannelId == channelId && rce.ChannelFilterScope == ChannelFilterScope.Exclude)
@@ -320,9 +319,9 @@ public class MangaService
 
     public async Task<RegexFilter[]> GetFilters(ulong guildId)
     {
-        using var context = dbService.GetDbContext();
+        await using var context = dbService.GetDbContext();
 
-        RegexFilter[] guildFilters = await context.RegexFilters.Where
+        var guildFilters = await context.RegexFilters.Where
             (x => x.GuildId == guildId).ToArrayAsync();
 
         return guildFilters;
