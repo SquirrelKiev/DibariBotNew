@@ -35,10 +35,10 @@ public static class ModulePrefixes
     public const string CONFIG_FILTERS = "c-f";
 
     public const string CONFIG_FILTERS_CONFIRMATION = $"{CONFIG_FILTERS}-c";
-    public const string CONFIG_FILTERS_CONFIRMATION_FILTER_TYPE = $"{CONFIG_FILTERS_CONFIRMATION}-ft";
+    public const string CONFIG_FILTERS_CONFIRMATION_FILTER_TYPE = $"{CONFIG_FILTERS_CONFIRMATION}-ft:";
     public const string CONFIG_FILTERS_CONFIRMATION_ADD_BUTTON = $"{CONFIG_FILTERS_CONFIRMATION}-a:";
-    public const string CONFIG_FILTERS_CONFIRMATION_CHANNEL_SELECT = $"{CONFIG_FILTERS_CONFIRMATION}-cs";
-    public const string CONFIG_FILTERS_CONFIRMATION_CHANNEL_SCOPE = $"{CONFIG_FILTERS_CONFIRMATION}-cs2";
+    public const string CONFIG_FILTERS_CONFIRMATION_CHANNEL_SELECT = $"{CONFIG_FILTERS_CONFIRMATION}-cs:";
+    public const string CONFIG_FILTERS_CONFIRMATION_CHANNEL_SCOPE = $"{CONFIG_FILTERS_CONFIRMATION}-cs2:";
 
     public const string CONFIG_FILTERS_ADD_BASE = $"{CONFIG_FILTERS}a";
     public const string CONFIG_FILTERS_ADD_BUTTON = $"{CONFIG_FILTERS_ADD_BASE}:";
@@ -48,9 +48,12 @@ public static class ModulePrefixes
     public const string CONFIG_FILTERS_MODAL_FILTER_TEXTBOX = $"{CONFIG_FILTERS_MODAL_BASE}-rtb";
     public const string CONFIG_FILTERS_MODAL_TEMPLATE_TEXTBOX = $"{CONFIG_FILTERS_MODAL_BASE}-ttb";
 
-    public const string CONFIG_FILTERS_REMOVE = $"{CONFIG_FILTERS}r:";
+    public const string CONFIG_FILTERS_REMOVE_BASE = $"{CONFIG_FILTERS}r";
+    public const string CONFIG_FILTERS_REMOVE_BUTTON = $"{CONFIG_FILTERS_REMOVE_BASE}:";
 
-    public const string CONFIG_FILTERS_EDIT = $"{CONFIG_FILTERS}e:";
+    public const string CONFIG_FILTERS_EDIT_BASE = $"{CONFIG_FILTERS}e";
+    public const string CONFIG_FILTERS_EDIT_BUTTON = $"{CONFIG_FILTERS_EDIT_BASE}:";
+    public const string CONFIG_FILTERS_EDIT_FILTER_SELECT = $"{CONFIG_FILTERS_EDIT_BASE}-s:";
 
     #endregion
 }

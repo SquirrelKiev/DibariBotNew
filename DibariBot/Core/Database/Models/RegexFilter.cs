@@ -28,13 +28,14 @@ public class RegexFilter : DbModel
     }
 
     [SetsRequiredMembers]
-    public RegexFilter(uint id, ulong guildId, string filter, string template, FilterType filterType, ICollection<RegexChannelEntry>? regexChannelEntries = null) : this()
+    public RegexFilter(uint id, ulong guildId, string filter, string template, FilterType filterType, ChannelFilterScope channelFilterScope, ICollection<RegexChannelEntry>? regexChannelEntries = null) : this()
     {
         Id = id;
         GuildId = guildId;
         Filter = filter;
         Template = template;
         FilterType = filterType;
+        ChannelFilterScope = channelFilterScope;
         RegexChannelEntries = regexChannelEntries ?? new List<RegexChannelEntry>();
     }
 

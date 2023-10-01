@@ -98,12 +98,12 @@ public class MangaService
         IManga manga;
         try
         {
-            manga = await mangaFactory.GetManga(state.identifier) ?? throw new NotImplementedException($"Platform \"{state.identifier.platform}\" not implemented!");
+            manga = await mangaFactory.GetManga(state.identifier) ?? throw new NotSupportedException($"Platform \"{state.identifier.platform}\" not implemented!");
         }
         catch (HttpRequestException ex)
         {
             var errorEmbed = new EmbedBuilder()
-                .WithDescription($"Failed to get manga. `{ex.Message}`\n `{state.identifier.platform}/{state.identifier.series}`")
+                .WithDescription($"Failed to get manga. `{ex.Message}`\n`{state.identifier.platform}/{state.identifier.series}`")
                 .WithColor(config)
                 .Build();
 
@@ -244,32 +244,57 @@ public class MangaService
 
     // Regex filter zone
 
-    /// <param name="filter"></param>
+    /// <param name="newFilter"></param>
     /// <returns>The ID of the entry added/updated. If the ID is zero, it means the ID could not be found.</returns>
     // TODO: reasonable limits on how many regexes one server can have
-    public async Task<uint> UpdateOrAddRegexFilter(RegexFilter filter)
+    public async Task<uint> UpdateOrAddRegexFilter(RegexFilter newFilter)
     {
         await using var context = dbService.GetDbContext();
 
-        if (filter.Id != 0ul)
+        if (newFilter.Id != 0ul)
         {
             // exists?
-            var potential = await context.RegexFilters.FindAsync(filter.Id);
+            var existingFilter = await context.RegexFilters.Include(x => x.RegexChannelEntries)
+                .SingleOrDefaultAsync(x => x.Id == newFilter.Id);
 
-            if (potential == null)
+            if (existingFilter == null)
             {
                 return 0;
             }
 
-            context.Entry(potential).CurrentValues.SetValues(filter);
+            // someone please tell me how i can do this better
+            context.Entry(existingFilter).CurrentValues.SetValues(newFilter);
+
+            // remove no longer ref'd channels
+            var entriesToRemove = existingFilter.RegexChannelEntries
+                .Where(existingEntry => newFilter.RegexChannelEntries.All(newEntry => newEntry.ChannelId != existingEntry.ChannelId))
+                .ToList();
+
+            foreach (var entryToRemove in entriesToRemove)
+            {
+                existingFilter.RegexChannelEntries.Remove(entryToRemove);
+            }
+
+            // add new ones
+            foreach (var newEntry in newFilter.RegexChannelEntries)
+            {
+                var existingEntry = existingFilter.RegexChannelEntries
+                    .SingleOrDefault(x => x.ChannelId == newEntry.ChannelId);
+            
+                if (existingEntry == null)
+                {
+                    // Add new entry
+                    existingFilter.RegexChannelEntries.Add(newEntry);
+                }
+            }
 
             await context.SaveChangesAsync();
 
-            return filter.Id;
+            return newFilter.Id;
         }
         else
         {
-            var res = context.Add(filter);
+            var res = context.Add(newFilter);
 
             await context.SaveChangesAsync();
 
@@ -281,7 +306,9 @@ public class MangaService
     {
         await using var context = dbService.GetDbContext();
 
-        return await context.RegexFilters.FindAsync(regexKey);
+        return await context.RegexFilters
+            .Include(rf => rf.RegexChannelEntries)
+            .SingleOrDefaultAsync(x => x.Id == regexKey);
     }
 
     /// <param name="guildId">ID of the guild.</param>
