@@ -244,9 +244,6 @@ public class MangaService
 
     // Regex filter zone
 
-    /// <summary>
-    /// 
-    /// </summary>
     /// <param name="filter"></param>
     /// <returns>The ID of the entry added/updated. If the ID is zero, it means the ID could not be found.</returns>
     // TODO: reasonable limits on how many regexes one server can have
@@ -264,7 +261,7 @@ public class MangaService
                 return 0;
             }
 
-            context.RegexFilters.Update(potential);
+            context.Entry(potential).CurrentValues.SetValues(filter);
 
             await context.SaveChangesAsync();
 
@@ -272,7 +269,9 @@ public class MangaService
         }
         else
         {
-            var res = await context.AddAsync(filter);
+            var res = context.Add(filter);
+
+            await context.SaveChangesAsync();
 
             return res.Entity.Id;
         }
@@ -291,24 +290,17 @@ public class MangaService
     {
         await using var context = dbService.GetDbContext();
 
-        // been tearing my hair out about this for at least an hour. its broken me
-        // also why there's so many comments. I need this as human readable as possible for my 1am brain
         var filterQuery = context.RegexFilters
             .Where(rf =>
                 // The filter is for the current guild
                 rf.GuildId == guildId
                 && // AND
                 (
-                    // There's an entry that includes the current channel
-                    rf.RegexChannelEntries.Any(rce => rce.ChannelId == channelId && rce.ChannelFilterScope == ChannelFilterScope.Include)
+                    // If the filter's scope is Include, check if there's an entry for the current channel.
+                    (rf.ChannelFilterScope == ChannelFilterScope.Include && rf.RegexChannelEntries.Any(rce => rce.ChannelId == channelId))
                     || // OR
-                    (
-                        // there isn't any entry with an Include scope
-                        rf.RegexChannelEntries.All(rce => rce.ChannelFilterScope != ChannelFilterScope.Include)
-                        && // AND
-                        // There isn't an entry that asks to exclude the current channel
-                        !rf.RegexChannelEntries.Any(rce => rce.ChannelId == channelId && rce.ChannelFilterScope == ChannelFilterScope.Exclude)
-                    )
+                    // If the filter's scope is Exclude, check if there isn't an entry for the current channel.
+                    (rf.ChannelFilterScope == ChannelFilterScope.Exclude && rf.RegexChannelEntries.All(rce => rce.ChannelId != channelId))
                 )
             );
 
@@ -321,8 +313,9 @@ public class MangaService
     {
         await using var context = dbService.GetDbContext();
 
-        var guildFilters = await context.RegexFilters.Where
-            (x => x.GuildId == guildId).ToArrayAsync();
+        var guildFilters = await context.RegexFilters
+            .Where(x => x.GuildId == guildId)
+            .Include(x => x.RegexChannelEntries).ToArrayAsync();
 
         return guildFilters;
     }

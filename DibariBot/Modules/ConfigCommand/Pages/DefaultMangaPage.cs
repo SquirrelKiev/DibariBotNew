@@ -148,7 +148,7 @@ public class DefaultMangaPage : ConfigPage
         var embed = GetCurrentDefaultsEmbed(defaults);
         var cancelButton = new ButtonBuilder()
                 .WithLabel("Cancel")
-                .WithStyle(config.PrimaryButtonStyle)
+                .WithStyle(ButtonStyle.Danger)
                 .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
                     StateSerializer.SerializeObject(StateSerializer.SerializeObject(Id))
                 );
@@ -214,7 +214,6 @@ public class DefaultMangaPage : ConfigPage
         }
 
         await ModifyOriginalResponseAsync(ConfirmPromptContents(new ConfirmState(parsedUrl.Value, channelId)));
-        return;
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_CHANNEL_INPUT + "*")]

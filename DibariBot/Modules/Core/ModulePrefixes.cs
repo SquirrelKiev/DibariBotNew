@@ -32,22 +32,25 @@ public static class ModulePrefixes
     #endregion
 
     #region Config - Regex Filters
-    public const string CONFIG_REGEX_FILTERS = "c-rf";
+    public const string CONFIG_FILTERS = "c-f";
 
-    public const string CONFIG_REGEX_FILTERS_CONFIRMATION = $"{CONFIG_REGEX_FILTERS}-c";
-    public const string CONFIG_REGEX_FILTERS_CONFIRMATION_FILTER_TYPE = $"{CONFIG_REGEX_FILTERS_CONFIRMATION}-ft";
-    public const string CONFIG_REGEX_FILTERS_CONFIRMATION_ADD_BUTTON = $"{CONFIG_REGEX_FILTERS_CONFIRMATION}-a:";
+    public const string CONFIG_FILTERS_CONFIRMATION = $"{CONFIG_FILTERS}-c";
+    public const string CONFIG_FILTERS_CONFIRMATION_FILTER_TYPE = $"{CONFIG_FILTERS_CONFIRMATION}-ft";
+    public const string CONFIG_FILTERS_CONFIRMATION_ADD_BUTTON = $"{CONFIG_FILTERS_CONFIRMATION}-a:";
+    public const string CONFIG_FILTERS_CONFIRMATION_CHANNEL_SELECT = $"{CONFIG_FILTERS_CONFIRMATION}-cs";
+    public const string CONFIG_FILTERS_CONFIRMATION_CHANNEL_SCOPE = $"{CONFIG_FILTERS_CONFIRMATION}-cs2";
 
-    public const string CONFIG_REGEX_FILTERS_ADD_BASE = $"{CONFIG_REGEX_FILTERS}a";
-    public const string CONFIG_REGEX_FILTERS_ADD_BUTTON = $"{CONFIG_REGEX_FILTERS_ADD_BASE}:";
+    public const string CONFIG_FILTERS_ADD_BASE = $"{CONFIG_FILTERS}a";
+    public const string CONFIG_FILTERS_ADD_BUTTON = $"{CONFIG_FILTERS_ADD_BASE}:";
 
-    public const string CONFIG_REGEX_FILTERS_MODAL_BASE = $"{CONFIG_REGEX_FILTERS}-m";
-    public const string CONFIG_REGEX_FILTERS_MODAL = $"{CONFIG_REGEX_FILTERS_MODAL_BASE}:";
-    public const string CONFIG_REGEX_FILTERS_MODAL_REGEX_TEXTBOX = $"{CONFIG_REGEX_FILTERS_MODAL_BASE}-rtb";
-    public const string CONFIG_REGEX_FILTERS_MODAL_TEMPLATE_TEXTBOX = $"{CONFIG_REGEX_FILTERS_MODAL_BASE}-ttb";
+    public const string CONFIG_FILTERS_MODAL_BASE = $"{CONFIG_FILTERS}-m";
+    public const string CONFIG_FILTERS_MODAL = $"{CONFIG_FILTERS_MODAL_BASE}:";
+    public const string CONFIG_FILTERS_MODAL_FILTER_TEXTBOX = $"{CONFIG_FILTERS_MODAL_BASE}-rtb";
+    public const string CONFIG_FILTERS_MODAL_TEMPLATE_TEXTBOX = $"{CONFIG_FILTERS_MODAL_BASE}-ttb";
 
-    public const string CONFIG_REGEX_FILTERS_REMOVE = $"{CONFIG_REGEX_FILTERS}r:";
+    public const string CONFIG_FILTERS_REMOVE = $"{CONFIG_FILTERS}r:";
 
-    public const string CONFIG_REGEX_FILTERS_EDIT = $"{CONFIG_REGEX_FILTERS}e:";
+    public const string CONFIG_FILTERS_EDIT = $"{CONFIG_FILTERS}e:";
+
     #endregion
 }
