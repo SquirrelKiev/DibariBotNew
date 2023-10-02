@@ -370,7 +370,7 @@ public partial class RegexFiltersPage : ConfigPage
     {
         await DeferAsync();
 
-        var filter = await GetRegexFilterFromContext();
+        var filter = await GetRegexFilterFromContext(channels.Select(x => new RegexChannelEntry { ChannelId = x.Id}).ToList());
 
         await ModifyOriginalResponseAsync(UpsertConfirmation(filter));
     }
