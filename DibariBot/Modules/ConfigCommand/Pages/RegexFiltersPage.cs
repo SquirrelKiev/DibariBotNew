@@ -24,7 +24,7 @@ public partial class RegexFiltersPage : ConfigPage
 
     public override string Label => "Regex filters";
 
-    public override string Description => "TODO";
+    public override string Description => "Specify filters to limit what mangas can be pulled up.";
 
     private const string EMBED_NAME_TEMPLATE = "Template";
     private const string EMBED_NAME_FILTER = "Filter";

@@ -441,7 +441,7 @@ public partial class MangaService
             var hydrated = CaptureDryElement().Replace(filter.Template, m =>
                 values.TryGetValue(m.Groups[1].Value, out var replacement) ? replacement : m.Value);
 
-            var tripped = Regex.IsMatch(hydrated, filter.Filter, RegexOptions.None, remaining);
+            var tripped = Regex.IsMatch(hydrated, filter.Filter, RegexOptions.IgnoreCase, remaining);
 
             if ((tripped && filter.FilterType == FilterType.Block) || (!tripped && filter.FilterType == FilterType.Allow))
             {
