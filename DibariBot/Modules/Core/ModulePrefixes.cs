@@ -41,7 +41,7 @@ public static class ModulePrefixes
     public const string CONFIG_FILTERS_CONFIRMATION_CHANNEL_SCOPE = $"{CONFIG_FILTERS_CONFIRMATION}-cs2:";
 
     public const string CONFIG_FILTERS_ADD_BASE = $"{CONFIG_FILTERS}a";
-    public const string CONFIG_FILTERS_ADD_BUTTON = $"{CONFIG_FILTERS_ADD_BASE}:";
+    public const string CONFIG_FILTERS_OPEN_MODAL_BUTTON = $"{CONFIG_FILTERS_ADD_BASE}:";
 
     public const string CONFIG_FILTERS_MODAL_BASE = $"{CONFIG_FILTERS}-m";
     public const string CONFIG_FILTERS_MODAL = $"{CONFIG_FILTERS_MODAL_BASE}:";
@@ -50,7 +50,8 @@ public static class ModulePrefixes
 
     public const string CONFIG_FILTERS_REMOVE_BASE = $"{CONFIG_FILTERS}r";
     public const string CONFIG_FILTERS_REMOVE_BUTTON = $"{CONFIG_FILTERS_REMOVE_BASE}:";
-
+    public const string CONFIG_FILTERS_REMOVE_FILTER_SELECT = $"{CONFIG_FILTERS_REMOVE_BASE}-s:";
+    
     public const string CONFIG_FILTERS_EDIT_BASE = $"{CONFIG_FILTERS}e";
     public const string CONFIG_FILTERS_EDIT_BUTTON = $"{CONFIG_FILTERS_EDIT_BASE}:";
     public const string CONFIG_FILTERS_EDIT_FILTER_SELECT = $"{CONFIG_FILTERS_EDIT_BASE}-s:";

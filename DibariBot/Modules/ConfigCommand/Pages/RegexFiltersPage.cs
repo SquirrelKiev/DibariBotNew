@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using DibariBot.Core.Database.Models;
 using DibariBot.Modules.Manga;
+using Discord.Interactions;
 using Humanizer;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
@@ -67,10 +68,10 @@ public partial class RegexFiltersPage : ConfigPage
                     .AppendLine("```")
 
                     .AppendLine("**Filter Type**")
-                    .AppendLine(filter.FilterType.Humanize())
+                    .AppendLine(filter.FilterType.ToString())
 
                     .AppendLine("**Channel Scope**")
-                    .AppendLine(filter.ChannelFilterScope.Humanize())
+                    .AppendLine(filter.ChannelFilterScope.ToString())
                     .AppendLine("**Channels**");
 
                 foreach (var channelEntry in filter.RegexChannelEntries)
@@ -79,7 +80,7 @@ public partial class RegexFiltersPage : ConfigPage
                 }
 
                 embed.AddField(new EmbedFieldBuilder()
-                    .WithName("Filter " + i)
+                    .WithName("Filter " + (i + 1))
                     .WithValue(value.ToString())
                     .WithIsInline(true));
             }
@@ -93,19 +94,64 @@ public partial class RegexFiltersPage : ConfigPage
             .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configCommandService.ConfigPages, Id))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Add")
-                .WithCustomId($"{ModulePrefixes.CONFIG_FILTERS_ADD_BUTTON}")
+                .WithCustomId($"{ModulePrefixes.CONFIG_FILTERS_OPEN_MODAL_BUTTON}{0ul}")
                 .WithStyle(config.PrimaryButtonStyle))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Edit")
                 .WithCustomId($"{ModulePrefixes.CONFIG_FILTERS_EDIT_BUTTON}")
-                .WithStyle(config.PrimaryButtonStyle))
+                .WithStyle(config.PrimaryButtonStyle)
+                .WithDisabled(filters.Length <= 0))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Remove")
                 .WithCustomId($"{ModulePrefixes.CONFIG_FILTERS_REMOVE_BUTTON}")
-                .WithStyle(config.PrimaryButtonStyle))
+                .WithStyle(config.PrimaryButtonStyle)
+                .WithDisabled(filters.Length <= 0))
             .WithRedButton();
 
         return new MessageContents("", embed.Build(), components);
+    }
+
+    private static SelectMenuBuilder GetFilterSelectMenu(string customId, IEnumerable<RegexFilter> filters)
+    {
+        return new SelectMenuBuilder()
+            .WithCustomId(customId)
+            .WithOptions(filters.Select(y =>
+                new SelectMenuOptionBuilder().WithLabel(y.Filter).WithDescription(y.Template)
+                    .WithValue(y.Id.ToString())).ToList());
+    }
+
+    [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_REMOVE_BUTTON)]
+    private async Task RemoveButton()
+    {
+        await DeferAsync();
+
+        var filters = await mangaService.GetFilters(Context.Guild.Id);
+
+        await ModifyOriginalResponseAsync(x =>
+        {
+            x.Components = new ComponentBuilder()
+                .WithSelectMenu(GetFilterSelectMenu(ModulePrefixes.CONFIG_FILTERS_REMOVE_FILTER_SELECT, filters))
+                .WithButton("Back", ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + StateSerializer.SerializeObject(Id), config.PrimaryButtonStyle)
+                .Build();
+        });
+    }
+
+    [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_REMOVE_FILTER_SELECT)]
+    private async Task RemoveFilterSelectChanged(string id)
+    {
+        await DeferAsync();
+
+        var filter = await mangaService.GetFilter(uint.Parse(id), Context.Guild.Id);
+
+        if (filter == null)
+        {
+            await FollowupAsync("That filter no longer exists anyway!", ephemeral: true);
+            return;
+        }
+
+        await mangaService.RemoveFilter(filter);
+
+        await ModifyOriginalResponseAsync(await GetMessageContents(new ConfigCommandService.State { page = Id }));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_EDIT_BUTTON)]
@@ -118,10 +164,7 @@ public partial class RegexFiltersPage : ConfigPage
         await ModifyOriginalResponseAsync(x =>
         {
             x.Components = new ComponentBuilder()
-                .WithSelectMenu(new SelectMenuBuilder()
-                    .WithCustomId(ModulePrefixes.CONFIG_FILTERS_EDIT_FILTER_SELECT)
-                    .WithOptions(filters.Select(y =>
-                        new SelectMenuOptionBuilder().WithLabel(y.Filter).WithDescription(y.Template).WithValue(y.Id.ToString())).ToList()))
+                .WithSelectMenu(GetFilterSelectMenu(ModulePrefixes.CONFIG_FILTERS_EDIT_FILTER_SELECT, filters))
                 .WithButton("Back", ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + StateSerializer.SerializeObject(Id), config.PrimaryButtonStyle)
                 .Build();
         });
@@ -132,29 +175,65 @@ public partial class RegexFiltersPage : ConfigPage
     {
         await DeferAsync();
 
-        var filter = await mangaService.GetFilter(uint.Parse(id));
+        var filter = await mangaService.GetFilter(uint.Parse(id), Context.Guild.Id);
 
         if (filter == null)
         {
-            await RespondAsync("That filter no longer exists!", ephemeral: true);
+            await FollowupAsync("That filter no longer exists!", ephemeral: true);
             return;
         }
 
         await ModifyOriginalResponseAsync(UpsertConfirmation(filter));
     }
 
-    [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_ADD_BUTTON)]
-    public async Task AddButton()
+    [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_OPEN_MODAL_BUTTON + "*")]
+    public async Task OpenModalButton(uint id)
     {
-        await Context.Interaction.RespondWithModalAsync<SetRegexModal>(ModulePrefixes.CONFIG_FILTERS_MODAL);
+        RegexFilter? filter = null;
+
+        // stupid but i cant get the original message
+        if (id != 0ul)
+        {
+            filter = await mangaService.GetFilter(id, Context.Guild.Id);
+            if (filter == null)
+            {
+                await RespondAsync("That filter no longer exists!", ephemeral: true);
+                return;
+            }
+        }
+
+        await Context.Interaction.RespondWithModalAsync<SetRegexModal>(ModulePrefixes.CONFIG_FILTERS_MODAL + (id != 0ul), modifyModal:
+            x =>
+            {
+                if (filter == null) return;
+
+                x.UpdateTextInput(ModulePrefixes.CONFIG_FILTERS_MODAL_FILTER_TEXTBOX, i =>
+                {
+                    i.Value = filter.Filter;
+                });
+                x.UpdateTextInput(ModulePrefixes.CONFIG_FILTERS_MODAL_TEMPLATE_TEXTBOX, i =>
+                {
+                    i.Value = filter.Template;
+                });
+            });
     }
 
-    [ModalInteraction(ModulePrefixes.CONFIG_FILTERS_MODAL)]
-    public async Task ModalResponse(SetRegexModal modal)
+    [ModalInteraction(ModulePrefixes.CONFIG_FILTERS_MODAL + "*")]
+    public async Task ModalResponse(bool existing, SetRegexModal modal)
     {
         await DeferAsync();
 
-        var filter = new RegexFilter(id: 0, guildId: Context.Guild.Id, filter: modal.Filter, template: modal.Template, 
+        RegexFilter? filter = null;
+
+        if (existing)
+        {
+            filter = await GetRegexFilterFromContext();
+
+            filter.Filter = modal.Filter;
+            filter.Template = modal.Template;
+        }
+
+        filter ??= new RegexFilter(id: 0, guildId: Context.Guild.Id, filter: modal.Filter, template: modal.Template,
             filterType: FilterType.Block, channelFilterScope: ChannelFilterScope.Exclude
             );
 
@@ -170,7 +249,13 @@ public partial class RegexFiltersPage : ConfigPage
 
         var filter = await GetRegexFilterFromContext();
 
-        await mangaService.UpdateOrAddRegexFilter(filter);
+        var newId = await mangaService.UpdateOrAddRegexFilter(filter);
+
+        if (newId == 0ul)
+        {
+            await FollowupAsync("Just noting nothing was actually added or changed as the filter no longer exists.",
+                ephemeral: true);
+        }
 
         await ModifyOriginalResponseAsync(await configCommandService.GetMessageContents(new ConfigCommandService.State { page = Id }, Context));
     }
@@ -185,10 +270,10 @@ public partial class RegexFiltersPage : ConfigPage
         (
             new EmbedFieldBuilder()
                 .WithName(EMBED_NAME_TEMPLATE)
-                .WithValue(filter.Template),
+                .WithValue($"```{filter.Template}```"),
             new EmbedFieldBuilder()
                 .WithName(EMBED_NAME_FILTER)
-                .WithValue(filter.Filter),
+                .WithValue($"```{filter.Filter}```"),
             new EmbedFieldBuilder()
                 .WithName(EMBED_NAME_CHANNELS)
                 .WithValue(channels
@@ -266,22 +351,26 @@ public partial class RegexFiltersPage : ConfigPage
                 .WithCustomId(ModulePrefixes.CONFIG_FILTERS_CONFIRMATION_ADD_BUTTON)
                 .WithStyle(ButtonStyle.Success))
             .WithButton(new ButtonBuilder()
+                .WithLabel("Edit")
+                .WithCustomId(ModulePrefixes.CONFIG_FILTERS_OPEN_MODAL_BUTTON + filter.Id)
+                .WithStyle(config.PrimaryButtonStyle))
+            .WithButton(new ButtonBuilder()
                 .WithLabel("Back")
                 .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
                               StateSerializer.SerializeObject(StateSerializer.SerializeObject(Id)))
-                    
+
                 .WithStyle(ButtonStyle.Danger))
             ;
 
         return new MessageContents(string.Empty, embed.Build(), components);
     }
-    
+
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_CONFIRMATION_CHANNEL_SELECT)]
     private async Task UpsertConfirmationChannelSelectChanged(IChannel[] channels)
     {
         await DeferAsync();
 
-        var filter = await GetRegexFilterFromContext(channels: channels.Select(x => new RegexChannelEntry { ChannelId = x.Id}).ToList());
+        var filter = await GetRegexFilterFromContext();
 
         await ModifyOriginalResponseAsync(UpsertConfirmation(filter));
     }
@@ -291,7 +380,9 @@ public partial class RegexFiltersPage : ConfigPage
     {
         await DeferAsync();
 
-        var filter = await GetRegexFilterFromContext(filterType: StateSerializer.DeserializeObject<FilterType>(id));
+        var filter = await GetRegexFilterFromContext();
+
+        filter.FilterType = StateSerializer.DeserializeObject<FilterType>(id);
 
         await ModifyOriginalResponseAsync(UpsertConfirmation(filter));
     }
@@ -301,35 +392,40 @@ public partial class RegexFiltersPage : ConfigPage
     {
         await DeferAsync();
 
-        var filter = await GetRegexFilterFromContext(scope: StateSerializer.DeserializeObject<ChannelFilterScope>(id));
+        var filter = await GetRegexFilterFromContext();
+
+        filter.ChannelFilterScope = StateSerializer.DeserializeObject<ChannelFilterScope>(id);
 
         await ModifyOriginalResponseAsync(UpsertConfirmation(filter));
     }
 
-    private async Task<RegexFilter> GetRegexFilterFromContext(FilterType? filterType = null, ChannelFilterScope? scope = null, List<RegexChannelEntry>? channels = null)
+    private async Task<RegexFilter> GetRegexFilterFromContext(List<RegexChannelEntry>? channels = null)
     {
         var ogRes = await Context.Interaction.GetOriginalResponseAsync();
 
         var embed = ogRes.Embeds.First(x => x.Type == EmbedType.Rich);
 
-        var template = embed.Fields.First(x => x.Name == EMBED_NAME_TEMPLATE).Value;
-        var filter = embed.Fields.First(x => x.Name == EMBED_NAME_FILTER).Value;
-        filterType ??= embed.Fields.First(x => x.Name == EMBED_NAME_FILTER_TYPE).Value.DehumanizeTo<FilterType>();
-        scope ??= embed.Fields.First(x => x.Name == EMBED_NAME_SCOPE).Value.DehumanizeTo<ChannelFilterScope>();
+        var template = CodeBlockMatcher().Match(embed.Fields.First(x => x.Name == EMBED_NAME_TEMPLATE).Value).Groups[1].Value;
+        var filter = CodeBlockMatcher().Match(embed.Fields.First(x => x.Name == EMBED_NAME_FILTER).Value).Groups[1].Value;
+        var filterType = embed.Fields.First(x => x.Name == EMBED_NAME_FILTER_TYPE).Value.DehumanizeTo<FilterType>();
+        var scope = embed.Fields.First(x => x.Name == EMBED_NAME_SCOPE).Value.DehumanizeTo<ChannelFilterScope>();
 
         channels ??= ChannelMatcher().Matches(embed.Fields.First(x => x.Name == EMBED_NAME_CHANNELS).Value).Select(x => new RegexChannelEntry
         {
             ChannelId = ulong.Parse(x.Groups[1].Value)
         }).ToList();
 
-        var idTxt = (embed.Footer?.Text) ?? throw new InvalidOperationException("Footer missing?");
+        var idTxt = embed.Footer?.Text ?? throw new InvalidOperationException("Footer missing?");
         var id = uint.Parse(idTxt);
 
         return new RegexFilter(id: id, guildId: Context.Guild.Id, filter: filter,
-            template: template, filterType: filterType.Value, channelFilterScope: scope.Value,
+            template: template, filterType: filterType, channelFilterScope: scope,
             regexChannelEntries: channels);
     }
 
-    [GeneratedRegex("<#(\\d+)>")]
+    [GeneratedRegex(@"<#(\d+)>")]
     private static partial Regex ChannelMatcher();
+
+    [GeneratedRegex(@"```([^`]*)```")]
+    private static partial Regex CodeBlockMatcher();
 }

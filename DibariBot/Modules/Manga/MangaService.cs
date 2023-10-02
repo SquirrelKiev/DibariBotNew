@@ -328,13 +328,24 @@ public partial class MangaService
         }
     }
 
-    public async Task<RegexFilter?> GetFilter(uint regexKey)
+    public async Task RemoveFilter(RegexFilter filter)
     {
         await using var context = dbService.GetDbContext();
 
-        return await context.RegexFilters
+        context.Remove(filter);
+
+        await context.SaveChangesAsync();
+    }
+
+    public async Task<RegexFilter?> GetFilter(uint regexKey, ulong guildId)
+    {
+        await using var context = dbService.GetDbContext();
+
+        var filter = await context.RegexFilters
             .Include(rf => rf.RegexChannelEntries)
             .SingleOrDefaultAsync(x => x.Id == regexKey);
+
+        return filter?.GuildId == guildId ? filter : null;
     }
 
     /// <param name="guildId">ID of the guild.</param>
