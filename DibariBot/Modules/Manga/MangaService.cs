@@ -174,7 +174,7 @@ public partial class MangaService
                 bookmark = await MangaNavigation.Navigate(manga, bookmark, 1, 0);
                 break;
             default:
-                throw new NotImplementedException($"{nameof(state.action)} not implemented!");
+                throw new NotSupportedException($"{nameof(state.action)} not implemented!");
         }
 
         chapterData = await manga.GetChapterMetadata(bookmark.chapter);

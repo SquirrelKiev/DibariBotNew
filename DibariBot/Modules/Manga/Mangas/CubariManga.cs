@@ -102,8 +102,8 @@ public class CubariManga : IManga
             }
         }
 
-        // no clue what on earth we've recieved, bail
-        throw new NotImplementedException();
+        // no clue what on earth we've received, bail
+        throw new NotSupportedException();
     }
     public virtual Task<ChapterMetadata> GetChapterMetadata(string chapter)
     {

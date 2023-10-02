@@ -20,8 +20,7 @@ public class ConfigCommandModule : DibariModule
 
         await FollowupAsync(await configService.GetMessageContents(new()
         {
-            // TODO: Change to Home before shipping!!
-            page = Pages.ConfigPage.Page.RegexFilters,
+            page = Pages.ConfigPage.Page.Help,
             data = ""
         }, Context));
     }
