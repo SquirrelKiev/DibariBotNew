@@ -318,7 +318,7 @@ public partial class RegexFiltersPage : ConfigPage
                     Enum.GetValues<ChannelFilterScope>().Select(x =>
                         new SelectMenuOptionBuilder()
                             .WithDefault(x == filter.ChannelFilterScope)
-                            .WithLabel("Filter type: " + x.Humanize())
+                            .WithLabel("Channel scope: " + x.Humanize())
                             // ehh i could do attributes but this is way easier (if against the whole, easily expandable principle ive been doing)
                             // TODO: should be reusable tho for like help pages and stuff
                             .WithDescription(x switch
