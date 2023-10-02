@@ -2,7 +2,9 @@
 
 public class RegexChannelEntry : DbModel
 {
-    public required uint RegexFilterId { get; set; }
+    public required ulong ChannelId { get; set; }
 
-    public required RegexFilter RegexFilter { get; set; } = null!;
+    public uint RegexFilterId { get; set; }
+
+    public RegexFilter RegexFilter { get; set; } = null!;
 }

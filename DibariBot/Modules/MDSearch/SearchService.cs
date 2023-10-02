@@ -72,18 +72,14 @@ public class SearchService
                     .WithOptions(res.data.Select(x =>
                         new SelectMenuOptionBuilder()
                             .WithValue(x.id.ToString())
-                            .WithLabel(x.attributes.title.ToString())
+                            .WithLabel(x.attributes.title.ToString().Truncate(config.MaxTitleLength))
                     ).ToList())
                     .WithCustomId(ModulePrefixes.MANGADEX_SEARCH_DROPDOWN_PREFIX)
                 )
             .WithButton(new ButtonBuilder()
                     .WithLabel("<")
                     .WithCustomId(ModulePrefixes.MANGADEX_SEARCH_BUTTON_PREFIX +
-                    StateSerializer.SerializeObject(new State()
-                    {
-                        page = state.page - 1,
-                        query = state.query
-                    }))
+                    StateSerializer.SerializeObject(state with { page = state.page - 1 }))
                     .WithDisabled(disableLeft)
                     .WithStyle(config.PrimaryButtonStyle)
                 )

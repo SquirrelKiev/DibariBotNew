@@ -1,20 +1,18 @@
-﻿using DibariBot.Database;
-
-namespace DibariBot.Modules.ConfigCommand;
+﻿namespace DibariBot.Modules.ConfigCommand;
 
 public class ConfigCommandModule : DibariModule
 {
-    private const string permissionGroup = "'User has Manage Guild or is in DM'";
+    private const string PERMISSION_GROUP = "'User has Manage Guild or is in DM'";
     private readonly ConfigCommandService configService;
-
+    
     public ConfigCommandModule(ConfigCommandService configService)
     {
         this.configService = configService;
     }
 
     [SlashCommand("manga-config", "Pulls up various options for configuring the bot to the server's needs.")]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = permissionGroup)]
-    [RequireContext(ContextType.DM | ContextType.Group, Group = permissionGroup)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = PERMISSION_GROUP)]
+    [RequireContext(ContextType.DM | ContextType.Group, Group = PERMISSION_GROUP)]
     [EnabledInDm(true)]
     public async Task ConfigSlash()
     {

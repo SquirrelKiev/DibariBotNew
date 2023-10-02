@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using DibariBot.Apis;
+using Newtonsoft.Json;
 
 namespace DibariBot.Modules.Manga;
 
@@ -37,7 +38,11 @@ public class XkcdManga : IManga
         return Task.FromResult(new MangaMetadata()
         {
             title = "xkcd",
-            author = "Randall Munroe"
+            author = "Randall Munroe",
+            artist = "Randall Munroe",
+            description = "A webcomic of romance, sarcasm, math, and language.",
+            tags = Array.Empty<string>(),
+            contentRating = MangaAttributesSchema.ContentRating.Safe
         });
     }
 

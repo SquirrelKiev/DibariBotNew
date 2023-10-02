@@ -1,5 +1,6 @@
 ﻿using DibariBot.Apis;
 using DibariBot.Modules.Manga;
+using System.Linq;
 
 namespace DibariBot;
 
@@ -56,12 +57,16 @@ public class MangaDexApi
         var author = authorRelation?.attributes?.ToObject<AuthorAttributesSchema>();
         var artist = artistRelation?.attributes?.ToObject<AuthorAttributesSchema>();
 
+        var tags = schema.attributes.tags.Select(t => t.attributes.name.ToString()).ToArray();
+
         return new MangaMetadata()
         {
             author = author?.name ?? "No author",
             artist = artist?.name ?? "No artist",
             description = schema.attributes.description.ToString(),
-            title = schema.attributes.title.ToString()
+            title = schema.attributes.title.ToString(),
+            tags = tags,
+            contentRating = schema.attributes.contentRating
         };
     }
 

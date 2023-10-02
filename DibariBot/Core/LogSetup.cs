@@ -11,9 +11,7 @@ public static class LogSetup
             .MinimumLevel.Verbose()
             .Enrich.FromLogContext()
             .WriteTo.Console(
-#if DEBUG
-            Serilog.Events.LogEventLevel.Verbose,
-#else
+#if !DEBUG
             Serilog.Events.LogEventLevel.Information,
 #endif
             theme: AnsiConsoleTheme.Literate)

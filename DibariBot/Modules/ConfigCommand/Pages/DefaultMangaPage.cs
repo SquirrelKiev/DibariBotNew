@@ -71,7 +71,7 @@ public class DefaultMangaPage : ConfigPage
 
     private async Task<DibariBot.Core.Database.Models.DefaultManga[]> GetMangaDefaultsList()
     {
-        using var dbContext = dbService.GetDbContext();
+        await using var dbContext = dbService.GetDbContext();
 
         var guildId = (Context.Guild?.Id) ?? 0ul;
 
@@ -114,7 +114,7 @@ public class DefaultMangaPage : ConfigPage
 
         ulong channelId = ulong.Parse(id);
 
-        using var context = dbService.GetDbContext();
+        await using var context = dbService.GetDbContext();
 
         var guildId = Context.Guild?.Id ?? 0ul;
 
@@ -148,7 +148,7 @@ public class DefaultMangaPage : ConfigPage
         var embed = GetCurrentDefaultsEmbed(defaults);
         var cancelButton = new ButtonBuilder()
                 .WithLabel("Cancel")
-                .WithStyle(config.PrimaryButtonStyle)
+                .WithStyle(ButtonStyle.Danger)
                 .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
                     StateSerializer.SerializeObject(StateSerializer.SerializeObject(Id))
                 );
@@ -214,7 +214,6 @@ public class DefaultMangaPage : ConfigPage
         }
 
         await ModifyOriginalResponseAsync(ConfirmPromptContents(new ConfirmState(parsedUrl.Value, channelId)));
-        return;
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_CHANNEL_INPUT + "*")]
@@ -277,8 +276,9 @@ public class DefaultMangaPage : ConfigPage
             Manga = state.series.ToString()
         };
 
+        // TODO: keep an eye on this to see if they implement it
         // Why is this not a thing yet: https://github.com/dotnet/efcore/issues/4526
-        using (var context = dbService.GetDbContext())
+        await using (var context = dbService.GetDbContext())
         {
             var exists = await context.DefaultMangas.FirstOrDefaultAsync(x => x.GuildId == toAdd.GuildId && x.ChannelId == toAdd.ChannelId);
 

@@ -2,6 +2,7 @@
 
 public static class StringExtensions
 {
+    // replace with humanizer truncate?
     public static string Truncate(this string str, int limit, bool useWordBoundary = true)
     {
         if (str.Length <= limit)
@@ -23,7 +24,7 @@ public static class StringExtensions
         return subString + '…';
     }
 
-    public static IEnumerable<string> SplitToLines(this string input)
+    public static IEnumerable<string> SplitToLines(this string? input)
     {
         if (input == null)
         {
@@ -32,22 +33,14 @@ public static class StringExtensions
 
         using StringReader reader = new(input);
 
-        string? line;
-        while ((line = reader.ReadLine()) != null)
+        while (reader.ReadLine() is { } line)
         {
             yield return line;
         }
     }
 
-    public static string StringOrDefault(this string potential, string def)
+    public static string StringOrDefault(this string? potential, string def)
     {
-        if (string.IsNullOrWhiteSpace(potential))
-        {
-            return def;
-        }
-        else
-        {
-            return potential;
-        }
+        return string.IsNullOrWhiteSpace(potential) ? def : potential;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using DibariBot.Apis;
+using Newtonsoft.Json.Linq;
 
 namespace DibariBot.Modules.Manga;
 
@@ -35,7 +36,9 @@ public class CubariManga : IManga
             title = mangaRes.title,
             description = mangaRes.description,
             author = mangaRes.author,
-            artist = mangaRes.artist
+            artist = mangaRes.artist,
+            tags = Array.Empty<string>(),
+            contentRating = identifier.platform == "nhentai" ? MangaAttributesSchema.ContentRating.Pornographic : MangaAttributesSchema.ContentRating.Unknown
         };
         Groups = mangaRes.groups;
 
@@ -99,8 +102,8 @@ public class CubariManga : IManga
             }
         }
 
-        // no clue what on earth we've recieved, bail
-        throw new NotImplementedException();
+        // no clue what on earth we've received, bail
+        throw new NotSupportedException();
     }
     public virtual Task<ChapterMetadata> GetChapterMetadata(string chapter)
     {

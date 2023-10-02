@@ -9,7 +9,6 @@ public class MangaModule : DibariModule
         this.mangaHandler = mangaHandler;
     }
 
-    // TODO: Too much is handled here!! move to separate func!!!
     [SlashCommand("manga", "Gets a page from a chapter of a manga.")]
     [EnabledInDm(true)]
     public async Task MangaSlash(string url = "", string chapter = "", int page = 1)
@@ -29,7 +28,7 @@ public class MangaModule : DibariModule
 
         var state = StateSerializer.DeserializeObject<MangaService.State>(rawState);
 
-        var contents = await mangaHandler.GetMangaMessage(state);
+        var contents = await mangaHandler.GetMangaMessage(Context.Guild?.Id ?? 0ul, Context.Channel.Id, state);
 
         await ModifyOriginalResponseAsync(contents);
     }

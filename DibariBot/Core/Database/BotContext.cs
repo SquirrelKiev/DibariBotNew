@@ -8,6 +8,7 @@ public abstract class BotContext : DbContext
     public DbSet<GuildConfig> GuildConfig { get; set; }
     public DbSet<DefaultManga> DefaultMangas { get; set; }
     public DbSet<RegexFilter> RegexFilters { get; set; }
+    public DbSet<RegexChannelEntry> RegexChannelEntries { get; set; }
 
     protected readonly string connectionString;
 
@@ -25,5 +26,8 @@ public abstract class BotContext : DbContext
         modelBuilder.Entity<DefaultManga>()
             .HasIndex(x => new { x.GuildId, x.ChannelId })
             .IsUnique();
+
+        modelBuilder.Entity<RegexFilter>()
+            .HasIndex(x => x.GuildId);
     }
 }

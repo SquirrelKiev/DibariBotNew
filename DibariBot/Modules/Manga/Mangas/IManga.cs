@@ -1,4 +1,6 @@
-﻿namespace DibariBot.Modules.Manga;
+﻿using DibariBot.Apis;
+
+namespace DibariBot.Modules.Manga;
 
 // Should this be Task or ValueTask?
 public interface IManga
@@ -29,10 +31,12 @@ public struct ChapterMetadata
 
 public struct MangaMetadata
 {
-    public string title;
-    public string author;
-    public string description;
-    public string artist;
+    public required string title;
+    public required string author;
+    public required string description;
+    public required string artist;
+    public required string[] tags;
+    public required MangaAttributesSchema.ContentRating contentRating;
 }
 
 public class Cover
