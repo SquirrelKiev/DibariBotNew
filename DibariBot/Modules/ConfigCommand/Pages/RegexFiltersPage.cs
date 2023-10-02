@@ -347,7 +347,7 @@ public partial class RegexFiltersPage : ConfigPage
             )
             // Rare case where button state is not used and we're gonna grab from the embed etc instead (100 characters too small for what people probably need)
             .WithButton(new ButtonBuilder()
-                .WithLabel("Add")
+                .WithLabel("Save")
                 .WithCustomId(ModulePrefixes.CONFIG_FILTERS_CONFIRMATION_ADD_BUTTON)
                 .WithStyle(ButtonStyle.Success))
             .WithButton(new ButtonBuilder()
