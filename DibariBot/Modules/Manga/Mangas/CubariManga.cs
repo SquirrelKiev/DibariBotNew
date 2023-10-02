@@ -35,7 +35,8 @@ public class CubariManga : IManga
             title = mangaRes.title,
             description = mangaRes.description,
             author = mangaRes.author,
-            artist = mangaRes.artist
+            artist = mangaRes.artist,
+            tags = Array.Empty<string>()
         };
         Groups = mangaRes.groups;
 

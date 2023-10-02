@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json.Serialization;
 using Tomlyn.Helpers;
@@ -51,6 +52,13 @@ public class BotConfig : ITomlMetadataProvider
 
     [TomlMetadata(Comment = "The style to use for pretty much every button that isn't a close button.")]
     public ButtonStyle PrimaryButtonStyle { get; set; } = ButtonStyle.Secondary;
+
+    [TomlMetadata(Comment = "The timeout for user specified regex. Applies to all regex as a whole, not per regex.\n" +
+                            "e.g. if there were 5 filters, each filter's time running would be deducted from the total timeout for that filter check.\n" +
+                            "(hope that makes sense)")]
+    public uint RegexTimeoutMilliseconds { get; set; } = 250;
+
+    public TimeSpan RegexTimeout => TimeSpan.FromMilliseconds(RegexTimeoutMilliseconds);
 
     [TomlMetadata(Comment = "***** IMAGE PROXY CONFIG *****\n\n" +
         "Specifies how the URL to proxy should be encoded.")]

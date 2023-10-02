@@ -28,7 +28,7 @@ public class MangaModule : DibariModule
 
         var state = StateSerializer.DeserializeObject<MangaService.State>(rawState);
 
-        var contents = await mangaHandler.GetMangaMessage(state);
+        var contents = await mangaHandler.GetMangaMessage(Context.Guild?.Id ?? 0ul, Context.Channel.Id, state);
 
         await ModifyOriginalResponseAsync(contents);
     }

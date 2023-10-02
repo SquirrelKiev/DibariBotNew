@@ -1,4 +1,7 @@
-﻿using DibariBot.Core.Database.Models;
+﻿using System.Diagnostics;
+using System.Linq;
+using System.Text.RegularExpressions;
+using DibariBot.Core.Database.Models;
 using DibariBot.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +17,7 @@ public enum MangaAction
 }
 
 [Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
-public class MangaService
+public partial class MangaService
 {
     public struct State
     {
@@ -26,21 +29,21 @@ public class MangaService
 
         public State(MangaAction interactionType, SeriesIdentifier identifier, Bookmark bookmark)
         {
-            this.action = interactionType;
+            action = interactionType;
             this.identifier = identifier;
             this.bookmark = bookmark;
         }
 
         public State(MangaAction interactionType, string? platform, string? series, string chapter, int page)
         {
-            this.action = interactionType;
+            action = interactionType;
             identifier = new(platform, series);
             bookmark = new(chapter, page);
         }
 
         public State WithAction(MangaAction interactionType)
         {
-            this.action = interactionType;
+            action = interactionType;
 
             return this;
         }
@@ -53,7 +56,7 @@ public class MangaService
     public MangaService(MangaFactory mangaFactory, BotConfig botConfig, DbService dbService)
     {
         this.mangaFactory = mangaFactory;
-        this.config = botConfig;
+        config = botConfig;
         this.dbService = dbService;
     }
 
@@ -61,10 +64,10 @@ public class MangaService
     {
         if (string.IsNullOrWhiteSpace(url))
         {
-            await using var context = dbService.GetDbContext();
-            
-            var exists = context.DefaultMangas.FirstOrDefault(x => x.GuildId == guildId && x.ChannelId == channelId);
-            exists ??= context.DefaultMangas.FirstOrDefault(x => x.GuildId == guildId && x.ChannelId == 0ul);
+            await using var contextDefaults = dbService.GetDbContext();
+
+            var exists = contextDefaults.DefaultMangas.FirstOrDefault(x => x.GuildId == guildId && x.ChannelId == channelId);
+            exists ??= contextDefaults.DefaultMangas.FirstOrDefault(x => x.GuildId == guildId && x.ChannelId == 0ul);
 
             if (exists == null)
             {
@@ -88,12 +91,12 @@ public class MangaService
 
         var state = new State(MangaAction.Open, series.Value, new Bookmark(chapter, page - 1));
 
-        var contents = await GetMangaMessage(state);
+        var contents = await GetMangaMessage(guildId, channelId, state);
 
         return contents;
     }
 
-    public async Task<MessageContents> GetMangaMessage(State state)
+    public async Task<MessageContents> GetMangaMessage(ulong guildId, ulong channelId, State state)
     {
         IManga manga;
         try
@@ -109,6 +112,33 @@ public class MangaService
 
             return new MessageContents(string.Empty, errorEmbed, null);
         }
+
+        var metadata = await manga.GetMetadata();
+
+        try
+        {
+            if (guildId != 0ul && !await IsMangaAllowed(guildId, channelId, metadata, manga.GetIdentifier()))
+            {
+                var errorEmbed = new EmbedBuilder()
+                    .WithDescription("Manga disallowed by server rules.")
+                    .WithColor(config)
+                    .Build();
+
+                return new MessageContents(string.Empty, errorEmbed, null);
+            }
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            Log.Warning("Long filter runtime (so long it caused a timeout!!), guild {guildId}. Might be worth checking for abuse?", guildId);
+
+            var errorEmbed = new EmbedBuilder()
+                .WithDescription("Filter took too long to process.")
+                .WithColor(config)
+                .Build();
+
+            return new MessageContents(string.Empty, errorEmbed, null);
+        }
+
 
         var bookmark = new Bookmark(
             state.bookmark.chapter == "" ? await manga.DefaultChapter() : state.bookmark.chapter,
@@ -165,8 +195,6 @@ public class MangaService
         }
 
         var pageSrc = GetProxiedUrl(pages.srcs[bookmark.page], state.identifier.platform!);
-
-        var metadata = await manga.GetMetadata();
 
         string author = metadata.author;
 
@@ -262,10 +290,10 @@ public class MangaService
                 return 0;
             }
 
-            // someone please tell me how i can do this better
+            // someone please tell me how i can do the below better
             context.Entry(existingFilter).CurrentValues.SetValues(newFilter);
 
-            // remove no longer ref'd channels
+            // remove no longer referenced channels
             var entriesToRemove = existingFilter.RegexChannelEntries
                 .Where(existingEntry => newFilter.RegexChannelEntries.All(newEntry => newEntry.ChannelId != existingEntry.ChannelId))
                 .ToList();
@@ -280,10 +308,9 @@ public class MangaService
             {
                 var existingEntry = existingFilter.RegexChannelEntries
                     .SingleOrDefault(x => x.ChannelId == newEntry.ChannelId);
-            
+
                 if (existingEntry == null)
                 {
-                    // Add new entry
                     existingFilter.RegexChannelEntries.Add(newEntry);
                 }
             }
@@ -324,14 +351,12 @@ public class MangaService
                 && // AND
                 (
                     // If the filter's scope is Include, check if there's an entry for the current channel.
-                    (rf.ChannelFilterScope == ChannelFilterScope.Include && rf.RegexChannelEntries.Any(rce => rce.ChannelId == channelId))
+                    rf.ChannelFilterScope == ChannelFilterScope.Include && rf.RegexChannelEntries.Any(rce => rce.ChannelId == channelId)
                     || // OR
-                    // If the filter's scope is Exclude, check if there isn't an entry for the current channel.
-                    (rf.ChannelFilterScope == ChannelFilterScope.Exclude && rf.RegexChannelEntries.All(rce => rce.ChannelId != channelId))
+                       // If the filter's scope is Exclude, check if there isn't an entry for the current channel.
+                    rf.ChannelFilterScope == ChannelFilterScope.Exclude && rf.RegexChannelEntries.All(rce => rce.ChannelId != channelId)
                 )
             );
-
-        // Log.Verbose("GetFilter query is: {query}", filterQuery.ToQueryString());
 
         return await filterQuery.ToArrayAsync();
     }
@@ -346,4 +371,77 @@ public class MangaService
 
         return guildFilters;
     }
+
+    public async Task<bool> IsMangaAllowed(ulong guildId, ulong channelId, MangaMetadata metadata, SeriesIdentifier identifier)
+    {
+        var filters = await GetFilters(guildId, channelId);
+
+        var values = new Dictionary<string, string>
+        {
+            {
+                "title",
+                metadata.title
+            },
+            {
+                "artist",
+                metadata.artist
+            },
+            {
+                "author",
+                metadata.author
+            },
+            {
+                "description",
+                metadata.description
+            },
+            {
+                "desc",
+                metadata.description
+            },
+            {
+                "seriesId",
+                identifier.series.StringOrDefault("")
+            },
+            {
+                "platformId",
+                identifier.platform.StringOrDefault("")
+            },
+            {
+                "tags",
+                string.Join(',', metadata.tags)
+            }
+        };
+
+        var stopwatch = Stopwatch.StartNew();
+
+        foreach (var filter in filters)
+        {
+            var remaining = config.RegexTimeout - stopwatch.Elapsed;
+
+            if (remaining <= TimeSpan.Zero)
+            {
+                throw new RegexMatchTimeoutException();
+            }
+
+            var hydrated = CaptureDryElement().Replace(filter.Template, m =>
+                values.TryGetValue(m.Groups[1].Value, out var replacement) ? replacement : m.Value);
+
+            var tripped = Regex.IsMatch(hydrated, filter.Filter, RegexOptions.None, remaining);
+
+            if ((tripped && filter.FilterType == FilterType.Block) || (!tripped && filter.FilterType == FilterType.Allow))
+            {
+                return false;
+            }
+        }
+
+        stopwatch.Stop();
+
+        Log.Debug("going for: {time}", stopwatch.Elapsed);
+
+        return true;
+    }
+
+    [GeneratedRegex(@"\{\{(\w+)\}\}")]
+    // TODO: Better name
+    private static partial Regex CaptureDryElement();
 }
