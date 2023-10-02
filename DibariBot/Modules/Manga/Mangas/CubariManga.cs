@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using DibariBot.Apis;
+using Newtonsoft.Json.Linq;
 
 namespace DibariBot.Modules.Manga;
 
@@ -36,7 +37,8 @@ public class CubariManga : IManga
             description = mangaRes.description,
             author = mangaRes.author,
             artist = mangaRes.artist,
-            tags = Array.Empty<string>()
+            tags = Array.Empty<string>(),
+            contentRating = identifier.platform == "nhentai" ? MangaAttributesSchema.ContentRating.Pornographic : MangaAttributesSchema.ContentRating.Unknown
         };
         Groups = mangaRes.groups;
 

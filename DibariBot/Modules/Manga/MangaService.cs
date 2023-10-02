@@ -1,9 +1,8 @@
-﻿using System.Diagnostics;
-using System.Linq;
-using System.Text.RegularExpressions;
-using DibariBot.Core.Database.Models;
+﻿using DibariBot.Core.Database.Models;
 using DibariBot.Database;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace DibariBot.Modules.Manga;
 
@@ -390,14 +389,15 @@ public partial class MangaService
                 "author",
                 metadata.author
             },
-            {
-                "description",
-                metadata.description
-            },
-            {
-                "desc",
-                metadata.description
-            },
+            // just in case im commenting this out. if anyone can justify why they need this feel free
+            //{
+            //    "description",
+            //    metadata.description
+            //},
+            //{
+            //    "desc",
+            //    metadata.description
+            //},
             {
                 "seriesId",
                 identifier.series.StringOrDefault("")
@@ -409,6 +409,10 @@ public partial class MangaService
             {
                 "tags",
                 string.Join(',', metadata.tags)
+            },
+            {
+                "contentRating",
+                metadata.contentRating.ToString()
             }
         };
 

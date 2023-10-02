@@ -65,7 +65,8 @@ public class MangaDexApi
             artist = artist?.name ?? "No artist",
             description = schema.attributes.description.ToString(),
             title = schema.attributes.title.ToString(),
-            tags = tags
+            tags = tags,
+            contentRating = schema.attributes.contentRating
         };
     }
 

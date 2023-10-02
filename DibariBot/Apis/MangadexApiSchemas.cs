@@ -104,7 +104,8 @@ public class MangaAttributesSchema
         Safe,
         Suggestive,
         Erotica,
-        Pornographic
+        Pornographic,
+        Unknown
     }
 
     [JsonConverter(typeof(StringEnumConverter), typeof(SnakeCaseNamingStrategy))]
