@@ -1,4 +1,5 @@
 ﻿using DibariBot.Database;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,27 +34,24 @@ namespace DibariBot
         }
 
         // Prefix command zone
-        private Task MessageRecieved(SocketMessage msg)
+        private async Task MessageReceived(SocketMessage msg)
         {
-            if(msg.Author.IsBot)
-                return Task.CompletedTask;
+            if (msg.Author.IsBot)
+                return;
 
-            if(msg is not SocketUserMessage userMessage)
-                return Task.CompletedTask;
+            if (msg is not SocketUserMessage userMessage)
+                return;
 
-            Task.Run(async () =>
+            try
             {
-                try
-                {
-                    await RunCommand(userMessage);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Command failed: ");
-                }
-            });
+                await RunCommand(userMessage);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Command failed: ");
+            }
 
-            return Task.CompletedTask;
+            return;
         }
 
         private async Task RunCommand(SocketUserMessage userMessage)
@@ -67,12 +65,40 @@ namespace DibariBot
             var context = new SocketCommandContext(client, userMessage);
 
             var res = await commandService.ExecuteAsync(context, argPos, services);
+        }
+
+        private Task CommandExecuted(Optional<CommandInfo> cmdInfoOpt, ICommandContext ctx, Discord.Commands.IResult res)
+        {
+            var cmdInfo = cmdInfoOpt.IsSpecified ? cmdInfoOpt.Value : null;
 
             if (res.IsSuccess)
             {
-                Log.Information("Prefix command successfully executed. Message: {message}",
-                    userMessage.Content);
+                Log.Information("Command {ModuleName}.{MethodName} successfully executed.", cmdInfo?.Module.Name, cmdInfo?.Name);
             }
+            else
+            {
+                if (res is Discord.Commands.ExecuteResult executeResult)
+                {
+                    Log.Error(executeResult.Exception, "Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.",
+                        cmdInfo?.Module?.Name, cmdInfo?.Name, executeResult.Error, executeResult.ErrorReason);
+                }
+                else
+                {
+                    Log.Error("Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.",
+                        cmdInfo?.Module?.Name, cmdInfo?.Name, res.Error, res.ErrorReason);
+                }
+
+                var messageBody = $"{res.Error}, {res.ErrorReason}";
+
+                if (res is Discord.Commands.PreconditionResult precondResult)
+                {
+                    messageBody = $"Condition to use command not met. (`{precondResult.ErrorReason}`)";
+                }
+
+                ctx.Message.AddReactionAsync(Emote.Parse("<:AiWut:821056610940092496>"));
+            }
+
+            return Task.CompletedTask;
         }
 
         // Interaction zone
@@ -86,20 +112,20 @@ namespace DibariBot
             {
                 if (res is Discord.Interactions.ExecuteResult executeResult)
                 {
-                    Log.Error(executeResult.Exception, "Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.",
+                    Log.Error(executeResult.Exception, "Interaction {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.",
                         cmdInfo?.Module?.Name, cmdInfo?.MethodName, executeResult.Error, executeResult.ErrorReason);
                 }
                 else
                 {
-                    Log.Error("Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.",
+                    Log.Error("Interaction {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.",
                         cmdInfo?.Module?.Name, cmdInfo?.MethodName, res.Error, res.ErrorReason);
                 }
 
                 var messageBody = $"{res.Error}, {res.ErrorReason}";
 
-                if(res is Discord.Interactions.PreconditionResult precondResult)
+                if (res is Discord.Interactions.PreconditionResult precondResult)
                 {
-                    messageBody = $"Condition to use command not met. (`{precondResult.ErrorReason}`)";
+                    messageBody = $"Condition to use interaction not met. (`{precondResult.ErrorReason}`)";
                 }
 
                 if (ctx.Interaction.HasResponded)
@@ -114,17 +140,29 @@ namespace DibariBot
 
             return Task.CompletedTask;
         }
-        
+
 
         private async Task InteractionCreated(SocketInteraction arg)
         {
+            await Task.Delay(5);
+
             var ctx = new SocketInteractionContext(client, arg);
 
-            if(ctx.Interaction is SocketMessageComponent componentInteraction)
+            if (ctx.Interaction is SocketMessageComponent componentInteraction)
             {
                 var ogRes = componentInteraction.Message;
 
-                if (ogRes.Interaction.User.Id != ctx.Interaction.User.Id)
+                var ogAuthor = ogRes.Interaction?.User.Id;
+
+                // horrible
+                if (ogAuthor == null)
+                {
+                    var channel = (ISocketMessageChannel)await client.GetChannelAsync(ogRes.Reference.ChannelId);
+                    var message = await channel.GetMessageAsync(ogRes.Reference.MessageId.Value);
+                    ogAuthor = message.Author.Id;
+                }
+
+                if (ogAuthor != ctx.Interaction.User.Id)
                 {
                     await componentInteraction.RespondAsync("You did not originally trigger this. Please run the command yourself.", ephemeral: true);
 
@@ -132,7 +170,6 @@ namespace DibariBot
                 }
             }
 
-            // something something blocking bad?
             await interactionService.ExecuteCommandAsync(ctx, services);
         }
 
@@ -141,11 +178,7 @@ namespace DibariBot
             await interactionService.AddModulesAsync(System.Reflection.Assembly.GetExecutingAssembly(), services);
             await interactionService.RegisterCommandsGloballyAsync(true);
 
-            client.InteractionCreated += x =>
-            {
-                Task.Run(() => InteractionCreated(x));
-                return Task.CompletedTask;
-            };
+            client.InteractionCreated += InteractionCreated;
             interactionService.InteractionExecuted += InteractionExecuted;
         }
 
@@ -153,7 +186,8 @@ namespace DibariBot
         {
             await commandService.AddModulesAsync(System.Reflection.Assembly.GetExecutingAssembly(), services);
 
-            client.MessageReceived += MessageRecieved;
+            client.MessageReceived += MessageReceived;
+            commandService.CommandExecuted += CommandExecuted;
         }
     }
 }

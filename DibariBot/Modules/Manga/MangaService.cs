@@ -109,6 +109,8 @@ public partial class MangaService
                 .WithColor(config)
                 .Build();
 
+            Log.Warning(ex, "Failed to get manga.");
+
             return new MessageContents(string.Empty, errorEmbed, null);
         }
 
@@ -451,7 +453,7 @@ public partial class MangaService
 
         stopwatch.Stop();
 
-        Log.Debug("going for: {time}", stopwatch.Elapsed);
+        Log.Verbose("Regex ran for: {time}. Guild: {guildId}, Channel: {channelId}", stopwatch.Elapsed, guildId, channelId);
 
         return true;
     }

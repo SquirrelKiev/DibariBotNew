@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace DibariBot;
 
@@ -25,7 +26,9 @@ public class Api
 
         return await cache.GetOrCreateAsync($"apiCache:{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(uri.ToString()))}", async () =>
         {
-            Log.Debug("Fetching {url}", uri);
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            Log.Verbose("Fetching {url}", uri);
 
             using var client = httpFactory.CreateClient();
 
@@ -38,6 +41,9 @@ public class Api
 
             var json = await res.Content.ReadAsStringAsync();
             var obj = JsonConvert.DeserializeObject<T>(json);
+
+            Log.Verbose("Took {time:fff}ms to fetch {uri}", stopwatch.Elapsed, uri);
+            stopwatch.Stop();
 
             return obj;
         }, cvs);

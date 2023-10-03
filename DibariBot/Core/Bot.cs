@@ -25,10 +25,15 @@ public class Bot
             GatewayIntents = GatewayIntents.Guilds | GatewayIntents.MessageContent | GatewayIntents.GuildMessages,
             LogLevel = LogSeverity.Verbose
         });
-        InteractionService = new InteractionService(Client, new InteractionServiceConfig());
+        InteractionService = new InteractionService(Client, new InteractionServiceConfig()
+        {
+            LogLevel = LogSeverity.Verbose,
+            DefaultRunMode = Discord.Interactions.RunMode.Async
+        });
         CommandService = new CommandService(new CommandServiceConfig
         {
-            LogLevel = LogSeverity.Verbose
+            LogLevel = LogSeverity.Verbose,
+            DefaultRunMode = Discord.Commands.RunMode.Async
         });
 
         if (!new BotConfigFactory().GetConfig(out var botConfig))

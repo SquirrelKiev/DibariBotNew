@@ -81,9 +81,6 @@ public class MemoryCacheProvider : ICacheProvider
 
     private static void LogHitOrMiss(string key, bool cacheHit)
     {
-        if (cacheHit)
-            Log.Debug("Cache hit! Key is {Key}.", key);
-        else
-            Log.Debug("Cache miss. Key is {Key}.", key);
+        Log.Verbose(cacheHit ? "Cache hit! Key is {Key}." : "Cache miss. Key is {Key}.", key);
     }
 }
