@@ -1,4 +1,6 @@
-﻿namespace DibariBot.Modules;
+﻿using Discord.WebSocket;
+
+namespace DibariBot.Modules;
 
 public abstract class DibariModule : InteractionModuleBase
 {
@@ -15,5 +17,17 @@ public abstract class DibariModule : InteractionModuleBase
     protected virtual Task<IUserMessage> ModifyOriginalResponseAsync(MessageContents contents, RequestOptions? options = null)
     {
         return Context.Interaction.ModifyOriginalResponseAsync(contents, options);
+    }
+
+    protected virtual IMessageChannel GetParentChannel()
+    {
+        var channel = Context.Channel;
+
+        if (Context.Channel is SocketThreadChannel thread)
+        {
+            channel = (IMessageChannel)thread.ParentChannel;
+        }
+
+        return channel;
     }
 }

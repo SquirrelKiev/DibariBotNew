@@ -1,4 +1,6 @@
-﻿namespace DibariBot.Modules.Manga;
+﻿using Discord.WebSocket;
+
+namespace DibariBot.Modules.Manga;
 
 public class MangaModule : DibariModule
 {
@@ -15,7 +17,7 @@ public class MangaModule : DibariModule
     {
         await DeferAsync();
 
-        var contents = await mangaHandler.MangaCommand(Context.Guild?.Id ?? 0ul, Context.Channel.Id,
+        var contents = await mangaHandler.MangaCommand(Context.Guild?.Id ?? 0ul, GetParentChannel().Id,
             url, chapter, page);
 
         await FollowupAsync(contents);
@@ -28,8 +30,10 @@ public class MangaModule : DibariModule
 
         var state = StateSerializer.DeserializeObject<MangaService.State>(rawState);
 
-        var contents = await mangaHandler.GetMangaMessage(Context.Guild?.Id ?? 0ul, Context.Channel.Id, state);
+        var contents = await mangaHandler.GetMangaMessage(Context.Guild?.Id ?? 0ul, GetParentChannel().Id, state);
 
         await ModifyOriginalResponseAsync(contents);
     }
+
+    
 }
