@@ -4,6 +4,14 @@ namespace DibariBot.Modules.Manga;
 
 public class MangaPrefixModule : DibariPrefixModule
 {
+    [NamedArgumentType]
+    public class NamableArguments
+    {
+        public string Url { get; set; } = "";
+        public string Ch { get; set; } = "";
+        public int Pg { get; set; } = 1;
+    }
+
     private readonly MangaService mangaHandler;
 
     public MangaPrefixModule(MangaService mangaHandler)
@@ -21,8 +29,9 @@ public class MangaPrefixModule : DibariPrefixModule
     public Task MangaCommand(string chapter) => MangaCommandImpl(chapter: chapter);
 
     [Command("manga")]
-    public Task MangaCommand() => MangaCommandImpl();
+    public Task MangaCommand(NamableArguments namedArgs) => MangaCommandImpl(namedArgs.Url, namedArgs.Ch, namedArgs.Pg);
 
+    [Command("manga")]
     private async Task MangaCommandImpl(string url = "", string chapter = "", int page = 1)
     {
         await DeferAsync();
