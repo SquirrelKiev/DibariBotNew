@@ -31,9 +31,9 @@ public class SearchService
             title = state.query
         });
 
-        var totalPages = res.total / config.MangaDexSearchLimit;
+        var totalPages = MathF.Ceiling((float)res.total / config.MangaDexSearchLimit);
 
-        if(totalPages <= 0)
+        if(res.total <= 0)
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("No results found!");
