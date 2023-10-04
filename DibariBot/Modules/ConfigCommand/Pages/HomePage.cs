@@ -8,6 +8,8 @@ public class HomePage : ConfigPage
 
     public override string Description => "Brings up information about each config page.";
 
+    public override bool EnabledInDMs => true;
+
     private readonly ConfigCommandService configCommandService;
 
     public HomePage(ConfigCommandService configCommandService)
@@ -19,13 +21,13 @@ public class HomePage : ConfigPage
     {
         var embed = new EmbedBuilder();
 
-        foreach(var page in configCommandService.ConfigPages.Values)
+        foreach(var page in configCommandService.ConfigPages.Values.Where(page => page.ShouldShow(IsDm())))
         {
             embed.AddField(page.Label, page.Description);
         }
 
         var components = new ComponentBuilder()
-            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configCommandService.ConfigPages, Id))
+            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configCommandService.ConfigPages, Id, IsDm()))
             .WithRedButton();
 
         return Task.FromResult(new MessageContents("", embed.Build(), components));

@@ -30,4 +30,9 @@ public abstract class DibariModule : InteractionModuleBase
 
         return channel;
     }
+
+    protected virtual bool IsDm()
+    {
+        return Context.Guild == null;
+    }
 }

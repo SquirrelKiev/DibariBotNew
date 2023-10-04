@@ -1,8 +1,8 @@
-﻿using DibariBot.Core.Database.Models;
-using DibariBot.Database;
+﻿using DibariBot.Database;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using DibariBot.Database.Models;
 
 namespace DibariBot.Modules.Manga;
 
@@ -108,6 +108,8 @@ public partial class MangaService
                 .WithDescription($"Failed to get manga. `{ex.Message}`\n`{state.identifier.platform}/{state.identifier.series}`")
                 .WithColor(config)
                 .Build();
+
+            Log.Warning(ex, "Failed to get manga.");
 
             return new MessageContents(string.Empty, errorEmbed, null);
         }
@@ -451,7 +453,7 @@ public partial class MangaService
 
         stopwatch.Stop();
 
-        Log.Debug("going for: {time}", stopwatch.Elapsed);
+        Log.Verbose("Regex ran for: {time}. Guild: {guildId}, Channel: {channelId}", stopwatch.Elapsed, guildId, channelId);
 
         return true;
     }

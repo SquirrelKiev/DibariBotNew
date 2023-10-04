@@ -1,4 +1,5 @@
 ﻿using DibariBot.Database;
+using DibariBot.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
@@ -38,6 +39,8 @@ public class DefaultMangaPage : ConfigPage
 
     public override string Description => "Change the manga that opens when no URL is specified. Can be per-server and per-channel.";
 
+    public override bool EnabledInDMs => true;
+
     private readonly DbService dbService;
     private readonly ConfigCommandService configCommandService;
     private readonly BotConfig config;
@@ -55,7 +58,7 @@ public class DefaultMangaPage : ConfigPage
         var embed = GetCurrentDefaultsEmbed(await GetMangaDefaultsList());
 
         var components = new ComponentBuilder()
-            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configCommandService.ConfigPages, Id))
+            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configCommandService.ConfigPages, Id, IsDm()))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Set")
                 .WithCustomId($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_SET}")
@@ -69,13 +72,13 @@ public class DefaultMangaPage : ConfigPage
         return new MessageContents("", embed.Build(), components);
     }
 
-    private async Task<DibariBot.Core.Database.Models.DefaultManga[]> GetMangaDefaultsList()
+    private async Task<DefaultManga[]> GetMangaDefaultsList()
     {
         await using var dbContext = dbService.GetDbContext();
 
         var guildId = (Context.Guild?.Id) ?? 0ul;
 
-        DibariBot.Core.Database.Models.DefaultManga[] defaults;
+        DefaultManga[] defaults;
         if (guildId == 0ul)
         {
             defaults = await dbContext.DefaultMangas.Where(x => x.ChannelId == Context.Channel.Id).ToArrayAsync();
@@ -88,7 +91,7 @@ public class DefaultMangaPage : ConfigPage
         return defaults;
     }
 
-    private static EmbedBuilder GetCurrentDefaultsEmbed(DibariBot.Core.Database.Models.DefaultManga[] defaults)
+    private static EmbedBuilder GetCurrentDefaultsEmbed(DefaultManga[] defaults)
     {
         var embed = new EmbedBuilder();
 
@@ -132,10 +135,8 @@ public class DefaultMangaPage : ConfigPage
 
         await context.SaveChangesAsync();
 
-        await ModifyOriginalResponseAsync(await GetMessageContents(new ConfigCommandService.State()
-        {
-            page = Page.DefaultManga
-        }));
+        await ModifyOriginalResponseAsync(await GetMessageContents(
+            new ConfigCommandService.State(page: Page.DefaultManga)));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE)]
@@ -269,7 +270,7 @@ public class DefaultMangaPage : ConfigPage
 
         var state = StateSerializer.DeserializeObject<ConfirmState>(id);
 
-        var toAdd = new DibariBot.Core.Database.Models.DefaultManga()
+        var toAdd = new DefaultManga()
         {
             GuildId = Context.Guild?.Id ?? 0ul,
             ChannelId = state.channelId,
@@ -295,9 +296,6 @@ public class DefaultMangaPage : ConfigPage
         }
 
         await ModifyOriginalResponseAsync(
-            await configCommandService.GetMessageContents(new ConfigCommandService.State()
-            {
-                page = Id
-            }, Context));
+            await configCommandService.GetMessageContents(new ConfigCommandService.State(page: Id), Context));
     }
 }

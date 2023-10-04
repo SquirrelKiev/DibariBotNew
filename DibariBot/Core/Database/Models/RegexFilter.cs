@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace DibariBot.Core.Database.Models;
+namespace DibariBot.Database.Models;
 
 public enum FilterType
 {

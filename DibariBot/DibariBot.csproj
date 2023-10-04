@@ -26,6 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Discord.Net.Commands">
+      <HintPath>..\tempdnet\Discord.Net.Commands.dll</HintPath>
+    </Reference>
     <Reference Include="Discord.Net.Core">
       <HintPath>..\tempdnet\Discord.Net.Core.dll</HintPath>
     </Reference>

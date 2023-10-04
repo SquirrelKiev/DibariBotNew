@@ -59,6 +59,10 @@ public class BotConfig : ITomlMetadataProvider
 
     public TimeSpan RegexTimeout => TimeSpan.FromMilliseconds(RegexTimeoutMilliseconds);
 
+
+    [TomlMetadata(Comment = "The reaction to put on prefix commands when an unhandled error occurs. Will only appear on prefix commands.")]
+    public string ErrorEmote { get; set; } = "\u2753";
+
     [TomlMetadata(Comment = "***** IMAGE PROXY CONFIG *****\n\n" +
         "Specifies how the URL to proxy should be encoded.")]
     public ProxyUrlEncodingFormat ProxyUrlEncoding { get; set; } = ProxyUrlEncodingFormat.Base64;
