@@ -11,6 +11,24 @@ public class ConfigCommandService
     {
         public ConfigPage.Page page;
         public string data;
+
+        public State()
+        {
+            page = default;
+            data = string.Empty;
+        }
+
+        public State(ConfigPage.Page page) : this()
+        {
+            this.page = page;
+            data = string.Empty;
+        }
+
+        public State(ConfigPage.Page page, string data)
+        {
+            this.page = page;
+            this.data = data;
+        }
     }
 
     public Dictionary<ConfigPage.Page, ConfigPage> ConfigPages { get

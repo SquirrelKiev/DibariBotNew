@@ -1,8 +1,8 @@
-﻿using DibariBot.Core.Database.Models;
-using DibariBot.Database;
+﻿using DibariBot.Database;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using DibariBot.Database.Models;
 
 namespace DibariBot.Modules.Manga;
 

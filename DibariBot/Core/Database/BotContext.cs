@@ -1,4 +1,4 @@
-﻿using DibariBot.Core.Database.Models;
+﻿using DibariBot.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DibariBot.Database;
@@ -29,5 +29,8 @@ public abstract class BotContext : DbContext
 
         modelBuilder.Entity<RegexFilter>()
             .HasIndex(x => x.GuildId);
+
+        modelBuilder.Entity<RegexChannelEntry>()
+            .HasIndex(x => new {x.ChannelId, x.RegexFilterId});
     }
 }

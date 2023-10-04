@@ -18,11 +18,7 @@ public class ConfigCommandModule : DibariModule
     {
         await DeferAsync();
 
-        await FollowupAsync(await configService.GetMessageContents(new()
-        {
-            page = Pages.ConfigPage.Page.Help,
-            data = ""
-        }, Context));
+        await FollowupAsync(await configService.GetMessageContents(new(page: Pages.ConfigPage.Page.Help, data: ""), Context));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE)]
@@ -32,11 +28,7 @@ public class ConfigCommandModule : DibariModule
 
         var page = StateSerializer.DeserializeObject<Pages.ConfigPage.Page>(id);
 
-        await ModifyOriginalResponseAsync(await configService.GetMessageContents(new()
-        {
-            page = page,
-            data = ""
-        }, Context));
+        await ModifyOriginalResponseAsync(await configService.GetMessageContents(new(page: page, data: ""), Context));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + "*")]

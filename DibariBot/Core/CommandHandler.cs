@@ -1,15 +1,16 @@
 ﻿using DibariBot.Database;
-using Discord;
+using DibariBot.Database.Extensions;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace DibariBot
 {
     [Inject(ServiceLifetime.Singleton)]
     public class CommandHandler
     {
+        public const string DEFAULT_PREFIX = "m.";
+
         private readonly InteractionService interactionService;
         private readonly CommandService commandService;
         private readonly DbService dbService;
@@ -33,7 +34,8 @@ namespace DibariBot
             await InitializeCommandService();
         }
 
-        // Prefix command zone
+        #region Prefix Command Handling
+
         private async Task MessageReceived(SocketMessage msg)
         {
             if (msg.Author.IsBot)
@@ -50,21 +52,26 @@ namespace DibariBot
             {
                 Log.Error(ex, "Command failed: ");
             }
-
-            return;
         }
 
         private async Task RunCommand(SocketUserMessage userMessage)
         {
-            int argPos = 0;
-            if (!userMessage.HasStringPrefix("!", ref argPos))
+            var prefix = DEFAULT_PREFIX;
+
+            if (userMessage.Channel is SocketTextChannel textChannel)
+            {
+                prefix = await dbService.GetPrefix(textChannel.Guild.Id);
+            }
+
+            var argPos = 0;
+            if (!userMessage.HasStringPrefix(prefix, ref argPos))
             {
                 return;
             }
 
             var context = new SocketCommandContext(client, userMessage);
 
-            var res = await commandService.ExecuteAsync(context, argPos, services);
+            await commandService.ExecuteAsync(context, argPos, services);
         }
 
         private Task CommandExecuted(Optional<CommandInfo> cmdInfoOpt, ICommandContext ctx, Discord.Commands.IResult res)
@@ -73,35 +80,39 @@ namespace DibariBot
 
             if (res.IsSuccess)
             {
-                Log.Information("Command {ModuleName}.{MethodName} successfully executed.", cmdInfo?.Module.Name, cmdInfo?.Name);
+                Log.Information("Command {ModuleName}.{MethodName} successfully executed. Message contents: {contents}", 
+                    cmdInfo?.Module.Name, cmdInfo?.Name, ctx.Message.CleanContent);
             }
             else
             {
                 if (res is Discord.Commands.ExecuteResult executeResult)
                 {
-                    Log.Error(executeResult.Exception, "Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.",
-                        cmdInfo?.Module?.Name, cmdInfo?.Name, executeResult.Error, executeResult.ErrorReason);
+                    Log.Error(executeResult.Exception, "Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}. Message contents: {contents}",
+                        cmdInfo?.Module?.Name, cmdInfo?.Name, executeResult.Error, executeResult.ErrorReason, ctx.Message.CleanContent);
                 }
                 else
                 {
-                    Log.Error("Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}.",
-                        cmdInfo?.Module?.Name, cmdInfo?.Name, res.Error, res.ErrorReason);
+                    Log.Error("Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}. Message contents: {contents}",
+                        cmdInfo?.Module?.Name, cmdInfo?.Name, res.Error, res.ErrorReason, ctx.Message.CleanContent);
                 }
 
-                var messageBody = $"{res.Error}, {res.ErrorReason}";
-
-                if (res is Discord.Commands.PreconditionResult precondResult)
+                try
                 {
-                    messageBody = $"Condition to use command not met. (`{precondResult.ErrorReason}`)";
+                    ctx.Message.AddReactionAsync(Emote.Parse(botConfig.ErrorEmote));
                 }
-
-                ctx.Message.AddReactionAsync(Emote.Parse("<:AiWut:821056610940092496>"));
+                catch (Exception e)
+                {
+                    Log.Warning(e, "Failed to add the error reaction!");
+                }
             }
 
             return Task.CompletedTask;
         }
 
-        // Interaction zone
+        #endregion
+
+        #region Interaction Handling
+        
         private Task InteractionExecuted(ICommandInfo cmdInfo, IInteractionContext ctx, Discord.Interactions.IResult res)
         {
             if (res.IsSuccess)
@@ -172,6 +183,8 @@ namespace DibariBot
 
             await interactionService.ExecuteCommandAsync(ctx, services);
         }
+
+        #endregion
 
         private async Task InitializeInteractionService()
         {

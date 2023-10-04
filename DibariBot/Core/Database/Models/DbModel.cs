@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DibariBot.Core.Database.Models;
+namespace DibariBot.Database.Models;
 
 public class DbModel
 {

@@ -22,7 +22,10 @@ public class Bot
     {
         Client = new DiscordSocketClient(new DiscordSocketConfig
         {
-            GatewayIntents = GatewayIntents.Guilds | GatewayIntents.MessageContent | GatewayIntents.GuildMessages,
+            GatewayIntents = GatewayIntents.Guilds | 
+                             GatewayIntents.MessageContent | 
+                             GatewayIntents.GuildMessages | 
+                             GatewayIntents.DirectMessages,
             LogLevel = LogSeverity.Verbose
         });
         InteractionService = new InteractionService(Client, new InteractionServiceConfig()

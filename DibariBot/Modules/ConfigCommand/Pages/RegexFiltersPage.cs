@@ -1,8 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
-using DibariBot.Core.Database.Models;
+using DibariBot.Database.Models;
 using DibariBot.Modules.Manga;
-using Discord.Interactions;
 using Humanizer;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
@@ -25,6 +24,8 @@ public partial class RegexFiltersPage : ConfigPage
     public override string Label => "Regex filters";
 
     public override string Description => "Specify filters to limit what mangas can be pulled up.";
+
+    public override bool EnabledInDMs => false;
 
     private const string EMBED_NAME_TEMPLATE = "Template";
     private const string EMBED_NAME_FILTER = "Filter";
@@ -91,7 +92,7 @@ public partial class RegexFiltersPage : ConfigPage
         }
 
         var components = new ComponentBuilder()
-            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configCommandService.ConfigPages, Id))
+            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configCommandService.ConfigPages, Id, IsDm()))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Add")
                 .WithCustomId($"{ModulePrefixes.CONFIG_FILTERS_OPEN_MODAL_BUTTON}{0ul}")
@@ -151,7 +152,7 @@ public partial class RegexFiltersPage : ConfigPage
 
         await mangaService.RemoveFilter(filter);
 
-        await ModifyOriginalResponseAsync(await GetMessageContents(new ConfigCommandService.State { page = Id }));
+        await ModifyOriginalResponseAsync(await GetMessageContents(new ConfigCommandService.State(page: Id)));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_EDIT_BUTTON)]
@@ -257,7 +258,8 @@ public partial class RegexFiltersPage : ConfigPage
                 ephemeral: true);
         }
 
-        await ModifyOriginalResponseAsync(await configCommandService.GetMessageContents(new ConfigCommandService.State { page = Id }, Context));
+        await ModifyOriginalResponseAsync(await configCommandService.GetMessageContents(
+            new ConfigCommandService.State(page: Id), Context));
     }
 
     private MessageContents UpsertConfirmation(RegexFilter filter)
