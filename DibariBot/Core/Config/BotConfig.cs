@@ -63,6 +63,12 @@ public class BotConfig : ITomlMetadataProvider
     [TomlMetadata(Comment = "The reaction to put on prefix commands when an unhandled error occurs. Will only appear on prefix commands.")]
     public string ErrorEmote { get; set; } = "\u2753";
 
+    [TomlMetadata(Comment = "An optional URL to an instance of Seq. Empty string is interpreted as not wanting Seq.")]
+    public string SeqUrl { get; set; } = "";
+
+    [TomlMetadata(Comment = "An optional API key for Seq. Empty string is interpreted as no API key.")]
+    public string SeqApiKey { get; set; } = "";
+
     [TomlMetadata(Comment = "***** IMAGE PROXY CONFIG *****\n\n" +
         "Specifies how the URL to proxy should be encoded.")]
     public ProxyUrlEncodingFormat ProxyUrlEncoding { get; set; } = ProxyUrlEncodingFormat.Base64;

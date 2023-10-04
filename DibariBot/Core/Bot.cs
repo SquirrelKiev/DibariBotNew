@@ -18,8 +18,10 @@ public class Bot
 
     private readonly IServiceProvider services;
 
-    public Bot()
+    public Bot(BotConfig config)
     {
+        Config = config;
+
         Client = new DiscordSocketClient(new DiscordSocketConfig
         {
             GatewayIntents = GatewayIntents.Guilds | 
@@ -38,17 +40,6 @@ public class Bot
             LogLevel = LogSeverity.Verbose,
             DefaultRunMode = Discord.Commands.RunMode.Async
         });
-
-        if (!new BotConfigFactory().GetConfig(out var botConfig))
-        {
-            Environment.Exit(1);
-        }
-        if (!botConfig.IsValid())
-        {
-            Environment.Exit(1);
-        }
-        Config = botConfig;
-        Log.Information("Bot config loaded.");
 
         services = CreateServices();
         Log.Information("Services created.");
