@@ -74,7 +74,7 @@ namespace DibariBot
             await commandService.ExecuteAsync(context, argPos, services);
         }
 
-        private Task CommandExecuted(Optional<CommandInfo> cmdInfoOpt, ICommandContext ctx, Discord.Commands.IResult res)
+        private async Task CommandExecuted(Optional<CommandInfo> cmdInfoOpt, ICommandContext ctx, Discord.Commands.IResult res)
         {
             var cmdInfo = cmdInfoOpt.IsSpecified ? cmdInfoOpt.Value : null;
 
@@ -98,15 +98,25 @@ namespace DibariBot
 
                 try
                 {
-                    ctx.Message.AddReactionAsync(Emote.Parse(botConfig.ErrorEmote));
+                    IEmote emote;
+
+                    if (Emote.TryParse(botConfig.ErrorEmote, out var result))
+                    {
+                        emote = result;
+                    }
+                    else
+                    {
+                        emote = Emoji.Parse(botConfig.ErrorEmote);
+                    }
+
+
+                    await ctx.Message.AddReactionAsync(emote);
                 }
                 catch (Exception e)
                 {
                     Log.Warning(e, "Failed to add the error reaction!");
                 }
             }
-
-            return Task.CompletedTask;
         }
 
         #endregion
@@ -155,8 +165,6 @@ namespace DibariBot
 
         private async Task InteractionCreated(SocketInteraction arg)
         {
-            await Task.Delay(5);
-
             var ctx = new SocketInteractionContext(client, arg);
 
             if (ctx.Interaction is SocketMessageComponent componentInteraction)
@@ -170,10 +178,10 @@ namespace DibariBot
                 {
                     var channel = (ISocketMessageChannel)await client.GetChannelAsync(ogRes.Reference.ChannelId);
                     var message = await channel.GetMessageAsync(ogRes.Reference.MessageId.Value);
-                    ogAuthor = message.Author.Id;
+                    ogAuthor = message?.Author?.Id;
                 }
 
-                if (ogAuthor != ctx.Interaction.User.Id)
+                if (ogAuthor != null && ogAuthor != ctx.Interaction.User.Id)
                 {
                     await componentInteraction.RespondAsync("You did not originally trigger this. Please run the command yourself.", ephemeral: true);
 

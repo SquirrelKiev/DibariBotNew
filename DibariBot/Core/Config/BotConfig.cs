@@ -61,7 +61,7 @@ public class BotConfig : ITomlMetadataProvider
 
 
     [TomlMetadata(Comment = "The reaction to put on prefix commands when an unhandled error occurs. Will only appear on prefix commands.")]
-    public string ErrorEmote { get; set; } = "<:AiWut:821056610940092496>";
+    public string ErrorEmote { get; set; } = "\u2753";
 
     [TomlMetadata(Comment = "***** IMAGE PROXY CONFIG *****\n\n" +
         "Specifies how the URL to proxy should be encoded.")]
