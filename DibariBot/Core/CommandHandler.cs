@@ -80,11 +80,14 @@ namespace DibariBot
 
             if (res.IsSuccess)
             {
-                Log.Information("Command {ModuleName}.{MethodName} successfully executed. Message contents: {contents}", 
+                Log.Information("Command {ModuleName}.{MethodName} successfully executed. Message contents: {contents}",
                     cmdInfo?.Module.Name, cmdInfo?.Name, ctx.Message.CleanContent);
             }
             else
             {
+                if (res.Error == CommandError.UnknownCommand)
+                    return;
+
                 if (res is Discord.Commands.ExecuteResult executeResult)
                 {
                     Log.Error(executeResult.Exception, "Command {ModuleName}.{MethodName} failed. {Error}, {ErrorReason}. Message contents: {contents}",
@@ -111,6 +114,7 @@ namespace DibariBot
 
 
                     await ctx.Message.AddReactionAsync(emote);
+
                 }
                 catch (Exception e)
                 {
@@ -122,7 +126,7 @@ namespace DibariBot
         #endregion
 
         #region Interaction Handling
-        
+
         private Task InteractionExecuted(ICommandInfo cmdInfo, IInteractionContext ctx, Discord.Interactions.IResult res)
         {
             if (res.IsSuccess)
