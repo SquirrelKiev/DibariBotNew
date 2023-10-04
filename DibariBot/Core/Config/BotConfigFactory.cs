@@ -48,10 +48,10 @@ public class BotConfigFactory
         }
         else if (Toml.TryToModel(File.ReadAllText(configPath), out botConfig, out var diagnostics, options: options))
         {
-#if DEBUG
+//#if DEBUG
             botConfig.GenerateMetadata();
             File.WriteAllText(configPath, Toml.FromModel(botConfig, options: options));
-#endif
+//#endif
 
             return true;
         }
