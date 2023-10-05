@@ -14,7 +14,7 @@ public enum MangaAction
     BackChapter,
     ForwardChapter,
     Jump,
-    SendNonEphemeral
+    SendNonEphemeral,
 }
 
 [Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
@@ -200,6 +200,7 @@ public partial class MangaService
             case MangaAction.ForwardChapter:
                 bookmark = await MangaNavigation.Navigate(manga, bookmark, 1, 0);
                 break;
+            case MangaAction.Jump:
             default:
                 throw new NotSupportedException($"{nameof(state.action)} not implemented!");
         }
@@ -250,34 +251,34 @@ public partial class MangaService
                 .WithButton(
                     "<<",
                     StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackChapter),
-                        ModulePrefixes.MANGA_MODULE_PREFIX),
+                        ModulePrefixes.MANGA_BUTTON),
                     disabled: disableLeftChapter,
                     style: config.PrimaryButtonStyle
                 )
                 .WithButton(
                     "<",
                     StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackPage),
-                        ModulePrefixes.MANGA_MODULE_PREFIX),
+                        ModulePrefixes.MANGA_BUTTON),
                     disabled: disableLeftPage,
                     style: config.PrimaryButtonStyle
                 )
-                // .WithButton(
-                //     "Jump",
-                //     StateSerializer.SerializeObject(newState.WithAction(MangaAction.Jump),
-                //         ModulePrefixes.MANGA_MODULE_PREFIX),
-                //     style: config.PrimaryButtonStyle
-                // )
+                 .WithButton(
+                     "Jump",
+                     StateSerializer.SerializeObject(newState.WithAction(MangaAction.Jump),
+                         ModulePrefixes.MANGA_BUTTON),
+                     style: config.PrimaryButtonStyle
+                 )
                 .WithButton(
                     ">",
                     StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardPage),
-                        ModulePrefixes.MANGA_MODULE_PREFIX),
+                        ModulePrefixes.MANGA_BUTTON),
                     disabled: disableRightPage,
                     style: config.PrimaryButtonStyle
                 )
                 .WithButton(
                     ">>",
                     StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardChapter),
-                        ModulePrefixes.MANGA_MODULE_PREFIX),
+                        ModulePrefixes.MANGA_BUTTON),
                     disabled: disableRightChapter,
                     style: config.PrimaryButtonStyle
                 )
@@ -288,7 +289,7 @@ public partial class MangaService
             components.WithButton(
                 "Send",
                 StateSerializer.SerializeObject(newState.WithAction(MangaAction.SendNonEphemeral),
-                    ModulePrefixes.MANGA_MODULE_PREFIX),
+                    ModulePrefixes.MANGA_BUTTON),
                 style: config.PrimaryButtonStyle,
                 row: 1
             );

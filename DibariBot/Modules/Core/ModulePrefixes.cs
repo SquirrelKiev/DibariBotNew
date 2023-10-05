@@ -5,8 +5,17 @@ public static class ModulePrefixes
     #region Misc
 
     public const string RED_BUTTON = "rb:";
+    
+    #endregion
 
-    public const string MANGA_MODULE_PREFIX = "m:";
+    #region Manga Command
+
+    public const string MANGA_PREFIX_BASE = "m";
+    public const string MANGA_BUTTON = $"{MANGA_PREFIX_BASE}:";
+    public const string MANGA_MODAL_BASE = $"{MANGA_PREFIX_BASE}-m";
+    public const string MANGA_MODAL = $"{MANGA_MODAL_BASE}:";
+    public const string MANGA_MODAL_CHAPTER_TEXTBOX = $"{MANGA_MODAL_BASE}-m-ctb:";
+    public const string MANGA_MODAL_PAGE_TEXTBOX = $"{MANGA_MODAL_BASE}-m-ptb:";
 
     #endregion
 
