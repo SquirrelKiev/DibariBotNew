@@ -4,32 +4,34 @@ public class ChapterNameComparer : IComparer<string>
 {
     public int Compare(string? x, string? y)
     {
-        if (x == null && y == null) return 0;
+        switch (x)
+        {
+            // null go to the start
+            case null when y == null:
+                return 0;
+            case null:
+                return -1;
+        }
 
-        // null to the start
-        if (x == null) return -1;
         if (y == null) return 1;
 
-        bool isXNumeric = float.TryParse(x, out float xValue);
-        bool isYNumeric = float.TryParse(y, out float yValue);
+        var isXNumeric = float.TryParse(x, out var xValue);
+        var isYNumeric = float.TryParse(y, out var yValue);
 
-        if (isXNumeric && isYNumeric)
+        return isXNumeric switch
         {
-            return xValue.CompareTo(yValue);
-        }
-        else if (isXNumeric)
-        {
-            // x is a number, y is not
-            return -1; // x comes before y
-        }
-        else if (isYNumeric)
-        {
-            // y is a number, x is not
-            return 1; // y comes before x
-        }
-        else
-        {
-            return x.CompareTo(y);
-        }
+            // x and y numeric
+            true when isYNumeric => xValue.CompareTo(yValue),
+            true =>
+                // x is a number, y is not
+                -1 // x comes before y
+            ,
+            false => isYNumeric
+                ?
+                // y is a number, x is not
+                1
+                : // y comes before x
+                string.Compare(x, y, StringComparison.Ordinal)
+        };
     }
 }

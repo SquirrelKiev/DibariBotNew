@@ -14,7 +14,7 @@ public struct Bookmark
         this.page = page;
     }
 
-    public override readonly string ToString()
+    public readonly override string ToString()
     {
         return $"Chapter \"{chapter}\", page {page}.";
     }

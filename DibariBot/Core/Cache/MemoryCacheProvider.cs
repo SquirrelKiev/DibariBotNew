@@ -4,15 +4,10 @@ namespace DibariBot;
 
 public class MemoryCacheProvider : ICacheProvider
 {
-    private readonly MemoryCache cache;
-
-    public MemoryCacheProvider()
+    private readonly MemoryCache cache = new(new MemoryCacheOptions()
     {
-        cache = new MemoryCache(new MemoryCacheOptions()
-        {
-            SizeLimit = 1000
-        });
-    }
+        SizeLimit = 1000
+    });
 
     public ValueTask<Optional<T>> GetAsync<T>(string key)
     {

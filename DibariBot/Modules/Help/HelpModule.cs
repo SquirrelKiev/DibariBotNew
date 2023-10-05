@@ -1,7 +1,4 @@
-﻿using DibariBot.Modules.Core;
-using Discord.Interactions;
-
-namespace DibariBot.Modules.Help;
+﻿namespace DibariBot.Modules.Help;
 
 public class HelpModule : DibariModule
 {
@@ -31,7 +28,7 @@ public class HelpModule : DibariModule
             var descAttr = command.Attributes.FirstOrDefault(x => x.GetType() == typeof(HelpPageDescriptionAttribute));
             if (descAttr != null)
             {
-                HelpPageDescriptionAttribute descAttrCasted = (HelpPageDescriptionAttribute)descAttr;
+                var descAttrCasted = (HelpPageDescriptionAttribute)descAttr;
 
                 desc = descAttrCasted.Description;
             }

@@ -1,4 +1,6 @@
-﻿namespace DibariBot.Modules.Manga;
+﻿using DibariBot.Apis;
+
+namespace DibariBot.Modules.Manga;
 
 public class MangaDexManga : CubariManga
 {
@@ -10,11 +12,11 @@ public class MangaDexManga : CubariManga
     }
 
 
-    public override async Task<IManga> Initialize(SeriesIdentifier identifier)
+    public override async Task<IManga> Initialize(SeriesIdentifier id)
     {
-        await base.Initialize(identifier);
+        await base.Initialize(id);
 
-        var res = await mangaDexApi.GetMangaById(identifier.series!);
+        var res = await mangaDexApi.GetMangaById(id.series!);
 
         Metadata = MangaDexApi.MangaSchemaToMetadata(res);
 

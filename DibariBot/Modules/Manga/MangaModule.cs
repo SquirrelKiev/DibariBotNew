@@ -38,7 +38,7 @@ public class MangaModule : DibariModule
 
         if (shouldResend)
         {
-            await FollowupAsync(contents, false);
+            await FollowupAsync(contents);
             await Context.Interaction.DeleteOriginalResponseAsync();
         }
         else

@@ -57,13 +57,6 @@ public class ConfigCommandService
 
     public static Dictionary<ConfigPage.Page, ConfigPage> GetConfigPages(IServiceProvider services)
     {
-        var configPages = new Dictionary<ConfigPage.Page, ConfigPage>();
-
-        foreach (var type in services.GetServices<ConfigPage>())
-        {
-            configPages.Add(type.Id, type);
-        }
-
-        return configPages;
+        return services.GetServices<ConfigPage>().ToDictionary(type => type.Id);
     }
 }

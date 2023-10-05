@@ -41,6 +41,8 @@ public class DbService
             case BotConfig.DatabaseType.Postgresql:
                 context = new PostgresqlContext(botConfig.DatabaseConnectionString);
                 break;
+            case BotConfig.DatabaseType.Sqlite:
+                throw new NotSupportedException("Sqlite isn't supported just yet.");
             default:
                 throw new NotSupportedException(botConfig.Database.ToString());
         }

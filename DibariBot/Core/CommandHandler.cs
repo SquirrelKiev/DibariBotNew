@@ -3,6 +3,7 @@ using DibariBot.Database.Extensions;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+// ReSharper disable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
 
 namespace DibariBot
 {
@@ -201,7 +202,7 @@ namespace DibariBot
         private async Task InitializeInteractionService()
         {
             await interactionService.AddModulesAsync(System.Reflection.Assembly.GetExecutingAssembly(), services);
-            await interactionService.RegisterCommandsGloballyAsync(true);
+            await interactionService.RegisterCommandsGloballyAsync();
 
             client.InteractionCreated += InteractionCreated;
             interactionService.InteractionExecuted += InteractionExecuted;

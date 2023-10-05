@@ -1,5 +1,4 @@
-﻿using DibariBot.Database;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace DibariBot;
 
@@ -12,6 +11,8 @@ public static class ServiceCollectionExtensions
             case BotConfig.CacheType.Memory:
                 services.AddSingleton<ICacheProvider, MemoryCacheProvider>();
                 break;
+            default:
+                throw new NotSupportedException(config.Cache.ToString());
         }
 
         return services;

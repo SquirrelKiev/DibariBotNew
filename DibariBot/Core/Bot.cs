@@ -1,6 +1,5 @@
 ﻿using DibariBot.Database;
 using DibariBot.Modules.ConfigCommand.Pages;
-using DibariBot.Modules.Manga;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,7 +59,7 @@ public class Bot
             .ConfigureHttpClient(DefaultHttpClientConfig);
 
         // Stupid but im not sure how to do this with one scan and pass the inject option's param to WithLifetime
-        collection.Scan(scan => scan.FromAssemblyOf<IManga>()
+        collection.Scan(scan => scan.FromAssemblyOf<Bot>()
             .AddClasses(classes => classes.WithAttribute<InjectAttribute>(x =>
                 x.ServiceLifetime == ServiceLifetime.Singleton)
             )
@@ -68,7 +67,7 @@ public class Bot
             .WithSingletonLifetime()
         );
 
-        collection.Scan(scan => scan.FromAssemblyOf<IManga>()
+        collection.Scan(scan => scan.FromAssemblyOf<Bot>()
             .AddClasses(classes => classes.WithAttribute<InjectAttribute>(x =>
                 x.ServiceLifetime == ServiceLifetime.Transient)
             )
@@ -76,7 +75,7 @@ public class Bot
             .WithTransientLifetime()
         );
 
-        collection.Scan(scan => scan.FromAssemblyOf<IManga>()
+        collection.Scan(scan => scan.FromAssemblyOf<Bot>()
             .AddClasses(classes => classes.AssignableTo<ConfigPage>())
             .As<ConfigPage>()
             .WithTransientLifetime());

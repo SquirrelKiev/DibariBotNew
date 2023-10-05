@@ -27,19 +27,19 @@ public static class MangaNavigation
         // Adjust page based on deltaPages within a loop to handle cross-chapter navigation.
         while (deltaPages != 0)
         {
-            var pageURLs = await manga.GetImageSrcs(currentChapterKey);
+            var pageUrls = await manga.GetImageSrcs(currentChapterKey);
 
             if (deltaPages > 0)
             {
                 // Moving forward
-                if (newPage + deltaPages < pageURLs.srcs.Length)
+                if (newPage + deltaPages < pageUrls.srcs.Length)
                 {
                     newPage += deltaPages;
                     deltaPages = 0;
                 }
                 else
                 {
-                    deltaPages -= (pageURLs.srcs.Length - newPage);
+                    deltaPages -= (pageUrls.srcs.Length - newPage);
                     newPage = 0;
                     string? nextChapterKey = await manga.GetNextChapterKey(currentChapterKey);
                     if (nextChapterKey != null)
@@ -68,8 +68,8 @@ public static class MangaNavigation
                     if (previousChapterKey != null)
                     {
                         currentChapterKey = previousChapterKey;
-                        pageURLs = await manga.GetImageSrcs(currentChapterKey);
-                        newPage = pageURLs.srcs.Length - 1;
+                        pageUrls = await manga.GetImageSrcs(currentChapterKey);
+                        newPage = pageUrls.srcs.Length - 1;
                     }
                     else
                     {

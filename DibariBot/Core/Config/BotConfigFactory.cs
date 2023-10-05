@@ -7,13 +7,8 @@ namespace DibariBot;
 
 public class BotConfigFactory
 {
-    private readonly string configPath;
-
-    public BotConfigFactory()
-    {
-        configPath = Environment.GetEnvironmentVariable("DIBARI_CONFIG_LOCATION") ?? 
-            Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty, "bot_config.toml");
-    }
+    private readonly string configPath = Environment.GetEnvironmentVariable("DIBARI_CONFIG_LOCATION") ?? 
+                                         Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty, "bot_config.toml");
 
     public bool GetConfig([NotNullWhen(true)] out BotConfig? botConfig)
     {

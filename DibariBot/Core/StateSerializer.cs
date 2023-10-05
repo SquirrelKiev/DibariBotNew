@@ -25,7 +25,7 @@ public static class StateSerializer
         return SerializeObject(obj, typeof(T));
     }
 
-    private static string SerializeObject(object obj, Type type)
+    private static string SerializeObject(object? obj, Type type)
     {
         if (obj == null) return "";
 
@@ -39,9 +39,6 @@ public static class StateSerializer
         var nullableType = Nullable.GetUnderlyingType(type);
         if (nullableType != null)
         {
-            if (obj == null)
-                return "";
-
             return SerializeObject(obj, nullableType);
         }
 

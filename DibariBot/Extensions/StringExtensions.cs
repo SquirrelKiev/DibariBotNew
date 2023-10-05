@@ -12,13 +12,12 @@ public static class StringExtensions
 
         var subString = str[..limit].Trim();
 
-        if(useWordBoundary)
+        if (!useWordBoundary) return subString + '…';
+
+        int lastSpaceIndex = subString.LastIndexOf(' ');
+        if (lastSpaceIndex != -1)
         {
-            int lastSpaceIndex = subString.LastIndexOf(' ');
-            if (lastSpaceIndex != -1)
-            {
-                subString = subString[..lastSpaceIndex].TrimEnd();
-            }
+            subString = subString[..lastSpaceIndex].TrimEnd();
         }
 
         return subString + '…';

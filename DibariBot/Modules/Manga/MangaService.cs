@@ -238,7 +238,7 @@ public partial class MangaService
             .WithImageUrl(pageSrc)
             .WithFooter(
                 new EmbedFooterBuilder()
-                    .WithText($"{metadata.title.Truncate(50, true)}, by {author}.\n" +
+                    .WithText($"{metadata.title.Truncate(50)}, by {author}.\n" +
                               $"Group: {pages.group}")
             )
             .WithColor(config)

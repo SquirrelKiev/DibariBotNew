@@ -11,6 +11,7 @@ public class DefaultMangaPage : ConfigPage
         public string Title => "Set Default Manga - Step 1";
 
         [ModalTextInput(customId: ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_MANGA_INPUT)]
+        // ReSharper disable once InconsistentNaming
         public string URL { get; set; } = "";
     }
 

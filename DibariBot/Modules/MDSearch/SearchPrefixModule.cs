@@ -16,6 +16,6 @@ public class SearchPrefixModule : DibariPrefixModule
     {
         await DeferAsync();
 
-        await ReplyAsync(await searchService.GetMessageContents(new SearchService.State() { query = query }));
+        await ReplyAsync(await searchService.GetMessageContents(new SearchService.State { query = query }));
     }
 }

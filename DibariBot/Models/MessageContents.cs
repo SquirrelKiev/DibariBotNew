@@ -18,10 +18,7 @@ public struct MessageContents
     public MessageContents(string body, Embed? embed, ComponentBuilder? components)
     {
         this.body = body;
-        if (embed != null)
-            embeds = new Embed[] { embed };
-        else
-            embeds = null;
+        embeds = embed == null ? null : new[] { embed };
 
         components ??= new ComponentBuilder().WithRedButton();
 
@@ -30,7 +27,7 @@ public struct MessageContents
 
     public MessageContents SetEmbed(Embed embed)
     {
-        embeds = new Embed[] { embed };
+        embeds = new[] { embed };
 
         return this;
     }

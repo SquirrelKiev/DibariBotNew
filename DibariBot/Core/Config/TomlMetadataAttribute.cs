@@ -2,7 +2,7 @@
 
 namespace DibariBot;
 
-[AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Property)]
 sealed class TomlMetadataAttribute : Attribute
 {
     public string Comment { get; set; } = string.Empty;

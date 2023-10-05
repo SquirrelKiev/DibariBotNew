@@ -24,7 +24,7 @@ public class SortedGroupsDictionaryConverter<TValue> : JsonConverter
 
         var typedObj = obj.ToObject(objectType);
 
-        // y'never know
+        // really don't want nullability ops on this method, not that it should ever return null anyway
         if (typedObj == null)
             throw new NullReferenceException(nameof(typedObj));
 

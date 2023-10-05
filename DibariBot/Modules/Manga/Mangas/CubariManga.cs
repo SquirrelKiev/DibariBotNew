@@ -21,13 +21,13 @@ public class CubariManga : IManga
     }
 #pragma warning restore CS8618
 
-    public virtual async Task<IManga> Initialize(SeriesIdentifier identifier)
+    public virtual async Task<IManga> Initialize(SeriesIdentifier id)
     {
-        ArgumentNullException.ThrowIfNull(identifier, nameof(identifier));
-        ArgumentNullException.ThrowIfNull(identifier.platform, nameof(identifier.platform));
-        ArgumentNullException.ThrowIfNull(identifier.series, nameof(identifier.series));
+        ArgumentNullException.ThrowIfNull(id, nameof(id));
+        ArgumentNullException.ThrowIfNull(id.platform, nameof(id.platform));
+        ArgumentNullException.ThrowIfNull(id.series, nameof(id.series));
 
-        string url = $"read/api/{Uri.EscapeDataString(identifier.platform)}/series/{Uri.EscapeDataString(identifier.series)}";
+        string url = $"read/api/{Uri.EscapeDataString(id.platform)}/series/{Uri.EscapeDataString(id.series)}";
 
         var mangaRes = await cubari.Get<CubariMangaSchema>(url, new CacheValueSettings(TimeSpan.FromMinutes(15)));
 
@@ -38,13 +38,13 @@ public class CubariManga : IManga
             author = mangaRes.author,
             artist = mangaRes.artist,
             tags = Array.Empty<string>(),
-            contentRating = identifier.platform == "nhentai" ? MangaAttributesSchema.ContentRating.Pornographic : MangaAttributesSchema.ContentRating.Unknown
+            contentRating = id.platform == "nhentai" ? MangaAttributesSchema.ContentRating.Pornographic : MangaAttributesSchema.ContentRating.Unknown
         };
         Groups = mangaRes.groups;
 
         chapters = new SortedList<string, CubariChapterSchema>(mangaRes.chapters, new ChapterNameComparer());
 
-        this.identifier = new SeriesIdentifier(identifier.platform, mangaRes.slug);
+        this.identifier = new SeriesIdentifier(id.platform, mangaRes.slug);
 
         return this;
     }

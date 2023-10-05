@@ -1,4 +1,4 @@
-﻿namespace DibariBot.Modules.Core;
+﻿namespace DibariBot.Modules;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class HelpPageDescriptionAttribute : Attribute

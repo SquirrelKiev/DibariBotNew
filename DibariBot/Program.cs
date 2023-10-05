@@ -1,5 +1,6 @@
 ﻿using DibariBot;
 
+// temp logger in case BotConfig fails
 Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
 if (!new BotConfigFactory().GetConfig(out var botConfig))
@@ -10,8 +11,7 @@ if (!botConfig.IsValid())
 {
     Environment.Exit(1);
 }
-var config = botConfig;
 
-DibariBot.LogSetup.SetupLogger(config);
+LogSetup.SetupLogger(botConfig);
 
-await new Bot(config).RunAndBlockAsync();
+await new Bot(botConfig).RunAndBlockAsync();

@@ -16,14 +16,13 @@ public struct SeriesIdentifier
     }
 
     [MemberNotNull(nameof(platform), nameof(series))]
-    /// <exception cref="ArgumentNullException">if platform or series are null</exception>
     public readonly void ThrowIfInvalid()
     {
         ArgumentNullException.ThrowIfNull(platform, nameof(platform));
         ArgumentNullException.ThrowIfNull(series, nameof(series));
     }
 
-    public override readonly string ToString()
+    public readonly override string ToString()
     {
         return $"{platform}/{series}";
     }

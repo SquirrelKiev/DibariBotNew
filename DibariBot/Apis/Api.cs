@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Newtonsoft.Json;
 
-namespace DibariBot;
+namespace DibariBot.Apis;
 
 public class Api
 {

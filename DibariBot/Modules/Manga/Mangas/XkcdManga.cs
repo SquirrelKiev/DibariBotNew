@@ -21,9 +21,9 @@ public class XkcdManga : IManga
         this.cache = cache;
     }
 
-    public Task<IManga> Initialize(SeriesIdentifier identifier)
+    public Task<IManga> Initialize(SeriesIdentifier id)
     {
-        this.identifier = identifier;
+        this.identifier = id;
 
         return Task.FromResult((IManga)this);
     }
@@ -60,7 +60,7 @@ public class XkcdManga : IManga
             throw new NullReferenceException("Comic doesnt exist!");
         }
 
-        return new ChapterSrcs(new string[] { comic.Value.imageSrc }, "xkcd");
+        return new ChapterSrcs(new[] { comic.Value.imageSrc }, "xkcd");
     }
 
     public async Task<ChapterMetadata> GetChapterMetadata(string chapter)
@@ -134,15 +134,18 @@ public class XkcdManga : IManga
 
     private async Task<XkcdComic?> GetComic(string num)
     {
+        var asInt = -1;
+
         switch (num.ToLowerInvariant())
         {
             case "latest":
                 return await GetLatestComic();
             case "random":
-                return await GetComic((await GetRandomComicId()).ToString());
+                asInt = await GetRandomComicId();
+                break;
         }
 
-        if(!int.TryParse(num, out int asInt))
+        if(asInt == -1 && !int.TryParse(num, out asInt))
         {
             return null;
         }

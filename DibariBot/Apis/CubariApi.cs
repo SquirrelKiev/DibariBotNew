@@ -1,4 +1,4 @@
-﻿namespace DibariBot;
+﻿namespace DibariBot.Apis;
 
 [Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
 public class CubariApi
