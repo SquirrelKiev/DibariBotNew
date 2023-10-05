@@ -15,9 +15,9 @@ public class SearchModule : DibariModule
 
     [SlashCommand("manga-search", "Searches MangaDex for the query provided. (searches titles, sorted by relevance)")]
     [EnabledInDm(true)]
-    public async Task SearchSlash(string query)
+    public async Task SearchSlash(string query, bool ephemeral = false)
     {
-        await DeferAsync();
+        await DeferAsync(ephemeral);
 
         await FollowupAsync(await searchService.GetMessageContents(new SearchService.State() { query = query }));
     }
@@ -37,7 +37,11 @@ public class SearchModule : DibariModule
     {
         await DeferAsync();
 
+        var ogRes = await GetOriginalResponseAsync();
+
+        var isEphemeral = (ogRes.Flags & MessageFlags.Ephemeral) != 0;
+
         await ModifyOriginalResponseAsync(await mangaService.MangaCommand(Context.Guild?.Id ?? 0ul, GetParentChannel().Id,
-            new SeriesIdentifier("mangadex", dexId).ToString()));
+            new SeriesIdentifier("mangadex", dexId).ToString(), ephemeral: isEphemeral));
     }
 }

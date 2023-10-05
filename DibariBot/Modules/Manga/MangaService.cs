@@ -279,12 +279,12 @@ public partial class MangaService
                 StateSerializer.SerializeObject(newState.WithAction(MangaAction.SendNonEphemeral),
                     ModulePrefixes.MANGA_MODULE_PREFIX),
                 style: config.PrimaryButtonStyle,
-                row: 2
+                row: 1
             );
         }
 
         components
-            .WithRedButton(row: 2);
+            .WithRedButton(row: 1);
 
         return new MessageContents(string.Empty, embed, components);
     }
