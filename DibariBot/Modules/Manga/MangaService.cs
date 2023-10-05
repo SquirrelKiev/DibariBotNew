@@ -13,6 +13,8 @@ public enum MangaAction
     ForwardPage,
     BackChapter,
     ForwardChapter,
+    Jump,
+    SendNonEphemeral
 }
 
 [Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
@@ -24,7 +26,9 @@ public partial class MangaService
         public SeriesIdentifier identifier = new();
         public Bookmark bookmark = new();
 
-        public State() { }
+        public State()
+        {
+        }
 
         public State(MangaAction interactionType, SeriesIdentifier identifier, Bookmark bookmark)
         {
@@ -59,53 +63,60 @@ public partial class MangaService
         this.dbService = dbService;
     }
 
-    public async Task<MessageContents> MangaCommand(ulong guildId, ulong channelId, string url = "", string chapter = "", int page = 1)
+    public async Task<MessageContents> MangaCommand(ulong guildId, ulong channelId, string url = "",
+        string chapter = "", int page = 1, bool ephemeral = false)
     {
         if (string.IsNullOrWhiteSpace(url))
         {
             await using var contextDefaults = dbService.GetDbContext();
 
-            var exists = contextDefaults.DefaultMangas.FirstOrDefault(x => x.GuildId == guildId && x.ChannelId == channelId);
+            var exists =
+                contextDefaults.DefaultMangas.FirstOrDefault(x => x.GuildId == guildId && x.ChannelId == channelId);
             exists ??= contextDefaults.DefaultMangas.FirstOrDefault(x => x.GuildId == guildId && x.ChannelId == 0ul);
 
             if (exists == null)
             {
                 return new MessageContents(string.Empty, embed:
                     new EmbedBuilder()
-                    .WithDescription("This server hasn't set a default manga! Please manually specify the URL.") // TODO: l18n
-                    .Build(), null);
+                        .WithDescription(
+                            "This server hasn't set a default manga! Please manually specify the URL.") // TODO: l18n
+                        .Build(), null);
             }
 
             url = exists.Manga;
         }
+
         var series = ParseUrl.ParseMangaUrl(url);
 
         if (series == null)
         {
             return new MessageContents(string.Empty, embed:
                 new EmbedBuilder()
-                .WithDescription("Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot.") // TODO: l18n
-                .Build(), null);
+                    .WithDescription(
+                        "Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot.") // TODO: l18n
+                    .Build(), null);
         }
 
         var state = new State(MangaAction.Open, series.Value, new Bookmark(chapter, page - 1));
 
-        var contents = await GetMangaMessage(guildId, channelId, state);
+        var contents = await GetMangaMessage(guildId, channelId, state, ephemeral);
 
         return contents;
     }
 
-    public async Task<MessageContents> GetMangaMessage(ulong guildId, ulong channelId, State state)
+    public async Task<MessageContents> GetMangaMessage(ulong guildId, ulong channelId, State state, bool ephemeral)
     {
         IManga manga;
         try
         {
-            manga = await mangaFactory.GetManga(state.identifier) ?? throw new NotSupportedException($"Platform \"{state.identifier.platform}\" not implemented!");
+            manga = await mangaFactory.GetManga(state.identifier) ??
+                    throw new NotSupportedException($"Platform \"{state.identifier.platform}\" not supported.");
         }
         catch (HttpRequestException ex)
         {
             var errorEmbed = new EmbedBuilder()
-                .WithDescription($"Failed to get manga. `{ex.Message}`\n`{state.identifier.platform}/{state.identifier.series}`")
+                .WithDescription(
+                    $"Failed to get manga. `{ex.Message}`\n`{state.identifier.platform}/{state.identifier.series}`")
                 .WithColor(config)
                 .Build();
 
@@ -130,7 +141,9 @@ public partial class MangaService
         }
         catch (RegexMatchTimeoutException)
         {
-            Log.Warning("Long filter runtime (so long it caused a timeout!!), guild {guildId}. Might be worth checking for abuse?", guildId);
+            Log.Warning(
+                "Long filter runtime (so long it caused a timeout!!), guild {guildId}. Might be worth checking for abuse?",
+                guildId);
 
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("Filter took too long to process.")
@@ -162,6 +175,7 @@ public partial class MangaService
         switch (state.action)
         {
             case MangaAction.Open:
+            case MangaAction.SendNonEphemeral:
                 break;
             case MangaAction.BackPage:
                 bookmark = await MangaNavigation.Navigate(manga, bookmark, 0, -1);
@@ -213,8 +227,8 @@ public partial class MangaService
             .WithImageUrl(pageSrc)
             .WithFooter(
                 new EmbedFooterBuilder()
-                .WithText($"{metadata.title.Truncate(50, true)}, by {author}.\n" +
-                $"Group: {pages.group}")
+                    .WithText($"{metadata.title.Truncate(50, true)}, by {author}.\n" +
+                              $"Group: {pages.group}")
             )
             .WithColor(config)
             .Build();
@@ -222,35 +236,55 @@ public partial class MangaService
         var newState = new State(MangaAction.Open, state.identifier, bookmark);
 
         var components = new ComponentBuilder()
-            .WithButton(
-                "<<",
-                StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackChapter),
-                ModulePrefixes.MANGA_MODULE_PREFIX),
-                disabled: disableLeftChapter,
-                style: config.PrimaryButtonStyle
+                .WithButton(
+                    "<<",
+                    StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackChapter),
+                        ModulePrefixes.MANGA_MODULE_PREFIX),
+                    disabled: disableLeftChapter,
+                    style: config.PrimaryButtonStyle
                 )
-            .WithButton(
-                "<",
-                StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackPage),
-                ModulePrefixes.MANGA_MODULE_PREFIX),
-                disabled: disableLeftPage,
-                style: config.PrimaryButtonStyle
+                .WithButton(
+                    "<",
+                    StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackPage),
+                        ModulePrefixes.MANGA_MODULE_PREFIX),
+                    disabled: disableLeftPage,
+                    style: config.PrimaryButtonStyle
                 )
-            .WithButton(
-                ">",
-                StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardPage),
-                ModulePrefixes.MANGA_MODULE_PREFIX),
-                disabled: disableRightPage,
-                style: config.PrimaryButtonStyle
+                // .WithButton(
+                //     "Jump",
+                //     StateSerializer.SerializeObject(newState.WithAction(MangaAction.Jump),
+                //         ModulePrefixes.MANGA_MODULE_PREFIX),
+                //     style: config.PrimaryButtonStyle
+                // )
+                .WithButton(
+                    ">",
+                    StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardPage),
+                        ModulePrefixes.MANGA_MODULE_PREFIX),
+                    disabled: disableRightPage,
+                    style: config.PrimaryButtonStyle
                 )
-            .WithButton(
-                ">>",
-                StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardChapter),
-                ModulePrefixes.MANGA_MODULE_PREFIX),
-                disabled: disableRightChapter,
-                style: config.PrimaryButtonStyle
+                .WithButton(
+                    ">>",
+                    StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardChapter),
+                        ModulePrefixes.MANGA_MODULE_PREFIX),
+                    disabled: disableRightChapter,
+                    style: config.PrimaryButtonStyle
                 )
-            .WithRedButton();
+            ;
+
+        if (ephemeral)
+        {
+            components.WithButton(
+                "Send",
+                StateSerializer.SerializeObject(newState.WithAction(MangaAction.SendNonEphemeral),
+                    ModulePrefixes.MANGA_MODULE_PREFIX),
+                style: config.PrimaryButtonStyle,
+                row: 2
+            );
+        }
+
+        components
+            .WithRedButton(row: 2);
 
         return new MessageContents(string.Empty, embed, components);
     }
@@ -265,8 +299,10 @@ public partial class MangaService
 
         return config.ProxyUrlEncoding switch
         {
-            BotConfig.ProxyUrlEncodingFormat.UrlEscaped => config.ProxyUrl.Replace("{{URL}}", System.Web.HttpUtility.UrlEncode(url)),
-            BotConfig.ProxyUrlEncodingFormat.Base64 => config.ProxyUrl.Replace("{{URL}}", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url))),
+            BotConfig.ProxyUrlEncodingFormat.UrlEscaped => config.ProxyUrl.Replace("{{URL}}",
+                System.Web.HttpUtility.UrlEncode(url)),
+            BotConfig.ProxyUrlEncodingFormat.Base64 => config.ProxyUrl.Replace("{{URL}}",
+                Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url))),
             _ => throw new NotSupportedException(),
         };
     }
@@ -296,7 +332,8 @@ public partial class MangaService
 
             // remove no longer referenced channels
             var entriesToRemove = existingFilter.RegexChannelEntries
-                .Where(existingEntry => newFilter.RegexChannelEntries.All(newEntry => newEntry.ChannelId != existingEntry.ChannelId))
+                .Where(existingEntry =>
+                    newFilter.RegexChannelEntries.All(newEntry => newEntry.ChannelId != existingEntry.ChannelId))
                 .ToList();
 
             foreach (var entryToRemove in entriesToRemove)
@@ -363,10 +400,12 @@ public partial class MangaService
                 && // AND
                 (
                     // If the filter's scope is Include, check if there's an entry for the current channel.
-                    rf.ChannelFilterScope == ChannelFilterScope.Include && rf.RegexChannelEntries.Any(rce => rce.ChannelId == channelId)
+                    rf.ChannelFilterScope == ChannelFilterScope.Include &&
+                    rf.RegexChannelEntries.Any(rce => rce.ChannelId == channelId)
                     || // OR
-                       // If the filter's scope is Exclude, check if there isn't an entry for the current channel.
-                    rf.ChannelFilterScope == ChannelFilterScope.Exclude && rf.RegexChannelEntries.All(rce => rce.ChannelId != channelId)
+                    // If the filter's scope is Exclude, check if there isn't an entry for the current channel.
+                    rf.ChannelFilterScope == ChannelFilterScope.Exclude &&
+                    rf.RegexChannelEntries.All(rce => rce.ChannelId != channelId)
                 )
             );
 
@@ -384,7 +423,8 @@ public partial class MangaService
         return guildFilters;
     }
 
-    public async Task<bool> IsMangaAllowed(ulong guildId, ulong channelId, MangaMetadata metadata, SeriesIdentifier identifier)
+    public async Task<bool> IsMangaAllowed(ulong guildId, ulong channelId, MangaMetadata metadata,
+        SeriesIdentifier identifier)
     {
         var filters = await GetFilters(guildId, channelId);
 
@@ -445,7 +485,8 @@ public partial class MangaService
 
             var tripped = Regex.IsMatch(hydrated, filter.Filter, RegexOptions.IgnoreCase, remaining);
 
-            if ((tripped && filter.FilterType == FilterType.Block) || (!tripped && filter.FilterType == FilterType.Allow))
+            if ((tripped && filter.FilterType == FilterType.Block) ||
+                (!tripped && filter.FilterType == FilterType.Allow))
             {
                 return false;
             }
@@ -453,7 +494,8 @@ public partial class MangaService
 
         stopwatch.Stop();
 
-        Log.Verbose("Regex ran for: {time}. Guild: {guildId}, Channel: {channelId}", stopwatch.Elapsed, guildId, channelId);
+        Log.Verbose("Regex ran for: {time}. Guild: {guildId}, Channel: {channelId}", stopwatch.Elapsed, guildId,
+            channelId);
 
         return true;
     }
