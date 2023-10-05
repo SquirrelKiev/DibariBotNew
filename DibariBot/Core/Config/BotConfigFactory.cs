@@ -1,6 +1,5 @@
 ﻿using Serilog.Events;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using Tomlyn;
 
 namespace DibariBot;
@@ -8,7 +7,7 @@ namespace DibariBot;
 public class BotConfigFactory
 {
     private readonly string configPath = Environment.GetEnvironmentVariable("DIBARI_CONFIG_LOCATION") ?? 
-                                         Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty, "bot_config.toml");
+                                         Path.Combine(Path.Combine(AppContext.BaseDirectory, "data"), "bot_config.toml");
 
     public bool GetConfig([NotNullWhen(true)] out BotConfig? botConfig)
     {

@@ -2,20 +2,17 @@
 using DibariBot.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace DibariBot.Migrations
+namespace DibariBot.Migrations.PostgresMigrations
 {
     [DbContext(typeof(PostgresqlContext))]
-    [Migration("20231002195057_RegexFilters")]
-    partial class RegexFilters
+    partial class PostgresqlContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,7 +21,7 @@ namespace DibariBot.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("DibariBot.Core.Database.Models.DefaultManga", b =>
+            modelBuilder.Entity("DibariBot.Database.Models.DefaultManga", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -49,7 +46,7 @@ namespace DibariBot.Migrations
                     b.ToTable("DefaultMangas");
                 });
 
-            modelBuilder.Entity("DibariBot.Core.Database.Models.GuildConfig", b =>
+            modelBuilder.Entity("DibariBot.Database.Models.GuildConfig", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -60,6 +57,9 @@ namespace DibariBot.Migrations
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");
 
+                    b.Property<string>("Prefix")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("GuildId")
@@ -68,7 +68,7 @@ namespace DibariBot.Migrations
                     b.ToTable("GuildConfig");
                 });
 
-            modelBuilder.Entity("DibariBot.Core.Database.Models.RegexChannelEntry", b =>
+            modelBuilder.Entity("DibariBot.Database.Models.RegexChannelEntry", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -86,10 +86,12 @@ namespace DibariBot.Migrations
 
                     b.HasIndex("RegexFilterId");
 
+                    b.HasIndex("ChannelId", "RegexFilterId");
+
                     b.ToTable("RegexChannelEntries");
                 });
 
-            modelBuilder.Entity("DibariBot.Core.Database.Models.RegexFilter", b =>
+            modelBuilder.Entity("DibariBot.Database.Models.RegexFilter", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -121,9 +123,9 @@ namespace DibariBot.Migrations
                     b.ToTable("RegexFilters");
                 });
 
-            modelBuilder.Entity("DibariBot.Core.Database.Models.RegexChannelEntry", b =>
+            modelBuilder.Entity("DibariBot.Database.Models.RegexChannelEntry", b =>
                 {
-                    b.HasOne("DibariBot.Core.Database.Models.RegexFilter", "RegexFilter")
+                    b.HasOne("DibariBot.Database.Models.RegexFilter", "RegexFilter")
                         .WithMany("RegexChannelEntries")
                         .HasForeignKey("RegexFilterId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -132,7 +134,7 @@ namespace DibariBot.Migrations
                     b.Navigation("RegexFilter");
                 });
 
-            modelBuilder.Entity("DibariBot.Core.Database.Models.RegexFilter", b =>
+            modelBuilder.Entity("DibariBot.Database.Models.RegexFilter", b =>
                 {
                     b.Navigation("RegexChannelEntries");
                 });

@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿#nullable disable
 
-#nullable disable
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DibariBot.Migrations
+namespace DibariBot.Migrations.PostgresMigrations
 {
     /// <inheritdoc />
     public partial class PrefixCommands : Migration

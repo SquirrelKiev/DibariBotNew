@@ -18,9 +18,16 @@ public class DbService
 
         Log.Debug("Database migration: {migrationStatus}", migrationEnabled);
 
+        var context = GetDbContext();
+
+        if (context is SqliteContext)
+        {
+            await context.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL");
+        }
+
         if (migrationEnabled)
         {
-            await GetDbContext().Database.MigrateAsync();
+            await context.Database.MigrateAsync();
         }
     }
 
@@ -42,7 +49,8 @@ public class DbService
                 context = new PostgresqlContext(botConfig.DatabaseConnectionString);
                 break;
             case BotConfig.DatabaseType.Sqlite:
-                throw new NotSupportedException("Sqlite isn't supported just yet.");
+                context = new SqliteContext(botConfig.DatabaseConnectionString);
+                break;
             default:
                 throw new NotSupportedException(botConfig.Database.ToString());
         }

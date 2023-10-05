@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿#nullable disable
+
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-#nullable disable
-
-namespace DibariBot.Migrations
+namespace DibariBot.Migrations.PostgresMigrations
 {
     /// <inheritdoc />
     public partial class RegexFilters : Migration

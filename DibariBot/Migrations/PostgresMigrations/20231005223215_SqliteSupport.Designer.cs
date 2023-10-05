@@ -8,11 +8,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace DibariBot.Migrations
+namespace DibariBot.Migrations.PostgresMigrations
 {
     [DbContext(typeof(PostgresqlContext))]
-    [Migration("20231004014516_PrefixCommands")]
-    partial class PrefixCommands
+    [Migration("20231005223215_SqliteSupport")]
+    partial class SqliteSupport
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

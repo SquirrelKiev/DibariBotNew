@@ -3,40 +3,33 @@ using DibariBot.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace DibariBot.Migrations
+namespace DibariBot.Migrations.SqliteMigrations
 {
-    [DbContext(typeof(PostgresqlContext))]
-    partial class PostgresqlContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(SqliteContext))]
+    partial class SqliteContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.11")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
-
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.11");
 
             modelBuilder.Entity("DibariBot.Database.Models.DefaultManga", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.Property<ulong>("ChannelId")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("ChannelId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Manga")
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -48,17 +41,15 @@ namespace DibariBot.Migrations
 
             modelBuilder.Entity("DibariBot.Database.Models.GuildConfig", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Prefix")
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -70,17 +61,15 @@ namespace DibariBot.Migrations
 
             modelBuilder.Entity("DibariBot.Database.Models.RegexChannelEntry", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.Property<ulong>("ChannelId")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("ChannelId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<long>("RegexFilterId")
-                        .HasColumnType("bigint");
+                    b.Property<uint>("RegexFilterId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -93,28 +82,26 @@ namespace DibariBot.Migrations
 
             modelBuilder.Entity("DibariBot.Database.Models.RegexFilter", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("ChannelFilterScope")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Filter")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("FilterType")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Template")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 

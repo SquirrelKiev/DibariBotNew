@@ -17,7 +17,7 @@ public class BotConfig : ITomlMetadataProvider
     [TomlMetadata(Comment = @"Your bot token from https://discord.com/developers/applications. Don't share!")]
     public string BotToken { get; set; } = "BOT_TOKEN_HERE";
 
-    [TomlMetadata(Comment = @"What color should be used in all embeds. In the format 0x00rrggbb, e.g. 0x00ffffff being white.", 
+    [TomlMetadata(Comment = @"What color should be used in manga-related embeds. In the format 0x00rrggbb, e.g. 0x00ffffff being white.",
         DisplayKind = TomlPropertyDisplayKind.IntegerHexadecimal)]
     public uint DefaultEmbedColor { get; set; } = 0xFBEED9;
 
@@ -25,10 +25,12 @@ public class BotConfig : ITomlMetadataProvider
     public CacheType Cache { get; set; } = CacheType.Memory;
 
     [TomlMetadata(Comment = "The type of database to use.")]
-    public DatabaseType Database { get; set; } = DatabaseType.Postgresql;
+    public DatabaseType Database { get; set; } = DatabaseType.Sqlite;
 
-    [TomlMetadata(Comment = "The connection string for the database specified above.")]
-    public string DatabaseConnectionString { get; set; } = "Host=127.0.0.1;Username=postgres;Password=;Database=dibari";
+    [TomlMetadata(Comment = "The connection string for the database specified above.\n" +
+                            "Example Postgres string: Host=127.0.0.1;Username=postgres;Password=;Database=dibari\n" +
+                            "Example Sqlite string: Data Source=data/DibariBot.db")]
+    public string DatabaseConnectionString { get; set; } = "Data Source=data/DibariBot.db";
 
     [TomlMetadata(Comment = "The base URL for Cubari requests.\n" +
         "Only really should be changed if you're using a self-hosted instance for whatever reason.")]
@@ -141,7 +143,7 @@ public class BotConfig : ITomlMetadataProvider
                     stringBuilder.AppendLine();
                     stringBuilder.AppendLine("Options are:");
 
-                    foreach ( var name in names)
+                    foreach (var name in names)
                     {
                         stringBuilder.AppendLine($"* {name.ToLowerInvariant()}");
                     }
