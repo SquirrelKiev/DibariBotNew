@@ -17,7 +17,7 @@ public interface IManga
     public Task<string?> GetNextChapterKey(string currentChapterKey);
     public Task<string?> GetPreviousChapterKey(string currentChapterKey);
 
-    public Task<string> DefaultChapter();
+    public Task<string?> DefaultChapter();
 
     public Task<bool> HasChapter(string chapter);
 }

@@ -62,7 +62,7 @@ public class CubariManga : IManga
         return cubari.GetUrl(identifier, bookmark);
     }
 
-    /// <exception cref="NotImplementedException">If the type we get from the api is something we don't handle</exception>
+    /// <exception cref="NotSupportedException">If the type we get from the api is something we don't handle</exception>
     public virtual async Task<ChapterSrcs> GetImageSrcs(string chapter)
     {
         var chapterObj = chapters[chapter];
@@ -140,9 +140,9 @@ public class CubariManga : IManga
         return Task.FromResult<string?>(chapters.GetKeyAtIndex(previousChapterKey));
     }
 
-    public virtual Task<string> DefaultChapter()
+    public virtual Task<string?> DefaultChapter()
     {
-        return Task.FromResult(chapters.Keys.First());
+        return Task.FromResult(chapters.Keys.FirstOrDefault());
     }
 
     public virtual Task<bool> HasChapter(string chapter)

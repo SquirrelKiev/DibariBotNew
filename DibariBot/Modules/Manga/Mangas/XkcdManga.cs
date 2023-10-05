@@ -118,9 +118,9 @@ public class XkcdManga : IManga
         return asInt.ToString();
     }
 
-    public Task<string> DefaultChapter()
+    public Task<string?> DefaultChapter()
     {
-        return Task.FromResult("random");
+        return Task.FromResult("random")!;
     }
 
     public async Task<bool> HasChapter(string chapter)
@@ -129,12 +129,7 @@ public class XkcdManga : IManga
 
         var comic = await GetComic(chapter);
 
-        if (comic == null)
-        {
-            return false;
-        }
-
-        return true;
+        return comic != null;
     }
 
     private async Task<XkcdComic?> GetComic(string num)
@@ -145,7 +140,7 @@ public class XkcdManga : IManga
                 return await GetLatestComic();
             case "random":
                 return await GetComic((await GetRandomComicId()).ToString());
-        };
+        }
 
         if(!int.TryParse(num, out int asInt))
         {

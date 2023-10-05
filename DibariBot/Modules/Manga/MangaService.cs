@@ -153,9 +153,20 @@ public partial class MangaService
             return new MessageContents(string.Empty, errorEmbed, null);
         }
 
+        // bookmark should be used instead really
+        var chapter = state.bookmark.chapter == "" ? await manga.DefaultChapter() : state.bookmark.chapter;
+        if (chapter == null)
+        {
+            var errorEmbed = new EmbedBuilder()
+                .WithDescription("No chapters found.")
+                .WithColor(config)
+                .Build();
 
+            return new MessageContents(string.Empty, errorEmbed, null);
+        }
+        
         var bookmark = new Bookmark(
-            state.bookmark.chapter == "" ? await manga.DefaultChapter() : state.bookmark.chapter,
+            chapter,
             state.bookmark.page);
 
         if (!await manga.HasChapter(bookmark.chapter))
