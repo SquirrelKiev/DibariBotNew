@@ -41,6 +41,9 @@ public class BotConfig : ITomlMetadataProvider
 
     [TomlMetadata(Comment = "The URL to link to for MangaDex searches. '{{ID}}' will be replaced with the mangadex id.")]
     public string MangaDexSearchUrl { get; set; } = "https://mangadex.org/title/{{ID}}";
+    
+    [TomlMetadata(Comment = "The URL for Phixiv requests. expects an instance of https://github.com/HazelTheWitch/phixiv")]
+    public string PhixivUrl { get; set; } = "https://www.phixiv.net";
 
     [TomlMetadata(Comment = "How many results to show per page when using the search command.")]
     public int MangaDexSearchLimit { get; set; } = 5;

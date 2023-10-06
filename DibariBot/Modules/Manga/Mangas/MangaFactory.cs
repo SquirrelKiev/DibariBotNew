@@ -27,6 +27,7 @@ public class MangaFactory
             "imgchest" => typeof(CubariManga),
             "xkcd" => typeof(XkcdManga),
             "mangadex" => typeof(MangaDexManga),
+            "pixiv" => typeof(PhixivManga),
             _ => null,
         };
 

@@ -92,9 +92,10 @@ public static class ParseUrl
             seriesIdentifier.platform = "xkcd";
             seriesIdentifier.series = "none";
         }
-        else
+        else if (Regex.IsMatch(url, @"p(?:p|h?i)xiv\.net"))
         {
-            return null;
+            seriesIdentifier.platform = "pixiv";
+            seriesIdentifier.series = Regex.Match(url, @"(?:\/[a-zA-Z0-9]+)?\/artworks\/([a-zA-Z0-9]+)")?.Groups[1].Value;
         }
 
         return seriesIdentifier;

@@ -17,9 +17,12 @@ Useful for quickly pulling up pages for reference in discussions, but can techni
 - [x] [ImgChest](https://imgchest.com/) (via [Cubari.moe](https://cubari.moe/))
 - [x] NH (via [Cubari.moe](https://cubari.moe/))
 - [x] [Xkcd](https://xkcd.com/)
-- [ ] [Twitter](https://twitter.com/) (Soon!)
-- [ ] [Pixiv](https://www.pixiv.net/) (Soon!)
+- [x] [Pixiv](https://www.pixiv.net/) (via [phixiv](https://github.com/HazelTheWitch/phixiv))
 - [ ] Feel free to suggest any in [the issues tab!](https://github.com/SquirrelKiev/DibariBotNew/issues)
+
+### Will not be supported
+
+- [Twitter](https://twitter.com/) - API fees. vxtwitter is an option however I don't want to add Twitter support if it wont support threads.
 
 ## Screenshots
 
