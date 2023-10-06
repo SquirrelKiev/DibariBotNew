@@ -3,7 +3,7 @@
 namespace DibariBot;
 
 // Any service with this will be auto discovered and marked as a service.
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct, Inherited = true, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct)]
 public sealed class InjectAttribute : Attribute
 {
     public InjectAttribute(ServiceLifetime serviceLifetime)
@@ -11,5 +11,5 @@ public sealed class InjectAttribute : Attribute
         ServiceLifetime = serviceLifetime;
     }
 
-    public ServiceLifetime ServiceLifetime { get; set; }
+    public ServiceLifetime ServiceLifetime { get; }
 }

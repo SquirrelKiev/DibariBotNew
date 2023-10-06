@@ -7,8 +7,8 @@ public class SearchPrefixModule : DibariPrefixModule
     [NamedArgumentType]
     public class NameableArguments
     {
-        public bool Spoiler { get; set; }= false;
-        
+        public bool Spoiler { get; set; } = false;
+
     }
 
     private readonly SearchService searchService;
@@ -18,7 +18,8 @@ public class SearchPrefixModule : DibariPrefixModule
         searchService = search;
     }
 
-        [Command("search")]
+    [Command("search")]
+    [ParentModulePrefix(typeof(SearchModule))]
     public async Task SearchCommand(string query, NameableArguments args)
     {
         await DeferAsync();
@@ -27,6 +28,7 @@ public class SearchPrefixModule : DibariPrefixModule
     }
 
     [Command("search")]
+    [ParentModulePrefix(typeof(SearchModule))]
     public async Task SearchCommand([Remainder] string query)
     {
         await DeferAsync();

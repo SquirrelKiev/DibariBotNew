@@ -292,7 +292,7 @@ public partial class MangaService
             );
         }
 
-        var body = state.isSpoiler ? $"{metadata.title}, ch{bookmark.chapter}\n|| {manga.GetUrl(bookmark)} ||" : string.Empty;
+        var body = state.isSpoiler ? $"`{metadata.title.Replace('`', '_')}`, chapter `{bookmark.chapter.Replace('`', '_')}`\n|| {manga.GetUrl(bookmark)} ||" : string.Empty;
 
         return new MessageContents(body, embed, components);
     }
