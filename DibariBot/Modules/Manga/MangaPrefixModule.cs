@@ -10,6 +10,7 @@ public class MangaPrefixModule : DibariPrefixModule
         public string Url { get; set; } = "";
         public string Ch { get; set; } = "";
         public int Pg { get; set; } = 1;
+        public bool Spoiler { get; set; } = false;
     }
 
     private readonly MangaService mangaHandler;
@@ -33,16 +34,16 @@ public class MangaPrefixModule : DibariPrefixModule
 
     [Command("manga"), Priority(10)]
     [Alias("m")]
-    public Task MangaCommand(NameableArguments namedArgs) => MangaCommandImpl(namedArgs.Url, namedArgs.Ch, namedArgs.Pg);
+    public Task MangaCommand(NameableArguments namedArgs) => MangaCommandImpl(namedArgs.Url, namedArgs.Ch, namedArgs.Pg, namedArgs.Spoiler);
 
     [Command("manga"), Priority(0)]
     [Alias("m")]
-    private async Task MangaCommandImpl(string url = "", string chapter = "", int page = 1)
+    private async Task MangaCommandImpl(string url = "", string chapter = "", int page = 1, bool spoiler = false)
     {
         await DeferAsync();
 
         var contents = await mangaHandler.MangaCommand(Context.Guild?.Id ?? 0ul, GetParentChannel().Id,
-            url, chapter, page);
+            url, chapter, page, isSpoiler:spoiler);
 
         await ReplyAsync(contents);
     }

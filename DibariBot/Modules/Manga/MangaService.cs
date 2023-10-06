@@ -1,4 +1,5 @@
-﻿using DibariBot.Database;
+﻿using System.ComponentModel;
+using DibariBot.Database;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
@@ -25,23 +26,19 @@ public partial class MangaService
         public MangaAction action = MangaAction.Open;
         public SeriesIdentifier identifier = new();
         public Bookmark bookmark = new();
+        [DefaultValue(false)]
+        public bool isSpoiler = false;
 
         public State()
         {
         }
 
-        public State(MangaAction interactionType, SeriesIdentifier identifier, Bookmark bookmark)
+        public State(MangaAction interactionType, SeriesIdentifier identifier, Bookmark bookmark, bool isSpoiler)
         {
             action = interactionType;
             this.identifier = identifier;
             this.bookmark = bookmark;
-        }
-
-        public State(MangaAction interactionType, string? platform, string? series, string chapter, int page)
-        {
-            action = interactionType;
-            identifier = new(platform, series);
-            bookmark = new(chapter, page);
+            this.isSpoiler = isSpoiler;
         }
 
         public State WithAction(MangaAction interactionType)
@@ -64,7 +61,7 @@ public partial class MangaService
     }
 
     public async Task<MessageContents> MangaCommand(ulong guildId, ulong channelId, string url = "",
-        string chapter = "", int page = 1, bool ephemeral = false)
+        string chapter = "", int page = 1, bool ephemeral = false, bool isSpoiler = false)
     {
         if (string.IsNullOrWhiteSpace(url))
         {
@@ -97,7 +94,7 @@ public partial class MangaService
                     .Build(), null);
         }
 
-        var state = new State(MangaAction.Open, series.Value, new Bookmark(chapter, page - 1));
+        var state = new State(MangaAction.Open, series.Value, new Bookmark(chapter, page - 1), isSpoiler);
 
         var contents = await GetMangaMessage(guildId, channelId, state, ephemeral);
 
@@ -245,7 +242,7 @@ public partial class MangaService
             .WithColor(config)
             .Build();
 
-        var newState = new State(MangaAction.Open, state.identifier, bookmark);
+        var newState = new State(MangaAction.Open, state.identifier, bookmark, state.isSpoiler);
 
         var components = new ComponentBuilder()
                 //.WithButton(
@@ -295,7 +292,9 @@ public partial class MangaService
             );
         }
 
-        return new MessageContents(string.Empty, embed, components);
+        var body = state.isSpoiler ? $"{metadata.title}, ch{bookmark.chapter}\n|| {manga.GetUrl(bookmark)} ||" : string.Empty;
+
+        return new MessageContents(body, embed, components);
     }
 
     /// <remarks>

@@ -1,4 +1,6 @@
-﻿namespace DibariBot.Modules.MDSearch;
+﻿using System.ComponentModel;
+
+namespace DibariBot.Modules.MDSearch;
 
 [Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
 public class SearchService
@@ -6,7 +8,11 @@ public class SearchService
     public struct State
     {
         public string query;
+
         public int page;
+
+        [DefaultValue(false)]
+        public bool isSpoiler;
     }
 
     private readonly MangaDexApi mangaDexApi;
@@ -33,7 +39,7 @@ public class SearchService
 
         var totalPages = MathF.Ceiling((float)res.total / config.MangaDexSearchLimit);
 
-        if(res.total <= 0)
+        if (res.total <= 0)
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("No results found!");
@@ -74,23 +80,19 @@ public class SearchService
                             .WithValue(x.id.ToString())
                             .WithLabel(x.attributes.title.ToString().Truncate(config.MaxTitleLength))
                     ).ToList())
-                    .WithCustomId(ModulePrefixes.MANGADEX_SEARCH_DROPDOWN_PREFIX)
+                    .WithCustomId(StateSerializer.SerializeObject(state, ModulePrefixes.MANGADEX_SEARCH_DROPDOWN_PREFIX))
                 )
             .WithButton(new ButtonBuilder()
                     .WithLabel("<")
-                    .WithCustomId(ModulePrefixes.MANGADEX_SEARCH_BUTTON_PREFIX +
-                    StateSerializer.SerializeObject(state with { page = state.page - 1 }))
+                    .WithCustomId(StateSerializer.SerializeObject(state with { page = state.page - 1 },
+                        ModulePrefixes.MANGADEX_SEARCH_BUTTON_PREFIX))
                     .WithDisabled(disableLeft)
                     .WithStyle(config.PrimaryButtonStyle)
                 )
             .WithButton(new ButtonBuilder()
                     .WithLabel(">")
-                    .WithCustomId(ModulePrefixes.MANGADEX_SEARCH_BUTTON_PREFIX +
-                    StateSerializer.SerializeObject(new State()
-                    {
-                        page = state.page + 1,
-                        query = state.query
-                    }))
+                    .WithCustomId(StateSerializer.SerializeObject(state with { page = state.page + 1 },
+                        ModulePrefixes.MANGADEX_SEARCH_BUTTON_PREFIX))
                     .WithDisabled(disableRight)
                     .WithStyle(config.PrimaryButtonStyle)
                 )

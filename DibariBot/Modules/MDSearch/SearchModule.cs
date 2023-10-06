@@ -15,11 +15,11 @@ public class SearchModule : DibariModule
 
     [SlashCommand("manga-search", "Searches MangaDex for the query provided. (searches titles, sorted by relevance)")]
     [EnabledInDm(true)]
-    public async Task SearchSlash(string query, bool ephemeral = false)
+    public async Task SearchSlash(string query, bool ephemeral = false, bool spoiler = false)
     {
         await DeferAsync(ephemeral);
 
-        await FollowupAsync(await searchService.GetMessageContents(new SearchService.State() { query = query }));
+        await FollowupAsync(await searchService.GetMessageContents(new SearchService.State() { query = query, isSpoiler = spoiler}));
     }
 
     [ComponentInteraction(ModulePrefixes.MANGADEX_SEARCH_BUTTON_PREFIX + "*")]
@@ -32,16 +32,18 @@ public class SearchModule : DibariModule
         await ModifyOriginalResponseAsync(await searchService.GetMessageContents(state));
     }
 
-    [ComponentInteraction(ModulePrefixes.MANGADEX_SEARCH_DROPDOWN_PREFIX)]
-    public async Task SearchDropdownInteraction(string dexId)
+    [ComponentInteraction(ModulePrefixes.MANGADEX_SEARCH_DROPDOWN_PREFIX + "*")]
+    public async Task SearchDropdownInteraction(string id, string dexId)
     {
         await DeferAsync();
+
+        var state = StateSerializer.DeserializeObject<SearchService.State>(id);
 
         var ogRes = await GetOriginalResponseAsync();
 
         var isEphemeral = (ogRes.Flags & MessageFlags.Ephemeral) != 0;
 
         await ModifyOriginalResponseAsync(await mangaService.MangaCommand(Context.Guild?.Id ?? 0ul, GetParentChannel().Id,
-            new SeriesIdentifier("mangadex", dexId).ToString(), ephemeral: isEphemeral));
+            new SeriesIdentifier("mangadex", dexId).ToString(), ephemeral: isEphemeral, isSpoiler: state.isSpoiler));
     }
 }

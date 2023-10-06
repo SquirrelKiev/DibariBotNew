@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel;
+using System.Reflection;
 
 namespace DibariBot;
 
@@ -29,6 +30,10 @@ public static class StateSerializer
     {
         if (obj == null) return "";
 
+        if (type == typeof(bool))
+        {
+            return (bool)obj ? "1" : "0";
+        }
         if (type.IsPrimitive || type == typeof(string))
         {
             // https://github.com/dotnet/coreclr/pull/23466
@@ -47,20 +52,8 @@ public static class StateSerializer
         foreach (var prop in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
         {
             var value = prop.GetValue(obj);
-            if (value == null)
-            {
-                serializedParts.Add("");
-                continue;
-            }
 
-            if (prop.FieldType.IsPrimitive || prop.FieldType == typeof(string))
-            {
-                serializedParts.Add(value.ToString() ?? "");
-            }
-            else
-            {
-                serializedParts.Add(SerializeObject(value, prop.FieldType));
-            }
+            serializedParts.Add(SerializeObject(value, prop.FieldType));
         }
 
         return string.Join(SEPARATOR, serializedParts);
@@ -73,6 +66,11 @@ public static class StateSerializer
 
     private static object? DeserializeObject(string obj, Type type)
     {
+        if (type == typeof(bool))
+        {
+            return Convert.ChangeType(int.Parse(obj), type);
+
+        }
         if (type.IsPrimitive || type == typeof(string))
         {
             return Convert.ChangeType(obj, type);
@@ -94,7 +92,15 @@ public static class StateSerializer
         foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
         {
             if (!parts.Any())
-                throw new InvalidOperationException("Invalid serialized data");
+            {
+                var attr = field.GetCustomAttribute<DefaultValueAttribute>() ??
+                           // field not in the serialized string, and there's no fallback value? must be error
+                           throw new InvalidOperationException("Invalid serialized data");
+
+                field.SetValue(instance, attr.Value);
+                continue;
+
+            }
 
             if (Nullable.GetUnderlyingType(field.FieldType) != null)
             {

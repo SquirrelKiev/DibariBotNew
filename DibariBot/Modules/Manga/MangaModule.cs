@@ -21,18 +21,18 @@ public class MangaModule : DibariModule
 
     [SlashCommand("manga", "Gets a page from a chapter of a manga.")]
     [EnabledInDm(true)]
-    private async Task MangaSlash(string url = "", string chapter = "", int page = 1, bool ephemeral = false)
+    public async Task MangaSlash(string url = "", string chapter = "", int page = 1, bool ephemeral = false, bool spoiler = false)
     {
         await DeferAsync(ephemeral);
 
         var contents = await mangaHandler.MangaCommand(Context.Guild?.Id ?? 0ul, GetParentChannel().Id,
-            url, chapter, page, ephemeral);
+            url, chapter, page, ephemeral, spoiler);
 
         await FollowupAsync(contents, ephemeral);
     }
 
     [ModalInteraction(ModulePrefixes.MANGA_MODAL + "*")]
-    private async Task MangaJumpModalInteraction(string rawState, JumpModal modal)
+    public async Task MangaJumpModalInteraction(string rawState, JumpModal modal)
     {
         var state = StateSerializer.DeserializeObject<MangaService.State>(rawState);
 
@@ -44,7 +44,7 @@ public class MangaModule : DibariModule
     }
 
     [ComponentInteraction($"{ModulePrefixes.MANGA_BUTTON}*")]
-    private async Task MangaComponentInteraction(string rawState)
+    public async Task MangaComponentInteraction(string rawState)
     {
         var state = StateSerializer.DeserializeObject<MangaService.State>(rawState);
 
