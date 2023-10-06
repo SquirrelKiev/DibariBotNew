@@ -248,13 +248,13 @@ public partial class MangaService
         var newState = new State(MangaAction.Open, state.identifier, bookmark);
 
         var components = new ComponentBuilder()
-                .WithButton(
-                    "<<",
-                    StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackChapter),
-                        ModulePrefixes.MANGA_BUTTON),
-                    disabled: disableLeftChapter,
-                    style: config.PrimaryButtonStyle
-                )
+                //.WithButton(
+                //    "<<",
+                //    StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackChapter),
+                //        ModulePrefixes.MANGA_BUTTON),
+                //    disabled: disableLeftChapter,
+                //    style: config.PrimaryButtonStyle
+                //)
                 .WithButton(
                     "<",
                     StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackPage),
@@ -275,14 +275,14 @@ public partial class MangaService
                     disabled: disableRightPage,
                     style: config.PrimaryButtonStyle
                 )
-                .WithButton(
-                    ">>",
-                    StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardChapter),
-                        ModulePrefixes.MANGA_BUTTON),
-                    disabled: disableRightChapter,
-                    style: config.PrimaryButtonStyle
-                )
-            ;
+                //.WithButton(
+                //    ">>",
+                //    StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardChapter),
+                //        ModulePrefixes.MANGA_BUTTON),
+                //    disabled: disableRightChapter,
+                //    style: config.PrimaryButtonStyle
+                //)
+            .WithRedButton();
 
         if (ephemeral)
         {
@@ -294,9 +294,6 @@ public partial class MangaService
                 row: 1
             );
         }
-
-        components
-            .WithRedButton(row: 1);
 
         return new MessageContents(string.Empty, embed, components);
     }

@@ -81,7 +81,7 @@ public class MangaModule : DibariModule
             await mangaHandler.GetMangaMessage(Context.Guild?.Id ?? 0ul, GetParentChannel().Id, state, isEphemeral);
 
         // its probably an error
-        if (contents.components == null || contents.components.Components.Count <= 1)
+        if (contents.components == null || contents.components.Components.Sum(component => component.Components.Count) <= 1)
         {
             await FollowupAsync(contents, true);
             return;
