@@ -22,6 +22,10 @@ public class SearchPrefixModule : DibariPrefixModule
     [ParentModulePrefix(typeof(SearchModule))]
     public async Task SearchCommand(string query, NameableArguments args)
     {
+        // oshi no ko, super lazy """fix"""
+        if (Context.Guild != null && Context.Guild.Id == 695200821910044783ul)
+            return;
+
         await DeferAsync();
 
         await ReplyAsync(await searchService.GetMessageContents(new SearchService.State { query = query, isSpoiler = args.Spoiler }));
@@ -31,6 +35,10 @@ public class SearchPrefixModule : DibariPrefixModule
     [ParentModulePrefix(typeof(SearchModule))]
     public async Task SearchCommand([Remainder] string query)
     {
+        // oshi no ko, super lazy """fix"""
+        if (Context.Guild != null && Context.Guild.Id == 695200821910044783ul)
+            return;
+
         await DeferAsync();
 
         await ReplyAsync(await searchService.GetMessageContents(new SearchService.State { query = query, isSpoiler = false }));
