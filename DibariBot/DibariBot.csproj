@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Discord.Net.Commands" Version="3.13.0" />
+    <PackageReference Include="Discord.Net.Core" Version="3.13.0" />
+    <PackageReference Include="Discord.Net.Interactions" Version="3.13.0" />
+    <PackageReference Include="Discord.Net.Rest" Version="3.13.0" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="3.13.0" />
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />
     <PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.11" />
@@ -26,24 +31,6 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="5.2.3" />
     <PackageReference Include="Tomlyn" Version="0.16.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Discord.Net.Commands">
-      <HintPath>..\tempdnet\Discord.Net.Commands.dll</HintPath>
-    </Reference>
-    <Reference Include="Discord.Net.Core">
-      <HintPath>..\tempdnet\Discord.Net.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Discord.Net.Interactions">
-      <HintPath>..\tempdnet\Discord.Net.Interactions.dll</HintPath>
-    </Reference>
-    <Reference Include="Discord.Net.Rest">
-      <HintPath>..\tempdnet\Discord.Net.Rest.dll</HintPath>
-    </Reference>
-    <Reference Include="Discord.Net.WebSocket">
-      <HintPath>..\tempdnet\Discord.Net.WebSocket.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>

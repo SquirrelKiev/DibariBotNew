@@ -1,29 +1,33 @@
 ﻿using DibariBot.Database;
 using DibariBot.Database.Extensions;
+using Discord.Commands;
 
 namespace DibariBot.Modules.Help;
 
-public class HelpModule : DibariModule
+public class HelpPrefixModule : DibariPrefixModule
 {
     private readonly DbService dbService;
     private readonly HelpService helpService;
 
-    public HelpModule(DbService dbService, HelpService helpService)
+    public HelpPrefixModule(DbService dbService, HelpService helpService)
     {
         this.dbService = dbService;
         this.helpService = helpService;
     }
 
-    [SlashCommand("manga-help", "Help! What are all the commands?")]
-    [HelpPageDescription("Pulls up this page!")]
-    [EnabledInDm(true)]
-    public async Task HelpSlash()
+    [Command("help")]
+    [ParentModulePrefix(typeof(HelpModule))]
+    public async Task HelpCommand()
     {
+        // oshi no ko, super lazy """fix"""
+        if (Context.Guild != null && Context.Guild.Id == 695200821910044783ul)
+            return;
+
         await DeferAsync();
 
         var prefix = Context.Guild != null ? await dbService.GetPrefix(Context.Guild.Id) : null;
         var contents = helpService.GetMessageContents(prefix);
 
-        await FollowupAsync(contents);
+        await ReplyAsync(contents);
     }
 }
