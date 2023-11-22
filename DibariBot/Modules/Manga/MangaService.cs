@@ -77,6 +77,7 @@ public partial class MangaService
                     new EmbedBuilder()
                         .WithDescription(
                             "This server hasn't set a default manga! Please manually specify the URL.") // TODO: l18n
+                        .WithColor(CommandResult.Failure)
                         .Build(), null);
             }
 
@@ -91,6 +92,7 @@ public partial class MangaService
                 new EmbedBuilder()
                     .WithDescription(
                         "Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot.") // TODO: l18n
+                    .WithColor(CommandResult.Failure)
                     .Build(), null);
         }
 
@@ -114,7 +116,7 @@ public partial class MangaService
             var errorEmbed = new EmbedBuilder()
                 .WithDescription(
                     $"Failed to get manga. `{ex.Message}`\n`{state.identifier.platform}/{state.identifier.series}`")
-                .WithColor(config)
+                .WithColor(CommandResult.Failure)
                 .Build();
 
             Log.Warning(ex, "Failed to get manga.");
@@ -130,7 +132,7 @@ public partial class MangaService
             {
                 var errorEmbed = new EmbedBuilder()
                     .WithDescription("Manga disallowed by server rules.")
-                    .WithColor(config)
+                    .WithColor(CommandResult.Failure)
                     .Build();
 
                 return new MessageContents(string.Empty, errorEmbed, null);
@@ -144,7 +146,7 @@ public partial class MangaService
 
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("Filter took too long to process.")
-                .WithColor(config)
+                .WithColor(CommandResult.Failure)
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
@@ -156,12 +158,12 @@ public partial class MangaService
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("No chapters found.")
-                .WithColor(config)
+                .WithColor(CommandResult.Failure)
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
         }
-        
+
         var bookmark = new Bookmark(
             chapter,
             state.bookmark.page);
@@ -170,7 +172,7 @@ public partial class MangaService
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("Chapter not found.")
-                .WithColor(config)
+                .WithColor(CommandResult.Failure)
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
@@ -212,7 +214,7 @@ public partial class MangaService
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription($"page {bookmark.page + 1} doesn't exist in chapter {bookmark.chapter}!")
-                .WithColor(config)
+                .WithColor(CommandResult.Failure)
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
@@ -239,7 +241,7 @@ public partial class MangaService
                     .WithText($"{metadata.title.Truncate(50)}, by {author}.\n" +
                               $"Group: {pages.group}")
             )
-            .WithColor(config)
+            .WithColor(CommandResult.Default)
             .Build();
 
         var newState = new State(MangaAction.Open, state.identifier, bookmark, state.isSpoiler);
@@ -257,28 +259,28 @@ public partial class MangaService
                     StateSerializer.SerializeObject(newState.WithAction(MangaAction.BackPage),
                         ModulePrefixes.MANGA_BUTTON),
                     disabled: disableLeftPage,
-                    style: config.PrimaryButtonStyle
+                    style: ButtonStyle.Secondary
                 )
                  .WithButton(
                      "Jump",
                      StateSerializer.SerializeObject(newState.WithAction(MangaAction.Jump),
                          ModulePrefixes.MANGA_BUTTON),
-                     style: config.PrimaryButtonStyle
+                     style: ButtonStyle.Secondary
                  )
                 .WithButton(
                     ">",
                     StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardPage),
                         ModulePrefixes.MANGA_BUTTON),
                     disabled: disableRightPage,
-                    style: config.PrimaryButtonStyle
+                    style: ButtonStyle.Secondary
                 )
-                //.WithButton(
-                //    ">>",
-                //    StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardChapter),
-                //        ModulePrefixes.MANGA_BUTTON),
-                //    disabled: disableRightChapter,
-                //    style: config.PrimaryButtonStyle
-                //)
+            //.WithButton(
+            //    ">>",
+            //    StateSerializer.SerializeObject(newState.WithAction(MangaAction.ForwardChapter),
+            //        ModulePrefixes.MANGA_BUTTON),
+            //    disabled: disableRightChapter,
+            //    style: config.PrimaryButtonStyle
+            //)
             .WithRedButton();
 
         if (ephemeral)
@@ -287,7 +289,7 @@ public partial class MangaService
                 "Send",
                 StateSerializer.SerializeObject(newState.WithAction(MangaAction.SendNonEphemeral),
                     ModulePrefixes.MANGA_BUTTON),
-                style: config.PrimaryButtonStyle,
+                style: ButtonStyle.Secondary,
                 row: 1
             );
         }
@@ -411,7 +413,7 @@ public partial class MangaService
                     rf.ChannelFilterScope == ChannelFilterScope.Include &&
                     rf.RegexChannelEntries.Any(rce => rce.ChannelId == channelId)
                     || // OR
-                    // If the filter's scope is Exclude, check if there isn't an entry for the current channel.
+                       // If the filter's scope is Exclude, check if there isn't an entry for the current channel.
                     rf.ChannelFilterScope == ChannelFilterScope.Exclude &&
                     rf.RegexChannelEntries.All(rce => rce.ChannelId != channelId)
                 )

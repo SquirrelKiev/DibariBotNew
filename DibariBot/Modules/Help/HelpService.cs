@@ -9,19 +9,17 @@ public class HelpService
 {
     private readonly CommandService commandService;
     private readonly InteractionService interactionService;
-    private readonly BotConfig botConfig;
 
-    public HelpService(InteractionService interactionService, CommandService commandService, BotConfig botConfig)
+    public HelpService(InteractionService interactionService, CommandService commandService)
     {
         this.interactionService = interactionService;
-        this.botConfig = botConfig;
         this.commandService = commandService;
     }
 
     public MessageContents GetMessageContents(string? prefix)
     {
-        var embed = new EmbedBuilder();
-        embed.WithColor(botConfig);
+        var embed = new EmbedBuilder()
+            .WithColor(CommandResult.Default);
         embed.WithDescription(
             "Noting that any prefix command parameter wrapped in square brackets is an optional named parameter.\n" +
             $"Usage is pretty much how the command shows, just without square brackets. e.g.\n" +

@@ -1,70 +1,53 @@
-﻿using Serilog.Events;
-using System.Diagnostics.CodeAnalysis;
-using Tomlyn;
+﻿using System.Diagnostics.CodeAnalysis;
+using YamlDotNet.Core;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace DibariBot;
 
 public class BotConfigFactory
 {
-    private readonly string configPath = Environment.GetEnvironmentVariable("DIBARI_CONFIG_LOCATION") ?? 
-                                         Path.Combine(Path.Combine(AppContext.BaseDirectory, "data"), "bot_config.toml");
+    private readonly string configPath = Environment.GetEnvironmentVariable("DIBARI_CONFIG_LOCATION") ??
+                                         Path.Combine(Path.Combine(AppContext.BaseDirectory, "data"), "bot_config.yaml");
 
     public bool GetConfig([NotNullWhen(true)] out BotConfig? botConfig)
     {
-        var options = new TomlModelOptions()
-        {
-            ConvertToModel = (obj, type) =>
-            {
-                if (!type.IsEnum) return null;
+        var serializer = new SerializerBuilder()
+            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .WithDefaultScalarStyle(ScalarStyle.DoubleQuoted)
+            .Build();
 
-                if (obj is not string str) return null;
-
-                return Enum.Parse(type, str);
-            },
-            ConvertToToml = (x) =>
-            {
-                if (!x.GetType().IsEnum) return x;
-
-                return x.ToString()?.ToLowerInvariant();
-            }
-        };
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .Build();
 
         if (!File.Exists(configPath))
         {
             botConfig = new BotConfig();
-            botConfig.GenerateMetadata();
 
-            Log.Fatal("Config not found. Created new config at {ConfigPath}. Please edit this file and restart the bot.", configPath);
+            Log.Fatal("Config not found. Creating new config at {ConfigPath}. Please edit this file and restart the bot.", configPath);
 
-            File.WriteAllText(configPath, Toml.FromModel(botConfig, options: options));
-
+            File.WriteAllText(configPath, serializer.Serialize(botConfig));
             return false;
         }
-        else if (Toml.TryToModel(File.ReadAllText(configPath), out botConfig, out var diagnostics, options: options))
-        {
-//#if DEBUG
-            botConfig.GenerateMetadata();
-            File.WriteAllText(configPath, Toml.FromModel(botConfig, options: options));
-//#endif
 
-            return true;
+        try
+        {
+            botConfig = deserializer.Deserialize<BotConfig>(File.ReadAllText(configPath));
         }
-        else
+        catch (Exception ex)
         {
-            Log.Fatal("Failed to read config. Diagnostics below.");
-            foreach(var diag in diagnostics)
-            {
-                var level = diag.Kind switch
-                {
-                    Tomlyn.Syntax.DiagnosticMessageKind.Error => LogEventLevel.Error,
-                    Tomlyn.Syntax.DiagnosticMessageKind.Warning => LogEventLevel.Warning,
-                    _ => LogEventLevel.Error,
-                };
-
-                Log.Write(level, "Toml | {DiagSpan}: {DiagMessage}", diag.Span.ToStringSimple(), diag.Message);
-            }
-
+            Log.Fatal(ex, "Failed to read config.");
+            botConfig = new BotConfig();
             return false;
         }
+
+        //#if DEBUG
+        //botConfig.GenerateMetadata();
+        File.WriteAllText(configPath, serializer.Serialize(botConfig));
+        //#endif
+
+        return true;
+
     }
 }

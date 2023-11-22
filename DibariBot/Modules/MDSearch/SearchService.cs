@@ -42,12 +42,13 @@ public class SearchService
         if (res.total <= 0)
         {
             var errorEmbed = new EmbedBuilder()
-                .WithDescription("No results found!");
+                .WithDescription("No results found!")
+                .WithColor(CommandResult.Default);
 
             return new MessageContents(string.Empty, errorEmbed.Build(), null);
         }
 
-        var embed = new EmbedBuilder();
+        var embed = new EmbedBuilder().WithColor(CommandResult.Default);
 
         foreach (var mangaSchema in res.data)
         {
@@ -87,14 +88,14 @@ public class SearchService
                     .WithCustomId(StateSerializer.SerializeObject(state with { page = state.page - 1 },
                         ModulePrefixes.MANGADEX_SEARCH_BUTTON_PREFIX))
                     .WithDisabled(disableLeft)
-                    .WithStyle(config.PrimaryButtonStyle)
+                    .WithStyle(ButtonStyle.Secondary)
                 )
             .WithButton(new ButtonBuilder()
                     .WithLabel(">")
                     .WithCustomId(StateSerializer.SerializeObject(state with { page = state.page + 1 },
                         ModulePrefixes.MANGADEX_SEARCH_BUTTON_PREFIX))
                     .WithDisabled(disableRight)
-                    .WithStyle(config.PrimaryButtonStyle)
+                    .WithStyle(ButtonStyle.Secondary)
                 )
             .WithRedButton();
 

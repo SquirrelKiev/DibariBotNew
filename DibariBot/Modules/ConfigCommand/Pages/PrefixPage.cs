@@ -37,7 +37,8 @@ public class PrefixPage : ConfigPage
         var embed = new EmbedBuilder()
             .WithFields(new EmbedFieldBuilder()
                 .WithName("Prefix")
-                .WithValue($"`{prefix}`"));
+                .WithValue($"`{prefix}`"))
+            .WithColor(CommandResult.Default);
 
         var components = new ComponentBuilder()
             .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configCommandService.ConfigPages, Id, IsDm()))

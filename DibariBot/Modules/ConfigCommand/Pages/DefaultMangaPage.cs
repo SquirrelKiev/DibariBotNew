@@ -44,13 +44,11 @@ public class DefaultMangaPage : ConfigPage
 
     private readonly DbService dbService;
     private readonly ConfigCommandService configCommandService;
-    private readonly BotConfig config;
 
-    public DefaultMangaPage(DbService db, ConfigCommandService configCommandService, BotConfig config)
+    public DefaultMangaPage(DbService db, ConfigCommandService configCommandService)
     {
         dbService = db;
         this.configCommandService = configCommandService;
-        this.config = config;
     }
 
     // step 1 - help page/modal open
@@ -63,11 +61,11 @@ public class DefaultMangaPage : ConfigPage
             .WithButton(new ButtonBuilder()
                 .WithLabel("Set")
                 .WithCustomId($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_SET}")
-                .WithStyle(config.PrimaryButtonStyle))
+                .WithStyle(ButtonStyle.Secondary))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Remove")
                 .WithCustomId($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE}")
-                .WithStyle(config.PrimaryButtonStyle))
+                .WithStyle(ButtonStyle.Secondary))
             .WithRedButton();
 
         return new MessageContents("", embed.Build(), components);
@@ -94,7 +92,7 @@ public class DefaultMangaPage : ConfigPage
 
     private static EmbedBuilder GetCurrentDefaultsEmbed(DefaultManga[] defaults)
     {
-        var embed = new EmbedBuilder();
+        var embed = new EmbedBuilder().WithColor(CommandResult.Default);
 
         if (defaults.Length > 0)
         {
@@ -203,7 +201,8 @@ public class DefaultMangaPage : ConfigPage
         if (parsedUrl == null || parsedUrl.Value.platform == null && parsedUrl.Value.series == null)
         {
             var errorEmbed = new EmbedBuilder()
-                .WithDescription("Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot."); // TODO: l18n
+                .WithDescription("Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot.")
+                .WithColor(CommandResult.Failure); // TODO: l18n
 
             await ModifyOriginalResponseAsync(new MessageContents(string.Empty, errorEmbed.Build(), null));
             return;
@@ -232,7 +231,8 @@ public class DefaultMangaPage : ConfigPage
     private MessageContents ConfirmPromptContents(ConfirmState confirmState)
     {
         var embed = new EmbedBuilder()
-            .WithDescription($"Set the default manga for **{(confirmState.channelId == 0ul ? "the server" : $"<#{confirmState.channelId}>")}** as **{confirmState.series}**?");
+            .WithDescription($"Set the default manga for **{(confirmState.channelId == 0ul ? "the server" : $"<#{confirmState.channelId}>")}** as **{confirmState.series}**?")
+            .WithColor(CommandResult.Default);
 
         var components = new ComponentBuilder();
 
@@ -252,7 +252,7 @@ public class DefaultMangaPage : ConfigPage
         components.WithButton(new ButtonBuilder()
             .WithLabel("Yes!")
             .WithCustomId(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_SUBMIT_BUTTON + StateSerializer.SerializeObject(confirmState))
-            .WithStyle(config.PrimaryButtonStyle));
+            .WithStyle(ButtonStyle.Secondary));
 
         components.WithButton(new ButtonBuilder()
             .WithLabel("Cancel")

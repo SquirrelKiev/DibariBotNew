@@ -19,7 +19,8 @@ public class HomePage : ConfigPage
 
     public override Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
     {
-        var embed = new EmbedBuilder();
+        var embed = new EmbedBuilder()
+            .WithColor(CommandResult.Default);
 
         foreach(var page in configCommandService.ConfigPages.Values.Where(page => page.ShouldShow(IsDm())))
         {

@@ -46,7 +46,7 @@ public partial class RegexFiltersPage : ConfigPage
 
     public override async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
     {
-        var embed = new EmbedBuilder();
+        var embed = new EmbedBuilder().WithColor(CommandResult.Default);
 
         var filters = await mangaService.GetFilters(Context.Guild.Id);
 
@@ -96,16 +96,16 @@ public partial class RegexFiltersPage : ConfigPage
             .WithButton(new ButtonBuilder()
                 .WithLabel("Add")
                 .WithCustomId($"{ModulePrefixes.CONFIG_FILTERS_OPEN_MODAL_BUTTON}{0ul}")
-                .WithStyle(config.PrimaryButtonStyle))
+                .WithStyle(ButtonStyle.Secondary))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Edit")
                 .WithCustomId($"{ModulePrefixes.CONFIG_FILTERS_EDIT_BUTTON}")
-                .WithStyle(config.PrimaryButtonStyle)
+                .WithStyle(ButtonStyle.Secondary)
                 .WithDisabled(filters.Length <= 0))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Remove")
                 .WithCustomId($"{ModulePrefixes.CONFIG_FILTERS_REMOVE_BUTTON}")
-                .WithStyle(config.PrimaryButtonStyle)
+                .WithStyle(ButtonStyle.Secondary)
                 .WithDisabled(filters.Length <= 0))
             .WithRedButton();
 
@@ -132,7 +132,7 @@ public partial class RegexFiltersPage : ConfigPage
         {
             x.Components = new ComponentBuilder()
                 .WithSelectMenu(GetFilterSelectMenu(ModulePrefixes.CONFIG_FILTERS_REMOVE_FILTER_SELECT, filters))
-                .WithButton("Back", ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + StateSerializer.SerializeObject(Id), config.PrimaryButtonStyle)
+                .WithButton("Back", ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + StateSerializer.SerializeObject(Id), ButtonStyle.Secondary)
                 .Build();
         });
     }
@@ -166,7 +166,7 @@ public partial class RegexFiltersPage : ConfigPage
         {
             x.Components = new ComponentBuilder()
                 .WithSelectMenu(GetFilterSelectMenu(ModulePrefixes.CONFIG_FILTERS_EDIT_FILTER_SELECT, filters))
-                .WithButton("Back", ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + StateSerializer.SerializeObject(Id), config.PrimaryButtonStyle)
+                .WithButton("Back", ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + StateSerializer.SerializeObject(Id), ButtonStyle.Secondary)
                 .Build();
         });
     }
@@ -264,7 +264,7 @@ public partial class RegexFiltersPage : ConfigPage
 
     private MessageContents UpsertConfirmation(RegexFilter filter)
     {
-        var embed = new EmbedBuilder();
+        var embed = new EmbedBuilder().WithColor(CommandResult.Default);
 
         var channels = filter.RegexChannelEntries;
 
@@ -355,7 +355,7 @@ public partial class RegexFiltersPage : ConfigPage
             .WithButton(new ButtonBuilder()
                 .WithLabel("Edit")
                 .WithCustomId(ModulePrefixes.CONFIG_FILTERS_OPEN_MODAL_BUTTON + filter.Id)
-                .WithStyle(config.PrimaryButtonStyle))
+                .WithStyle(ButtonStyle.Secondary))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Back")
                 .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +

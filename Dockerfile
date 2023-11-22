@@ -24,6 +24,6 @@ COPY --from=build-env /app .
 
 VOLUME [ "/data" ]
 
-ENV DIBARI_CONFIG_LOCATION /data/botconfig.toml
+ENV DIBARI_CONFIG_LOCATION /data/botconfig.yaml
 
 CMD dotnet DibariBot.dll
