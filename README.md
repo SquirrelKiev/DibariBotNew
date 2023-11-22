@@ -2,8 +2,6 @@
 
 > really need a better project name
 
-[Task board](https://app.startinfinity.com/b/UBVVinFFitv/AEN72Z2bUko)
-
 A Discord bot for reading manga, within Discord.
 
 Useful for quickly pulling up pages for reference in discussions, but can technically be used to read an entire manga from back to front.
