@@ -18,6 +18,6 @@ public class AboutModule : DibariModule
 
         var contents = aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client));
 
-        await RespondAsync(contents);
+        await FollowupAsync(contents);
     }
 }

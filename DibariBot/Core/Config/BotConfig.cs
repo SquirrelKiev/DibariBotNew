@@ -17,7 +17,7 @@ public class BotConfig
     public CacheType Cache { get; set; } = CacheType.Memory;
 
     [YamlMember(Description = "The type of database to use.\n" +
-                              "Options are \"Sqlite\" and \"Postgres\".")]
+                              "Options are \"Sqlite\" and \"Postgresql\".")]
     public DatabaseType Database { get; set; } = DatabaseType.Sqlite;
 
     [YamlMember(Description = "The connection string for the database specified above.\n" +
@@ -112,7 +112,7 @@ public class BotConfig
     public string ProxyUrl { get; set; } = "https://services.f-ck.me/v1/image/{{URL}}?source=dibari_bot";
 
     [YamlMember(Description = "What platforms should have their images proxied.")]
-    public string[] PlatformsToProxy { get; set; } = new string[] { "mangadex" };
+    public string[] PlatformsToProxy { get; set; } = { "mangadex" };
 
     public enum CacheType
     {

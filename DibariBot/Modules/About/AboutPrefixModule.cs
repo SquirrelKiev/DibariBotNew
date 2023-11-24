@@ -15,6 +15,9 @@ public class AboutPrefixModule : DibariPrefixModule
     [ParentModulePrefix(typeof(AboutModule))]
     public async Task AboutSlash()
     {
+        if (Context.Guild != null && Context.Guild.Id == 695200821910044783ul)
+            return;
+
         await DeferAsync();
 
         var contents = aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client));
