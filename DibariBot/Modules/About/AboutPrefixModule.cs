@@ -20,7 +20,7 @@ public class AboutPrefixModule : DibariPrefixModule
 
         await DeferAsync();
 
-        var contents = aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client));
+        var contents = await aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client), Context.User.Id);
 
         await ReplyAsync(contents);
     }

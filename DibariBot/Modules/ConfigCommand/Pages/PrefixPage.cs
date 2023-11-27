@@ -49,6 +49,8 @@ public class PrefixPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_PREFIX_MODAL_BUTTON)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
     public async Task OnChangeButton()
     {
         var prefix = await dbService.GetPrefix(Context.Guild.Id);
@@ -62,6 +64,8 @@ public class PrefixPage : ConfigPage
     }
 
     [ModalInteraction(ModulePrefixes.CONFIG_PREFIX_MODAL)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
     public async Task OnModal(SetPrefixModal modal)
     {
         await DeferAsync();

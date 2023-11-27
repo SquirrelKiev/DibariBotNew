@@ -66,8 +66,13 @@ public class MemoryCacheProvider : ICacheProvider
         ArgumentNullException.ThrowIfNull(cacheEntry, nameof(cacheEntry));
 
         cacheEntry
-            .SetAbsoluteExpiration(settings.ttl)
             .SetSize(settings.size);
+
+        if (settings.ttl.HasValue)
+        {
+            cacheEntry
+                .SetAbsoluteExpiration(settings.ttl.Value);
+        }
 
         cacheEntry.Value = value;
 

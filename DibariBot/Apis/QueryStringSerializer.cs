@@ -7,6 +7,7 @@ using System.Web;
 namespace DibariBot.Apis;
 
 // gotta be a faster way of doing this, like,, why is this not built in in some form
+// if perf was a concern this wouldn't exist
 public static class QueryStringSerializer
 {
     public static string ToQueryParams(object obj)

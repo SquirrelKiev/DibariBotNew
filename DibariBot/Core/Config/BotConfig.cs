@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using System.Text;
-using YamlDotNet.Serialization;
+﻿using YamlDotNet.Serialization;
 
 namespace DibariBot;
 
@@ -25,16 +23,33 @@ public class BotConfig
                             "Example Sqlite string: Data Source=data/DibariBot.db")]
     public string DatabaseConnectionString { get; set; } = "Data Source=data/DibariBot.db";
 
+    [YamlMember(Description = "The reaction to put on prefix commands when an unhandled error occurs. Will only appear on prefix commands.")]
+    public string ErrorEmote { get; set; } = "\u2753";
+
+    // hash set might be better?
+    [YamlMember(Description = "A set of UserIDs. Users in this set will be granted permission to use commands to manage the instance itself.\n" +
+                              "This is a dangerous permission to grant.")]
+    public HashSet<ulong> ManagerUserIds { get; set; } = new()
+    {
+        0ul
+    };
+
+    [YamlMember(Description = "An optional URL to an instance of Seq. Empty string is interpreted as not wanting Seq.")]
+    public string SeqUrl { get; set; } = "";
+
+    [YamlMember(Description = "An optional API key for Seq. Empty string is interpreted as no API key.")]
+    public string SeqApiKey { get; set; } = "";
+
     [YamlMember(Description = "The base URL for Cubari requests.\n" +
         "Only really should be changed if you're using a self-hosted instance for whatever reason.")]
     public string CubariUrl { get; set; } = "https://cubari.moe";
 
-    [YamlMember(Description = "The URL for MangaDex searches. Leave empty to disable.")]
+    [YamlMember(Description = "The URL for MangaDex searches.")]
     public string MangaDexApiUrl { get; set; } = "https://api.mangadex.org";
 
     [YamlMember(Description = "The URL to link to for MangaDex searches. '{{ID}}' will be replaced with the mangadex id.")]
     public string MangaDexSearchUrl { get; set; } = "https://mangadex.org/title/{{ID}}";
-    
+
     [YamlMember(Description = "The URL for Phixiv requests. expects an instance of https://github.com/HazelTheWitch/phixiv")]
     public string PhixivUrl { get; set; } = "https://www.phixiv.net";
 
@@ -55,20 +70,11 @@ public class BotConfig
     [YamlIgnore]
     public TimeSpan RegexTimeout => TimeSpan.FromMilliseconds(RegexTimeoutMilliseconds);
 
-    [YamlMember(Description = "The reaction to put on prefix commands when an unhandled error occurs. Will only appear on prefix commands.")]
-    public string ErrorEmote { get; set; } = "\u2753";
-
-    [YamlMember(Description = "An optional URL to an instance of Seq. Empty string is interpreted as not wanting Seq.")]
-    public string SeqUrl { get; set; } = "";
-
-    [YamlMember(Description = "An optional API key for Seq. Empty string is interpreted as no API key.")]
-    public string SeqApiKey { get; set; } = "";
-
     [YamlMember(Description = "***** ABOUT PAGE *****\n" +
                             "For any string here, the following will be replaced:\n" +
                             "- {{guilds}} will be substituted with how many guilds (servers) the bot is in.\n" +
                             "- {{botUsername}} will be substituted with the bot's username.\n" +
-                            "\n" + 
+                            "\n" +
                             "The about page title.")]
     public string AboutPageTitle { get; set; } = "About {{botUsername}}";
 
@@ -79,13 +85,13 @@ public class BotConfig
     public AboutField[] AboutPageFields { get; set; } = {
         new()
         {
-            Name = "Credits:",
-            Value = "Bot by [SquirrelKiev](https://github.com/SquirrelKiev)"
+            Name = "Total Servers:",
+            Value = "{{guilds}}"
         },
         new()
         {
-            Name = "Total Servers:",
-            Value = "{{guilds}}"
+            Name = "Credits:",
+            Value = "Bot by [SquirrelKiev](https://github.com/SquirrelKiev)"
         },
         new()
         {

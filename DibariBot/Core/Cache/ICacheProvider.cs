@@ -11,9 +11,9 @@ public interface ICacheProvider
 public class CacheValueSettings
 {
     /// <summary>
-    /// How long the object will be in cache before being deleted. default to 15 mins.
+    /// How long the object will be in cache before being deleted. default is none.
     /// </summary>
-    public TimeSpan ttl = TimeSpan.FromMinutes(15);
+    public TimeSpan? ttl;
     /// <summary>
     /// The "size" of the object in memory.
     /// </summary>

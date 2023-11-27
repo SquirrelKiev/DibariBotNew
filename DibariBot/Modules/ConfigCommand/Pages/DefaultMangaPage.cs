@@ -110,6 +110,8 @@ public class DefaultMangaPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE_DROPDOWN)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
     public async Task RemoveMangaDropdown(string id)
     {
         await DeferAsync();
@@ -120,25 +122,24 @@ public class DefaultMangaPage : ConfigPage
 
         var guildId = Context.Guild?.Id ?? 0ul;
 
-        var farts = await context.DefaultMangas.FirstOrDefaultAsync(x =>
+        var entryToRemove = await context.DefaultMangas.FirstOrDefaultAsync(x =>
             x.GuildId == guildId && x.ChannelId == channelId
         );
 
-        if (farts == null)
+        if (entryToRemove != null)
         {
-            await ModifyOriginalResponseAsync(new MessageContents("Couldn't find it anymore?", embed: null, null));
-            return;
+            context.Remove(entryToRemove);
+
+            await context.SaveChangesAsync();
         }
-
-        context.Remove(farts);
-
-        await context.SaveChangesAsync();
 
         await ModifyOriginalResponseAsync(await GetMessageContents(
             new ConfigCommandService.State(page: Page.DefaultManga)));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
     public async Task RemoveMangaButton()
     {
         await DeferAsync();
@@ -185,6 +186,8 @@ public class DefaultMangaPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
     public async Task OpenModal()
     {
         await RespondWithModalAsync<DefaultMangaSetModal>(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_MODAL);
@@ -192,6 +195,8 @@ public class DefaultMangaPage : ConfigPage
 
     // step 2 - confirm section
     [ModalInteraction($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_MODAL}")]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
     public async Task OnModalResponse(DefaultMangaSetModal modal)
     {
         await DeferAsync();
@@ -218,6 +223,8 @@ public class DefaultMangaPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_CHANNEL_INPUT + "*")]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
     public async Task OnChannelSet(string id, IChannel[] channel)
     {
         // should be doing UpdateAsync but i have no clue how to get that kekw
@@ -265,6 +272,8 @@ public class DefaultMangaPage : ConfigPage
 
     // step 3 - we've got a submit!!
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_SUBMIT_BUTTON + "*")]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
     public async Task OnConfirmed(string id)
     {
         await DeferAsync();

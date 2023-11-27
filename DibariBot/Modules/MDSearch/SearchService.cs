@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using DibariBot.Apis;
 
 namespace DibariBot.Modules.MDSearch;
 

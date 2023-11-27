@@ -9,6 +9,24 @@ public class AboutModule : DibariModule
         this.aboutService = aboutService;
     }
 
+    [ComponentInteraction(ModulePrefixes.ABOUT_OVERRIDE_TOGGLE)]
+    [EnabledInDm(true)]
+    public async Task OverrideToggleButton()
+    {
+        await DeferAsync();
+
+        if (await aboutService.TryToggleOverride(Context.User.Id))
+        {
+            var contents = await aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client), Context.User.Id);
+
+            await ModifyOriginalResponseAsync(contents);
+        }
+        else
+        {
+            await RespondAsync(new MessageContents("No permission.", embed: null, null), true);
+        }
+    }
+
     [SlashCommand("about", "Info about the bot.")]
     [HelpPageDescription("Pulls up info about the bot.")]
     [EnabledInDm(true)]
@@ -16,7 +34,7 @@ public class AboutModule : DibariModule
     {
         await DeferAsync();
 
-        var contents = aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client));
+        var contents = await aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client), Context.User.Id);
 
         await FollowupAsync(contents);
     }

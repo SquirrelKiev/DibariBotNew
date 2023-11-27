@@ -1,8 +1,6 @@
-﻿using DibariBot.Apis;
-using DibariBot.Modules.Manga;
-using System.Linq;
+﻿using DibariBot.Modules.Manga;
 
-namespace DibariBot;
+namespace DibariBot.Apis;
 
 [Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
 public class MangaDexApi

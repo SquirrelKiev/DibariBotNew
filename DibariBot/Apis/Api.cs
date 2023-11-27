@@ -22,7 +22,7 @@ public class Api
     /// <exception cref="HttpRequestException"></exception>
     public virtual async Task<T?> Get<T>(Uri uri, CacheValueSettings? cvs = null)
     {
-        cvs ??= new CacheValueSettings();
+        cvs ??= new CacheValueSettings(TimeSpan.FromMinutes(15));
 
         return await cache.GetOrCreateAsync($"apiCache:{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(uri.ToString()))}", async () =>
         {

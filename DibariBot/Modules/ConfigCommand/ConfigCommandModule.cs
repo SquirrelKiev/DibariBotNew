@@ -2,17 +2,17 @@
 
 public class ConfigCommandModule : DibariModule
 {
-    private const string PERMISSION_GROUP = "'User has Manage Guild or is in DM'";
     private readonly ConfigCommandService configService;
-    
+
     public ConfigCommandModule(ConfigCommandService configService)
     {
         this.configService = configService;
     }
 
     [SlashCommand("manga-config", "Pulls up various options for configuring the bot to the server's needs.")]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = PERMISSION_GROUP)]
-    [RequireContext(ContextType.DM | ContextType.Group, Group = PERMISSION_GROUP)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
+    [RequireContext(ContextType.DM | ContextType.Group, Group = ModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
     [EnabledInDm(true)]
     public async Task ConfigSlash()
     {
@@ -22,6 +22,8 @@ public class ConfigCommandModule : DibariModule
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
     public async Task SelectInteraction(string id)
     {
         await DeferAsync();
@@ -32,6 +34,8 @@ public class ConfigCommandModule : DibariModule
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + "*")]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
     public Task SelectInteractionButton(string id)
     {
         return SelectInteraction(id);

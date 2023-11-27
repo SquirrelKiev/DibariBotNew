@@ -164,7 +164,7 @@ public class XkcdManga : IManga
             var comicInfo = JsonConvert.DeserializeObject<XkcdComic>(await req.Content.ReadAsStringAsync());
 
             return comicInfo;
-        }, new CacheValueSettings());
+        }, new CacheValueSettings(TimeSpan.FromMinutes(15)));
     }
 
     private async Task<XkcdComic> GetLatestComic()
