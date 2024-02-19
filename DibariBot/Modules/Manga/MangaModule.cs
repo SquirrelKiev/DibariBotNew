@@ -1,6 +1,9 @@
-﻿namespace DibariBot.Modules.Manga;
+﻿using BotBase;
+using BotBase.Modules;
 
-public class MangaModule : DibariModule
+namespace DibariBot.Modules.Manga;
+
+public class MangaModule : BotModule
 {
     public class JumpModal : IModal
     {

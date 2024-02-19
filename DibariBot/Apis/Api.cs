@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using BotBase;
 using Newtonsoft.Json;
 
 namespace DibariBot.Apis;

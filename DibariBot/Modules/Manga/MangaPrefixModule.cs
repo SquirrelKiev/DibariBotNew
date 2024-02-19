@@ -1,9 +1,9 @@
-﻿using DibariBot.Modules.MDSearch;
+﻿using BotBase;
 using Discord.Commands;
 
 namespace DibariBot.Modules.Manga;
 
-public class MangaPrefixModule : DibariPrefixModule
+public class MangaPrefixModule : PrefixModule
 {
     [NamedArgumentType]
     public class NameableArguments

@@ -2,13 +2,6 @@
 
 public static class ModulePrefixes
 {
-    #region Misc
-
-    public const string RED_BUTTON = "rb:";
-    public const string ABOUT_OVERRIDE_TOGGLE = "ovt:";
-    
-    #endregion
-
     #region Manga Command
 
     public const string MANGA_PREFIX_BASE = "m";
@@ -24,13 +17,6 @@ public static class ModulePrefixes
 
     public const string MANGADEX_SEARCH_BUTTON_PREFIX = "mdsb:";
     public const string MANGADEX_SEARCH_DROPDOWN_PREFIX = "mdsd:";
-
-    #endregion
-
-    #region Config - Core
-
-    public const string CONFIG_PAGE_SELECT_PAGE = "c-s:";
-    public const string CONFIG_PAGE_SELECT_PAGE_BUTTON = "c-sb:";
 
     #endregion
 
@@ -74,16 +60,6 @@ public static class ModulePrefixes
     public const string CONFIG_FILTERS_EDIT_BASE = $"{CONFIG_FILTERS}e";
     public const string CONFIG_FILTERS_EDIT_BUTTON = $"{CONFIG_FILTERS_EDIT_BASE}:";
     public const string CONFIG_FILTERS_EDIT_FILTER_SELECT = $"{CONFIG_FILTERS_EDIT_BASE}-s:";
-
-    #endregion
-
-    #region Config - Prefix
-
-    public const string CONFIG_PREFIX_BASE = "c-p";
-    public const string CONFIG_PREFIX_MODAL = $"{CONFIG_PREFIX_BASE}-m";
-    public const string CONFIG_PREFIX_MODAL_PREFIX_TEXTBOX = $"{CONFIG_PREFIX_BASE}-ptb";
-    public const string CONFIG_PREFIX_MODAL_BUTTON = $"{CONFIG_PREFIX_MODAL}-b";
-    public const string PERMISSION_GROUP = "'User has Manage Guild or is in DM'";
 
     #endregion
 }

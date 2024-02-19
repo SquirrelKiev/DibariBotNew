@@ -1,4 +1,11 @@
-﻿using DibariBot.Database;
+﻿using System.Reflection;
+using BotBase;
+using BotBase.Database;
+using BotBase.Modules.About;
+using BotBase.Modules.ConfigCommand;
+using BotBase.Modules.Help;
+using DibariBot.Database;
+using DibariBot.Modules.ConfigCommand;
 using DibariBot.Modules.ConfigCommand.Pages;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -23,9 +30,9 @@ public class Bot
 
         Client = new DiscordSocketClient(new DiscordSocketConfig
         {
-            GatewayIntents = GatewayIntents.Guilds | 
-                             GatewayIntents.MessageContent | 
-                             GatewayIntents.GuildMessages | 
+            GatewayIntents = GatewayIntents.Guilds |
+                             GatewayIntents.MessageContent |
+                             GatewayIntents.GuildMessages |
                              GatewayIntents.DirectMessages,
             LogLevel = LogSeverity.Verbose
         });
@@ -44,17 +51,28 @@ public class Bot
         Log.Information("Services created.");
     }
 
-    private IServiceProvider CreateServices()
+    private ServiceProvider CreateServices()
     {
         var collection = new ServiceCollection()
             .AddCache(Config)
+            .AddSingleton<BotConfigBase>(Config)
             .AddSingleton(Config)
-            .AddSingleton<DbService>()
             .AddSingleton(Client)
             .AddSingleton(InteractionService)
             .AddSingleton(CommandService)
-            ;
-
+            .AddSingleton<DbService>()
+            .AddSingleton(x => (DbServiceBase<BotDbContext>)x.GetService<DbService>()!)
+            .AddSingleton<CommandHandler, DbCommandHandler<BotDbContext>>()
+            // for help command
+            .AddSingleton<OverrideTrackerService>()
+            .AddSingleton<HelpService>()
+            // about command
+            .AddSingleton<AboutService>()
+            // config command
+            .AddSingleton<ConfigCommandService>()
+            .AddSingleton(x => (ConfigCommandServiceBase<ConfigPage.Page>)x.GetService<ConfigCommandService>()!);
+        ;
+        
         collection.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName)
             .ConfigureHttpClient(DefaultHttpClientConfig);
 
@@ -78,6 +96,7 @@ public class Bot
         collection.Scan(scan => scan.FromAssemblyOf<Bot>()
             .AddClasses(classes => classes.AssignableTo<ConfigPage>())
             .As<ConfigPage>()
+            .As<ConfigPageBase<ConfigPage.Page>>()
             .WithTransientLifetime());
 
         return collection.BuildServiceProvider();
@@ -98,7 +117,9 @@ public class Bot
 
     private async Task RunAsync()
     {
-        await services.GetRequiredService<DbService>().Initialize();
+        var args = Environment.GetCommandLineArgs();
+        var migrationEnabled = !(args.Contains("nomigrate") || args.Contains("nukedb"));
+        await services.GetRequiredService<DbService>().Initialize(migrationEnabled);
 
 #if DEBUG
         if (Environment.GetCommandLineArgs().Contains("nukedb"))
@@ -147,6 +168,6 @@ public class Bot
     {
         Log.Information("Logged in as {user}#{discriminator} ({id})", Client.CurrentUser?.Username, Client.CurrentUser?.Discriminator, Client.CurrentUser?.Id);
 
-        await services.GetRequiredService<CommandHandler>().OnReady();
+        await services.GetRequiredService<CommandHandler>().OnReady(Assembly.GetExecutingAssembly());
     }
 }

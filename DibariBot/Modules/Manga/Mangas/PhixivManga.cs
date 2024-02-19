@@ -1,4 +1,5 @@
-﻿using DibariBot.Apis;
+﻿using BotBase;
+using DibariBot.Apis;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DibariBot.Modules.Manga;

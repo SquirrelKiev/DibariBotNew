@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel;
-using DibariBot.Database;
-using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using DibariBot.Database;
+using BotBase;
+using BotBase.Database;
 using DibariBot.Database.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DibariBot.Modules.Manga;
 

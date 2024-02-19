@@ -1,60 +1,32 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BotBase;
+using BotBase.Database;
+using SQLitePCL;
 
-namespace DibariBot.Database;
-
-public class DbService
+namespace DibariBot.Database
 {
-    private readonly BotConfig botConfig;
-
-    public DbService(BotConfig botConfig)
+    public class DbService : DbServiceBase<BotDbContext>
     {
-        this.botConfig = botConfig;
-    }
-
-    public async Task Initialize()
-    {
-        var args = Environment.GetCommandLineArgs();
-        var migrationEnabled = !(args.Contains("nomigrate") || args.Contains("nukedb"));
-
-        Log.Debug("Database migration: {migrationStatus}", migrationEnabled);
-
-        var context = GetDbContext();
-
-        if (context is SqliteContext)
+        public DbService(BotConfigBase botConfig) : base(botConfig)
         {
-            await context.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL");
         }
 
-        if (migrationEnabled)
+        public override BotDbContext GetDbContext()
         {
-            await context.Database.MigrateAsync();
+            BotDbContext context;
+
+            switch (botConfig.Database)
+            {
+                case BotConfig.DatabaseType.Postgresql:
+                    context = new PostgresqlContext(botConfig.DatabaseConnectionString);
+                    break;
+                case BotConfig.DatabaseType.Sqlite:
+                    context = new SqliteContext(botConfig.DatabaseConnectionString);
+                    break;
+                default:
+                    throw new NotSupportedException(botConfig.Database.ToString());
+            }
+
+            return context;
         }
-    }
-
-    public async Task ResetDatabase()
-    {
-        await using var dbContext = GetDbContext();
-
-        await dbContext.Database.EnsureDeletedAsync();
-        await dbContext.Database.EnsureCreatedAsync();
-    }
-
-    public BotContext GetDbContext()
-    {
-        BotContext context;
-
-        switch (botConfig.Database)
-        {
-            case BotConfig.DatabaseType.Postgresql:
-                context = new PostgresqlContext(botConfig.DatabaseConnectionString);
-                break;
-            case BotConfig.DatabaseType.Sqlite:
-                context = new SqliteContext(botConfig.DatabaseConnectionString);
-                break;
-            default:
-                throw new NotSupportedException(botConfig.Database.ToString());
-        }
-
-        return context;
     }
 }

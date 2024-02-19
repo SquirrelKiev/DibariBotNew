@@ -2,6 +2,7 @@
 using DibariBot.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DibariBot.Migrations.PostgresMigrations
 {
     [DbContext(typeof(PostgresqlContext))]
-    partial class PostgresqlContextModelSnapshot : ModelSnapshot
+    [Migration("20240219062803_SwitchToBotBase")]
+    partial class SwitchToBotBase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

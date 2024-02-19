@@ -1,8 +1,10 @@
-﻿using Discord.Commands;
+﻿using BotBase;
+using BotBase.Modules;
+using Discord.Commands;
 
 namespace DibariBot.Modules.MDSearch;
 
-public class SearchPrefixModule : DibariPrefixModule
+public class SearchPrefixModule : PrefixModule
 {
     [NamedArgumentType]
     public class NameableArguments

@@ -14,7 +14,27 @@ namespace DibariBot.Migrations.SqliteMigrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.11");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
+
+            modelBuilder.Entity("BotBase.Database.GuildPrefixPreference", b =>
+                {
+                    b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Prefix")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId")
+                        .IsUnique();
+
+                    b.ToTable("GuildPrefixPreferences");
+                });
 
             modelBuilder.Entity("DibariBot.Database.Models.DefaultManga", b =>
                 {
@@ -37,26 +57,6 @@ namespace DibariBot.Migrations.SqliteMigrations
                         .IsUnique();
 
                     b.ToTable("DefaultMangas");
-                });
-
-            modelBuilder.Entity("DibariBot.Database.Models.GuildConfig", b =>
-                {
-                    b.Property<uint>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<ulong>("GuildId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Prefix")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuildId")
-                        .IsUnique();
-
-                    b.ToTable("GuildConfig");
                 });
 
             modelBuilder.Entity("DibariBot.Database.Models.RegexChannelEntry", b =>

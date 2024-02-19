@@ -1,6 +1,10 @@
 ﻿using DibariBot.Database;
-using DibariBot.Database.Models;
+using BotBase;
+using BotBase.Database;
+using BotBase.Modules;
+using BotBase.Modules.ConfigCommand;
 using Microsoft.EntityFrameworkCore;
+using DibariBot.Database.Models;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
 
@@ -43,21 +47,21 @@ public class DefaultMangaPage : ConfigPage
     public override bool EnabledInDMs => true;
 
     private readonly DbService dbService;
-    private readonly ConfigCommandService configCommandService;
+    private readonly ConfigCommandServiceBase<Page> configCommandService;
 
-    public DefaultMangaPage(DbService db, ConfigCommandService configCommandService)
+    public DefaultMangaPage(DbService db, ConfigCommandServiceBase<Page> configCommandService)
     {
         dbService = db;
         this.configCommandService = configCommandService;
     }
 
     // step 1 - help page/modal open
-    public override async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
+    public override async Task<MessageContents> GetMessageContents(ConfigCommandServiceBase<Page>.State state)
     {
         var embed = GetCurrentDefaultsEmbed(await GetMangaDefaultsList());
 
         var components = new ComponentBuilder()
-            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configCommandService.ConfigPages, Id, IsDm()))
+            .WithSelectMenu(GetPageSelectDropdown(configCommandService.ConfigPages, Id, IsDm()))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Set")
                 .WithCustomId($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_SET}")
@@ -110,8 +114,8 @@ public class DefaultMangaPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE_DROPDOWN)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task RemoveMangaDropdown(string id)
     {
         await DeferAsync();
@@ -134,12 +138,12 @@ public class DefaultMangaPage : ConfigPage
         }
 
         await ModifyOriginalResponseAsync(await GetMessageContents(
-            new ConfigCommandService.State(page: Page.DefaultManga)));
+            new ConfigCommandServiceBase<Page>.State(page: Page.DefaultManga)));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task RemoveMangaButton()
     {
         await DeferAsync();
@@ -150,7 +154,7 @@ public class DefaultMangaPage : ConfigPage
         var cancelButton = new ButtonBuilder()
                 .WithLabel("Cancel")
                 .WithStyle(ButtonStyle.Danger)
-                .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
+                .WithCustomId(BaseModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
                     StateSerializer.SerializeObject(StateSerializer.SerializeObject(Id))
                 );
 
@@ -186,8 +190,8 @@ public class DefaultMangaPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task OpenModal()
     {
         await RespondWithModalAsync<DefaultMangaSetModal>(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_MODAL);
@@ -195,8 +199,8 @@ public class DefaultMangaPage : ConfigPage
 
     // step 2 - confirm section
     [ModalInteraction($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_MODAL}")]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task OnModalResponse(DefaultMangaSetModal modal)
     {
         await DeferAsync();
@@ -223,8 +227,8 @@ public class DefaultMangaPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_CHANNEL_INPUT + "*")]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task OnChannelSet(string id, IChannel[] channel)
     {
         // should be doing UpdateAsync but i have no clue how to get that kekw
@@ -263,7 +267,7 @@ public class DefaultMangaPage : ConfigPage
 
         components.WithButton(new ButtonBuilder()
             .WithLabel("Cancel")
-            .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
+            .WithCustomId(BaseModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
                 StateSerializer.SerializeObject(StateSerializer.SerializeObject(Id)))
             .WithStyle(ButtonStyle.Danger));
 
@@ -272,8 +276,8 @@ public class DefaultMangaPage : ConfigPage
 
     // step 3 - we've got a submit!!
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_SUBMIT_BUTTON + "*")]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task OnConfirmed(string id)
     {
         await DeferAsync();
@@ -306,6 +310,6 @@ public class DefaultMangaPage : ConfigPage
         }
 
         await ModifyOriginalResponseAsync(
-            await configCommandService.GetMessageContents(new ConfigCommandService.State(page: Id), Context));
+            await configCommandService.GetMessageContents(new ConfigCommandServiceBase<Page>.State(page: Id), Context));
     }
 }

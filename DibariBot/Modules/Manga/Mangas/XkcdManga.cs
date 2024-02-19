@@ -1,4 +1,5 @@
-﻿using DibariBot.Apis;
+﻿using BotBase;
+using DibariBot.Apis;
 using Newtonsoft.Json;
 
 namespace DibariBot.Modules.Manga;

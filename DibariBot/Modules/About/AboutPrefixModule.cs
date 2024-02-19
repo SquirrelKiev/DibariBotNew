@@ -1,8 +1,10 @@
-﻿using Discord.Commands;
+﻿using BotBase;
+using BotBase.Modules.About;
+using Discord.Commands;
 
 namespace DibariBot.Modules.About;
 
-public class AboutPrefixModule : DibariPrefixModule
+public class AboutPrefixModule : PrefixModule
 {
     private readonly AboutService aboutService;
 
@@ -13,7 +15,7 @@ public class AboutPrefixModule : DibariPrefixModule
 
     [Command("about")]
     [ParentModulePrefix(typeof(AboutModule))]
-    public async Task AboutSlash()
+    public async Task AboutCommand()
     {
         if (Context.Guild != null && Context.Guild.Id == 695200821910044783ul)
             return;

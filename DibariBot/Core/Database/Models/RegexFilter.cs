@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using BotBase.Database;
 
 namespace DibariBot.Database.Models;
 

@@ -1,18 +1,22 @@
-﻿using DibariBot.Database;
-using DibariBot.Database.Extensions;
+﻿using BotBase;
+using BotBase.Database;
+using BotBase.Modules.Help;
+using DibariBot.Database;
 using Discord.Commands;
 
 namespace DibariBot.Modules.Help;
 
-public class HelpPrefixModule : DibariPrefixModule
+public class HelpPrefixModule : PrefixModule
 {
     private readonly DbService dbService;
     private readonly HelpService helpService;
+    private readonly BotConfigBase botConfig;
 
-    public HelpPrefixModule(DbService dbService, HelpService helpService)
+    public HelpPrefixModule(DbService dbService, HelpService helpService, BotConfigBase botConfig)
     {
         this.dbService = dbService;
         this.helpService = helpService;
+        this.botConfig = botConfig;
     }
 
     [Command("help")]
@@ -25,7 +29,7 @@ public class HelpPrefixModule : DibariPrefixModule
 
         await DeferAsync();
 
-        var prefix = Context.Guild != null ? await dbService.GetPrefix(Context.Guild.Id) : null;
+        var prefix = Context.Guild != null ? await dbService.GetPrefix(Context.Guild.Id, botConfig.DefaultPrefix) : null;
         var contents = helpService.GetMessageContents(prefix);
 
         await ReplyAsync(contents);

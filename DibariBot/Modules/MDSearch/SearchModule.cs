@@ -1,8 +1,10 @@
-﻿using DibariBot.Modules.Manga;
+﻿using BotBase;
+using BotBase.Modules;
+using DibariBot.Modules.Manga;
 
 namespace DibariBot.Modules.MDSearch;
 
-public class SearchModule : DibariModule
+public class SearchModule : BotModule
 {
     private readonly SearchService searchService;
     private readonly MangaService mangaService;

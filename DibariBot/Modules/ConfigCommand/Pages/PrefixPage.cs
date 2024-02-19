@@ -1,18 +1,13 @@
-﻿using DibariBot.Database;
-using DibariBot.Database.Extensions;
+﻿using BotBase;
+using BotBase.Database;
+using BotBase.Modules;
+using BotBase.Modules.ConfigCommand;
+using DibariBot.Database;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
 
 public class PrefixPage : ConfigPage
 {
-    public class SetPrefixModal : IModal
-    {
-        public string Title => "Set Prefix";
-
-        [ModalTextInput(customId: ModulePrefixes.CONFIG_PREFIX_MODAL_PREFIX_TEXTBOX, minLength: 1, maxLength: 10)]
-        public string Prefix { get; set; } = "";
-    }
-
     public override Page Id => Page.Prefix;
     
     public override string Label => "Prefix";
@@ -21,58 +16,39 @@ public class PrefixPage : ConfigPage
 
     public override bool EnabledInDMs => false;
 
-    private readonly ConfigCommandService configCommandService;
-    private readonly DbService dbService;
+    private readonly ConfigCommandServiceBase<Page> configCommandService;
+    private readonly PrefixPageImpl<Page, BotDbContext> prefixPageImpl;
 
-    public PrefixPage(ConfigCommandService configCommandService, DbService dbService)
+    public PrefixPage(ConfigCommandServiceBase<Page> configCommandService, DbService dbService, BotConfigBase botConfig)
     {
         this.configCommandService = configCommandService;
-        this.dbService = dbService;
+
+        prefixPageImpl = new PrefixPageImpl<Page,BotDbContext>(configCommandService, dbService, this, botConfig);
     }
 
-    public override async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
+    public override Task<MessageContents> GetMessageContents(ConfigCommandServiceBase<Page>.State state)
     {
-        var prefix = await dbService.GetPrefix(Context.Guild.Id);
-
-        var embed = new EmbedBuilder()
-            .WithFields(new EmbedFieldBuilder()
-                .WithName("Prefix")
-                .WithValue($"`{prefix}`"))
-            .WithColor(CommandResult.Default);
-
-        var components = new ComponentBuilder()
-            .WithSelectMenu(ConfigPageUtility.GetPageSelectDropdown(configCommandService.ConfigPages, Id, IsDm()))
-            .WithButton("Change Prefix", ModulePrefixes.CONFIG_PREFIX_MODAL_BUTTON, ButtonStyle.Secondary)
-            .WithRedButton();
-
-        return new MessageContents(string.Empty, embed.Build(), components);
+        return prefixPageImpl.GetMessageContents();
     }
 
-    [ComponentInteraction(ModulePrefixes.CONFIG_PREFIX_MODAL_BUTTON)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
-    public async Task OnChangeButton()
+    [ComponentInteraction(BaseModulePrefixes.CONFIG_PREFIX_MODAL_BUTTON)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
+    public Task OnChangeButton()
     {
-        var prefix = await dbService.GetPrefix(Context.Guild.Id);
-
-        await Context.Interaction.RespondWithModalAsync<SetPrefixModal>(ModulePrefixes.CONFIG_PREFIX_MODAL, modifyModal:
-            builder =>
-            {
-                builder.UpdateTextInput(ModulePrefixes.CONFIG_PREFIX_MODAL_PREFIX_TEXTBOX,
-                    input => input.Value = prefix);
-            });
+        return prefixPageImpl.OnChangeButton();
     }
 
-    [ModalInteraction(ModulePrefixes.CONFIG_PREFIX_MODAL)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = ModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = ModulePrefixes.PERMISSION_GROUP)]
+    [ModalInteraction(BaseModulePrefixes.CONFIG_PREFIX_MODAL)]
+    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
+    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task OnModal(SetPrefixModal modal)
     {
         await DeferAsync();
 
-        await dbService.SetPrefix(Context.Guild.Id, modal.Prefix);
+        await prefixPageImpl.OnModal(modal);
 
         await ModifyOriginalResponseAsync(
-            await configCommandService.GetMessageContents(new ConfigCommandService.State(page: Id), Context));
+            await configCommandService.GetMessageContents(new ConfigCommandServiceBase<Page>.State(page: Id), Context));
     }
 }

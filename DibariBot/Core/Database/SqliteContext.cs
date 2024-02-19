@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DibariBot.Database;
 
-public class SqliteContext : BotContext
+public class SqliteContext : BotDbContext
 {
     public SqliteContext(string connStr = "Data Source=data/DibariBot.db") : base(connStr)
     {

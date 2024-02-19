@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using BotBase;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DibariBot.Apis;
 
