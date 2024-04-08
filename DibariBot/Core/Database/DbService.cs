@@ -1,6 +1,5 @@
 ﻿using BotBase;
 using BotBase.Database;
-using SQLitePCL;
 
 namespace DibariBot.Database
 {
