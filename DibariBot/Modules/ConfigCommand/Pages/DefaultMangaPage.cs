@@ -1,6 +1,5 @@
 ﻿using DibariBot.Database;
 using BotBase;
-using BotBase.Database;
 using BotBase.Modules;
 using BotBase.Modules.ConfigCommand;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +7,9 @@ using DibariBot.Database.Models;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
 
+[RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
+[RequireContext(ContextType.DM | ContextType.Group, Group = BaseModulePrefixes.PERMISSION_GROUP)]
+[HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
 public class DefaultMangaPage : ConfigPage
 {
     public class DefaultMangaSetModal : IModal
@@ -114,8 +116,6 @@ public class DefaultMangaPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE_DROPDOWN)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task RemoveMangaDropdown(string id)
     {
         await DeferAsync();
@@ -142,8 +142,6 @@ public class DefaultMangaPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task RemoveMangaButton()
     {
         await DeferAsync();
@@ -190,8 +188,6 @@ public class DefaultMangaPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task OpenModal()
     {
         await RespondWithModalAsync<DefaultMangaSetModal>(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_MODAL);
@@ -199,8 +195,6 @@ public class DefaultMangaPage : ConfigPage
 
     // step 2 - confirm section
     [ModalInteraction($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_MODAL}")]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task OnModalResponse(DefaultMangaSetModal modal)
     {
         await DeferAsync();
@@ -227,8 +221,6 @@ public class DefaultMangaPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_CHANNEL_INPUT + "*")]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task OnChannelSet(string id, IChannel[] channel)
     {
         // should be doing UpdateAsync but i have no clue how to get that kekw
@@ -276,8 +268,6 @@ public class DefaultMangaPage : ConfigPage
 
     // step 3 - we've got a submit!!
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_SUBMIT_BUTTON + "*")]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task OnConfirmed(string id)
     {
         await DeferAsync();

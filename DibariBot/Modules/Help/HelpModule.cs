@@ -5,22 +5,13 @@ using DibariBot.Database;
 
 namespace DibariBot.Modules.Help;
 
-public class HelpModule : BotModule
+[CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
+[IntegrationType(ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall)]
+public class HelpModule(DbService dbService, HelpService helpService, BotConfigBase botConfig)
+    : BotModule
 {
-    private readonly DbService dbService;
-    private readonly HelpService helpService;
-    private readonly BotConfigBase botConfig;
-
-    public HelpModule(DbService dbService, HelpService helpService, BotConfigBase botConfig)
-    {
-        this.dbService = dbService;
-        this.helpService = helpService;
-        this.botConfig = botConfig;
-    }
-
     [SlashCommand("help", "Help! What are all the commands?")]
     [HelpPageDescription("Pulls up this page!")]
-    [EnabledInDm(true)]
     public async Task HelpSlash()
     {
         await DeferAsync();

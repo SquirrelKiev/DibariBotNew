@@ -1,27 +1,18 @@
 ﻿using BotBase;
-using BotBase.Modules;
 using DibariBot.Modules.Manga;
 
 namespace DibariBot.Modules.MDSearch;
 
-public class SearchModule : BotModule
+[CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
+[IntegrationType(ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall)]
+public class SearchModule(SearchService search, MangaService mangaService) : BotModule
 {
-    private readonly SearchService searchService;
-    private readonly MangaService mangaService;
-
-    public SearchModule(SearchService search, MangaService mangaService)
-    {
-        searchService = search;
-        this.mangaService = mangaService;
-    }
-
     [SlashCommand("manga-search", "Searches MangaDex for the query provided. (searches titles, sorted by relevance)")]
-    [EnabledInDm(true)]
     public async Task SearchSlash(string query, bool ephemeral = false, bool spoiler = false)
     {
         await DeferAsync(ephemeral);
 
-        await FollowupAsync(await searchService.GetMessageContents(new SearchService.State() { query = query, isSpoiler = spoiler}));
+        await FollowupAsync(await search.GetMessageContents(new SearchService.State() { query = query, isSpoiler = spoiler}));
     }
 
     [ComponentInteraction(ModulePrefixes.MANGADEX_SEARCH_BUTTON_PREFIX + "*")]
@@ -31,7 +22,7 @@ public class SearchModule : BotModule
 
         var state = StateSerializer.DeserializeObject<SearchService.State>(id);
 
-        await ModifyOriginalResponseAsync(await searchService.GetMessageContents(state));
+        await ModifyOriginalResponseAsync(await search.GetMessageContents(state));
     }
 
     [ComponentInteraction(ModulePrefixes.MANGADEX_SEARCH_DROPDOWN_PREFIX + "*")]

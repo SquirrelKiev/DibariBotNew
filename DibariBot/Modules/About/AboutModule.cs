@@ -3,15 +3,13 @@ using BotBase.Modules.About;
 
 namespace DibariBot.Modules.About;
 
-public class AboutModule : AboutModuleImpl
+[CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
+[IntegrationType(ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall)]
+public class AboutModule(AboutService aboutService, OverrideTrackerService overrideTrackerService)
+: AboutModuleImpl(aboutService, overrideTrackerService)
 {
-    public AboutModule(AboutService aboutService, OverrideTrackerService overrideTrackerService) : base(aboutService, overrideTrackerService)
-    {
-    }
-
     [SlashCommand("about", "Info about the bot.")]
     [HelpPageDescription("Pulls up info about the bot.")]
-    [EnabledInDm(true)]
     public override Task AboutSlash()
     {
         return base.AboutSlash();

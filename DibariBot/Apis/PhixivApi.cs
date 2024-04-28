@@ -4,20 +4,14 @@ using Microsoft.Extensions.DependencyInjection;
 namespace DibariBot.Apis;
 
 [Inject(ServiceLifetime.Singleton)]
-public class PhixivApi
+public class PhixivApi(IHttpClientFactory http, ICacheProvider cache, BotConfig botConfig)
 {
-    private readonly Api api;
-    private readonly Uri baseUri;
+    private readonly Api api = new(http, cache);
+    private readonly Uri baseUri = new(botConfig.PhixivUrl);
 
     //private readonly BotConfig botConfig;
 
-    public PhixivApi(IHttpClientFactory http, ICacheProvider cache, BotConfig botConfig)
-    {
-        //this.botConfig = botConfig;
-        api = new Api(http, cache);
-
-        baseUri = new Uri(botConfig.PhixivUrl);
-    }
+    //this.botConfig = botConfig;
 
     public Task<PhixivInfoSchema?> GetById(string id)
     {

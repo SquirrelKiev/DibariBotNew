@@ -6,8 +6,9 @@ using System.Web;
 
 namespace DibariBot.Apis;
 
-// gotta be a faster way of doing this, like,, why is this not built in in some form
+// gotta be a faster way of doing this, like, why is this not built-in in some form
 // if perf was a concern this wouldn't exist
+// future me: literally just use Fergun.Interactive why did you do all this work lol
 public static class QueryStringSerializer
 {
     public static string ToQueryParams(object obj)
@@ -20,7 +21,7 @@ public static class QueryStringSerializer
         return string.Join("&", dict.Select(kvp => $"{kvp.Key}={kvp.Value}"));
     }
 
-    public static Dictionary<string, string>? ToUrlEncodedKeyValue(object obj)
+    public static Dictionary<string, string>? ToUrlEncodedKeyValue(object? obj)
     {
         if (obj == null)
         {

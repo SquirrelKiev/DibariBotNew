@@ -9,7 +9,13 @@ using Humanizer;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
 
-public partial class RegexFiltersPage : ConfigPage
+[RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
+[HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
+public partial class RegexFiltersPage(
+    MangaService mangaService,
+    ConfigCommandServiceBase<ConfigPage.Page> configCommandService,
+    BotConfig config)
+    : ConfigPage
 {
     public class SetRegexModal : IModal
     {
@@ -36,16 +42,7 @@ public partial class RegexFiltersPage : ConfigPage
     private const string EMBED_NAME_FILTER_TYPE = "Filter Type";
     private const string EMBED_NAME_SCOPE = "Channel Scope";
 
-    private readonly MangaService mangaService;
-    private readonly ConfigCommandServiceBase<Page> configCommandService;
-    private readonly BotConfig config;
-
-    public RegexFiltersPage(MangaService mangaService, ConfigCommandServiceBase<Page> configCommandService, BotConfig config)
-    {
-        this.mangaService = mangaService;
-        this.configCommandService = configCommandService;
-        this.config = config;
-    }
+    private readonly BotConfig config = config;
 
     public override async Task<MessageContents> GetMessageContents(ConfigCommandServiceBase<Page>.State state)
     {
@@ -125,8 +122,6 @@ public partial class RegexFiltersPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_REMOVE_BUTTON)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     private async Task RemoveButton()
     {
         await DeferAsync();
@@ -143,8 +138,6 @@ public partial class RegexFiltersPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_REMOVE_FILTER_SELECT)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     private async Task RemoveFilterSelectChanged(string id)
     {
         await DeferAsync();
@@ -163,8 +156,6 @@ public partial class RegexFiltersPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_EDIT_BUTTON)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     private async Task EditButton()
     {
         await DeferAsync();
@@ -181,8 +172,6 @@ public partial class RegexFiltersPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_EDIT_FILTER_SELECT)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     private async Task EditFilterSelectChanged(string id)
     {
         await DeferAsync();
@@ -199,8 +188,6 @@ public partial class RegexFiltersPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_OPEN_MODAL_BUTTON + "*")]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     public async Task OpenModalButton(uint id)
     {
         RegexFilter? filter = null;
@@ -257,8 +244,6 @@ public partial class RegexFiltersPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_CONFIRMATION_ADD_BUTTON)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     private async Task ConfirmationAddButton()
     {
         await DeferAsync();
@@ -383,8 +368,6 @@ public partial class RegexFiltersPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_CONFIRMATION_CHANNEL_SELECT)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     private async Task UpsertConfirmationChannelSelectChanged(IChannel[] channels)
     {
         await DeferAsync();
@@ -407,8 +390,6 @@ public partial class RegexFiltersPage : ConfigPage
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_CONFIRMATION_CHANNEL_SCOPE)]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
     private async Task UpsertConfirmationChannelScopeChanged(string id)
     {
         await DeferAsync();

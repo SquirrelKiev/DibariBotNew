@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using DibariBot.Database;
 using BotBase;
-using BotBase.Database;
 using DibariBot.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -78,7 +77,7 @@ public partial class MangaService
                 return new MessageContents(string.Empty, embed:
                     new EmbedBuilder()
                         .WithDescription(
-                            "This server hasn't set a default manga! Please manually specify the URL.") // TODO: l18n
+                            "This server/channel hasn't got a default manga set! Please manually specify the URL.") // TODO: l18n
                         .WithColor(CommandResult.Failure)
                         .Build(), null);
             }
@@ -123,7 +122,7 @@ public partial class MangaService
 
             Log.Warning(ex, "Failed to get manga.");
 
-            return new MessageContents(string.Empty, errorEmbed, null);
+            return new MessageContents(string.Empty, errorEmbed);
         }
 
         var metadata = await manga.GetMetadata();
@@ -137,7 +136,7 @@ public partial class MangaService
                     .WithColor(CommandResult.Failure)
                     .Build();
 
-                return new MessageContents(string.Empty, errorEmbed, null);
+                return new MessageContents(string.Empty, errorEmbed);
             }
         }
         catch (RegexMatchTimeoutException)

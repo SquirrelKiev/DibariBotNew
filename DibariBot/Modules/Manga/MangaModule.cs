@@ -1,9 +1,10 @@
 ﻿using BotBase;
-using BotBase.Modules;
 
 namespace DibariBot.Modules.Manga;
 
-public class MangaModule : BotModule
+[CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
+[IntegrationType(ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall)]
+public class MangaModule(MangaService mangaHandler) : BotModule
 {
     public class JumpModal : IModal
     {
@@ -15,15 +16,7 @@ public class MangaModule : BotModule
         public int Page { get; set; }
     }
 
-    private readonly MangaService mangaHandler;
-
-    public MangaModule(MangaService mangaHandler)
-    {
-        this.mangaHandler = mangaHandler;
-    }
-
     [SlashCommand("manga", "Gets a page from a chapter of a manga.")]
-    [EnabledInDm(true)]
     public async Task MangaSlash(string url = "", string chapter = "", int page = 1, bool ephemeral = false, bool spoiler = false)
     {
         await DeferAsync(ephemeral);

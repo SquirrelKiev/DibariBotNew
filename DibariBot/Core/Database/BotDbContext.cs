@@ -4,15 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DibariBot.Database
 {
-    public class BotDbContext : BotDbContextBase
+    public class BotDbContext(string connectionString) : BotDbContextPrefixBase(connectionString)
     {
         public DbSet<DefaultManga> DefaultMangas { get; set; }
         public DbSet<RegexFilter> RegexFilters { get; set; }
         public DbSet<RegexChannelEntry> RegexChannelEntries { get; set; }
-
-        public BotDbContext(string connectionString) : base(connectionString)
-        {
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

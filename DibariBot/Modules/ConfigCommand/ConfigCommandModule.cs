@@ -5,17 +5,15 @@ using DibariBot.Modules.ConfigCommand.Pages;
 
 namespace DibariBot.Modules.ConfigCommand;
 
-public class ConfigCommandModule : ConfigCommandModuleBase<ConfigPage.Page>
+[CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
+[IntegrationType(ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall)]
+[RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
+[RequireContext(ContextType.DM | ContextType.Group, Group = BaseModulePrefixes.PERMISSION_GROUP)]
+[HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
+public class ConfigCommandModule(ConfigCommandServiceBase<ConfigPage.Page> configService)
+    : ConfigCommandModuleBase<ConfigPage.Page>(configService)
 {
-    public ConfigCommandModule(ConfigCommandServiceBase<ConfigPage.Page> configService) : base(configService)
-    {
-    }
-
-    [SlashCommand("config", "Pulls up various options for configuring the bot to the server's needs.")]
-    [RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [RequireContext(ContextType.DM | ContextType.Group, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
-    [EnabledInDm(true)]
+    [SlashCommand("config", "Pulls up various options for configuring the bot.")]
     public override Task ConfigSlash()
     {
         return base.ConfigSlash();

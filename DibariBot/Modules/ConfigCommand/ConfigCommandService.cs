@@ -3,9 +3,4 @@ using DibariBot.Modules.ConfigCommand.Pages;
 
 namespace DibariBot.Modules.ConfigCommand;
 
-public class ConfigCommandService : ConfigCommandServiceBase<ConfigPage.Page>
-{
-    public ConfigCommandService(IServiceProvider services) : base(services)
-    {
-    }
-}
+public class ConfigCommandService(IServiceProvider services) : ConfigCommandServiceBase<ConfigPage.Page>(services);

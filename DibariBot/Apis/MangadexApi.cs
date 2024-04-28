@@ -4,17 +4,10 @@ using DibariBot.Modules.Manga;
 namespace DibariBot.Apis;
 
 [Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
-public class MangaDexApi
+public class MangaDexApi(IHttpClientFactory http, ICacheProvider cache, BotConfig botConfig)
 {
-    private readonly Api api;
-    private readonly Uri baseUri;
-
-    public MangaDexApi(IHttpClientFactory http, ICacheProvider cache, BotConfig botConfig)
-    {
-        api = new Api(http, cache);
-
-        baseUri = new Uri(botConfig.MangaDexApiUrl);
-    }
+    private readonly Api api = new(http, cache);
+    private readonly Uri baseUri = new(botConfig.MangaDexApiUrl);
 
     public async Task<MangaListSchema> GetMangas(MangaListQueryParams queryParams)
     {
