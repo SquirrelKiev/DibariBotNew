@@ -209,7 +209,20 @@ public partial class MangaService
 
         bookmark.chapter = chapterData.id;
 
-        var pages = await manga.GetImageSrcs(bookmark.chapter);
+        ChapterSrcs pages;
+        try
+        {
+            pages = await manga.GetImageSrcs(bookmark.chapter);
+        }
+        catch(Exception ex)
+        {
+            var errorEmbed = new EmbedBuilder()
+                .WithDescription($"Failed to get chapter {bookmark.chapter}: `{ex.Message}`")
+                .WithColor(CommandResult.Failure)
+                .Build();
+
+            return new MessageContents(string.Empty, errorEmbed, null);
+        }
 
         if (bookmark.page > pages.srcs.Length - 1 || bookmark.page < 0)
         {
@@ -305,7 +318,7 @@ public partial class MangaService
     /// </remarks>
     private string GetProxiedUrl(string url, string platform)
     {
-        if (!config.PlatformsToProxy.Contains(platform.ToLower()))
+        if (!config.PlatformsToProxy.Contains(platform.ToLowerInvariant()))
             return url;
 
         return config.ProxyUrlEncoding switch
