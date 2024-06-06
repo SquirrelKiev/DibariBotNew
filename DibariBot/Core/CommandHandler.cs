@@ -78,7 +78,7 @@ public class CommandHandler(
         if (res.IsSuccess)
             return;
 
-        if (res.Error == CommandError.UnknownCommand)
+        if (res.Error != CommandError.Exception && res.Error != CommandError.UnmetPrecondition)
             return;
 
         try

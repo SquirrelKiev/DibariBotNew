@@ -8,7 +8,7 @@ using System.Threading.Channels;
 namespace DibariBot.Modules.Help;
 
 [Inject(ServiceLifetime.Singleton)]
-public class LazyHelpService(CommandHandler commandHandler)
+public class LazyHelpService
 {
     public MessageContents GetMessageContents(string prefix)
     {
