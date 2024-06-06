@@ -78,12 +78,9 @@ public static class Startup
             {
                 GatewayIntents = GatewayIntents.Guilds |
                                  GatewayIntents.MessageContent |
-                                 GatewayIntents.GuildMessageReactions |
                                  GatewayIntents.GuildMessages |
-                                 GatewayIntents.DirectMessages |
-                                 GatewayIntents.GuildMembers,
-                LogLevel = LogSeverity.Verbose,
-                AlwaysDownloadUsers = true
+                                 GatewayIntents.DirectMessages,
+                LogLevel = LogSeverity.Verbose
             }))
             .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>(),
                 new InteractionServiceConfig()
