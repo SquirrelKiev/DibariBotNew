@@ -4,20 +4,13 @@ using Discord.Commands;
 
 namespace DibariBot.Modules.MDSearch;
 
-public class SearchPrefixModule : PrefixModule
+public class SearchPrefixModule(SearchService search) : PrefixModule
 {
     [NamedArgumentType]
     public class NameableArguments
     {
         public bool Spoiler { get; set; } = false;
 
-    }
-
-    private readonly SearchService searchService;
-
-    public SearchPrefixModule(SearchService search)
-    {
-        searchService = search;
     }
 
     [Command("search")]
@@ -30,7 +23,7 @@ public class SearchPrefixModule : PrefixModule
 
         await DeferAsync();
 
-        await ReplyAsync(await searchService.GetMessageContents(new SearchService.State { query = query, isSpoiler = args.Spoiler }));
+        await ReplyAsync(await search.GetMessageContents(new SearchService.State { query = query, isSpoiler = args.Spoiler }));
     }
 
     [Command("search")]
@@ -43,6 +36,6 @@ public class SearchPrefixModule : PrefixModule
 
         await DeferAsync();
 
-        await ReplyAsync(await searchService.GetMessageContents(new SearchService.State { query = query, isSpoiler = false }));
+        await ReplyAsync(await search.GetMessageContents(new SearchService.State { query = query, isSpoiler = false }));
     }
 }

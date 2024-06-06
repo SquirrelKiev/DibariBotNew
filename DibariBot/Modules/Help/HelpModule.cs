@@ -7,7 +7,7 @@ namespace DibariBot.Modules.Help;
 
 [CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
 [IntegrationType(ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall)]
-public class HelpModule(DbService dbService, HelpService helpService, BotConfigBase botConfig)
+public class HelpModule(DbService dbService, LazyHelpService helpService, BotConfigBase botConfig)
     : BotModule
 {
     [SlashCommand("help", "Help! What are all the commands?")]
@@ -16,7 +16,7 @@ public class HelpModule(DbService dbService, HelpService helpService, BotConfigB
     {
         await DeferAsync();
 
-        var prefix = Context.Guild != null ? await dbService.GetPrefix(Context.Guild.Id, botConfig.DefaultPrefix) : null;
+        var prefix = Context.Guild != null ? await dbService.GetPrefix(Context.Guild.Id, botConfig.DefaultPrefix) : botConfig.DefaultPrefix;
         var contents = helpService.GetMessageContents(prefix);
 
         await FollowupAsync(contents);

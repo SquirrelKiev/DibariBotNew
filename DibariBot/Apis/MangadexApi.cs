@@ -1,20 +1,21 @@
 ﻿using BotBase;
 using DibariBot.Modules.Manga;
+using Microsoft.Extensions.Logging;
 
 namespace DibariBot.Apis;
 
 [Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
-public class MangaDexApi(IHttpClientFactory http, ICacheProvider cache, BotConfig botConfig)
+public class MangaDexApi(IHttpClientFactory http, ICacheProvider cache, BotConfig botConfig, ILogger<MangaDexApi> logger)
 {
-    private readonly Api api = new(http, cache);
+    private readonly Api api = new(http, cache, logger);
     private readonly Uri baseUri = new(botConfig.MangaDexApiUrl);
 
     public async Task<MangaListSchema> GetMangas(MangaListQueryParams queryParams)
     {
-        queryParams.includes = new ReferenceExpansionMangaSchema[]
-        {
+        queryParams.includes =
+        [
             ReferenceExpansionMangaSchema.Author
-        };
+        ];
 
         var uri = new Uri(baseUri, "manga?" + QueryStringSerializer.ToQueryParams(queryParams));
 
@@ -27,11 +28,11 @@ public class MangaDexApi(IHttpClientFactory http, ICacheProvider cache, BotConfi
     {
         var queryParams = new GetMangaIdParamsSchema()
         {
-            includes = new ReferenceExpansionMangaSchema[]
-            {
+            includes =
+            [
                 ReferenceExpansionMangaSchema.Author,
                 ReferenceExpansionMangaSchema.Artist
-            }
+            ]
         };
 
         var uri = new Uri(baseUri, "manga/" + id + '?' + QueryStringSerializer.ToQueryParams(queryParams));

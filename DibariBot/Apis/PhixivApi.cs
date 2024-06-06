@@ -1,12 +1,14 @@
 ﻿using BotBase;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace DibariBot.Apis;
 
 [Inject(ServiceLifetime.Singleton)]
-public class PhixivApi(IHttpClientFactory http, ICacheProvider cache, BotConfig botConfig)
+public class PhixivApi(IHttpClientFactory http, ICacheProvider cache, BotConfig botConfig, ILogger<PhixivApi> logger)
 {
-    private readonly Api api = new(http, cache);
+    private readonly Api api = new(http, cache, logger);
     private readonly Uri baseUri = new(botConfig.PhixivUrl);
 
     //private readonly BotConfig botConfig;

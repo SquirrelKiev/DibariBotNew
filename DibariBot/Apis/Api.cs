@@ -1,20 +1,12 @@
 ﻿using System.Diagnostics;
 using BotBase;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace DibariBot.Apis;
 
-public class Api
+public class Api(IHttpClientFactory httpFactory, ICacheProvider cache, ILogger logger)
 {
-    public readonly IHttpClientFactory httpFactory;
-    public readonly ICacheProvider cache;
-
-    public Api(IHttpClientFactory http, ICacheProvider cache)
-    {
-        httpFactory = http;
-        this.cache = cache;
-    }
-
     /// <summary>
     /// Gets and deserializes the result from whatever url is.
     /// </summary>
@@ -29,7 +21,7 @@ public class Api
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            Log.Verbose("Fetching {url}", uri);
+            logger.LogTrace("Fetching {url}", uri);
 
             using var client = httpFactory.CreateClient();
 
@@ -43,7 +35,7 @@ public class Api
             var json = await res.Content.ReadAsStringAsync();
             var obj = JsonConvert.DeserializeObject<T>(json);
 
-            Log.Verbose("Took {time:fff}ms to fetch {uri}", stopwatch.Elapsed, uri);
+            logger.LogTrace("Took {time:fff}ms to fetch {uri}", stopwatch.Elapsed, uri);
             stopwatch.Stop();
 
             return obj;

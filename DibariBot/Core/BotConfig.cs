@@ -60,7 +60,7 @@ namespace DibariBot
         public string ProxyUrl { get; set; } = "https://services.f-ck.me/v1/image/{{URL}}?source=dibari_bot";
 
         [YamlMember(Description = "What platforms should have their images proxied.")]
-        public string[] PlatformsToProxy { get; set; } = { "mangadex" };
+        public string[] PlatformsToProxy { get; set; } = ["mangadex"];
 
         public override string DefaultPrefix { get; set; } = "m.";
 
@@ -68,23 +68,24 @@ namespace DibariBot
 
         public override string AboutPageDescription { get; set; } = "A discord bot for reading manga, within Discord.";
 
-        public override AboutField[] AboutPageFields { get; set; } = {
-            new()
+        public override AboutField[] AboutPageFields { get; set; } =
+        [
+            new AboutField
             {
                 Name = "Total Servers:",
                 Value = "{{guilds}}"
             },
-            new()
+            new AboutField
             {
                 Name = "Credits:",
                 Value = "Bot by [SquirrelKiev](https://github.com/SquirrelKiev)"
             },
-            new()
+            new AboutField
             {
                 Name = "Source Code:",
                 Value = "https://github.com/SquirrelKiev/DibariBotNew"
             }
-        };
+        ];
 
         public enum ProxyUrlEncodingFormat
         {

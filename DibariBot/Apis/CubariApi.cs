@@ -1,24 +1,14 @@
 ﻿using BotBase;
+using Microsoft.Extensions.Logging;
 
 namespace DibariBot.Apis;
 
 [Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
-public class CubariApi
+public class CubariApi(IHttpClientFactory http, ICacheProvider cache, BotConfig botConfig, ILogger<CubariApi> logger)
 {
-    private readonly Api api;
-    private readonly Uri baseUri;
+    private readonly Api api = new(http, cache, logger);
+    private readonly Uri baseUri = new(botConfig.CubariUrl);
 
-    //private readonly BotConfig botConfig;
-
-    public CubariApi(IHttpClientFactory http, ICacheProvider cache, BotConfig botConfig)
-    {
-        //this.botConfig = botConfig;
-        api = new Api(http, cache);
-
-        baseUri = new Uri(botConfig.CubariUrl);
-    }
-
-    
     public Task<T?> Get<T>(string url, CacheValueSettings? cvs = null)
     {
         return api.Get<T>(new Uri(baseUri, url), cvs);

@@ -5,19 +5,25 @@ namespace DibariBot.Modules.Manga;
 [CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
 [IntegrationType(ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall)]
 public class MangaModule(MangaService mangaHandler) : BotModule
-{ 
+{
     public class JumpModal : IModal
     {
         public string Title => "Jump to Chapter/Page";
 
         [ModalTextInput(ModulePrefixes.MANGA_MODAL_CHAPTER_TEXTBOX)]
         public string Chapter { get; set; } = "";
+
         [ModalTextInput(ModulePrefixes.MANGA_MODAL_PAGE_TEXTBOX)]
         public int Page { get; set; }
     }
 
     [SlashCommand("manga", "Gets a page from a chapter of a manga.")]
-    public async Task MangaSlash(string url = "", string chapter = "", int page = 1, bool ephemeral = false, bool spoiler = false)
+    public async Task MangaSlash(
+        [Summary(description: "The URL of the manga.")] string url = "",
+        [Summary(description: "The chapter of the manga.")] string chapter = "",
+        [Summary(description: "The page number.")] int page = 1,
+        [Summary(description: "Whether the response should be ephemeral (only you can see it).")] bool ephemeral = false,
+        [Summary(description: "Whether to spoiler tag the response or not.")] bool spoiler = false)
     {
         await DeferAsync(ephemeral);
 

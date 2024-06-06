@@ -8,7 +8,9 @@ namespace DibariBot.Modules.MDSearch;
 public class SearchModule(SearchService search, MangaService mangaService) : BotModule
 {
     [SlashCommand("manga-search", "Searches MangaDex for the query provided. (searches titles, sorted by relevance)")]
-    public async Task SearchSlash(string query, bool ephemeral = false, bool spoiler = false)
+    public async Task SearchSlash([Summary(description: "The manga to search for.")] string query,
+        [Summary(description: "Whether the response should be ephemeral (only you can see it).")] bool ephemeral = false,
+        [Summary(description: "Whether to spoiler tag the response or not.")] bool spoiler = false)
     {
         await DeferAsync(ephemeral);
 

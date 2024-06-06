@@ -5,6 +5,7 @@ using DibariBot.Database;
 using BotBase;
 using DibariBot.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace DibariBot.Modules.Manga;
 
@@ -20,7 +21,7 @@ public enum MangaAction
 }
 
 [Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
-public partial class MangaService
+public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig, DbService dbService, ILogger<MangaService> logger)
 {
     public struct State
     {
@@ -48,17 +49,6 @@ public partial class MangaService
 
             return this;
         }
-    }
-
-    private readonly MangaFactory mangaFactory;
-    private readonly BotConfig config;
-    private readonly DbService dbService;
-
-    public MangaService(MangaFactory mangaFactory, BotConfig botConfig, DbService dbService)
-    {
-        this.mangaFactory = mangaFactory;
-        config = botConfig;
-        this.dbService = dbService;
     }
 
     public async Task<MessageContents> MangaCommand(ulong guildId, ulong channelId, string url = "",
@@ -120,7 +110,7 @@ public partial class MangaService
                 .WithColor(CommandResult.Failure)
                 .Build();
 
-            Log.Warning(ex, "Failed to get manga.");
+            logger.LogWarning(ex, "Failed to get manga.");
 
             return new MessageContents(string.Empty, errorEmbed);
         }
@@ -141,7 +131,7 @@ public partial class MangaService
         }
         catch (RegexMatchTimeoutException)
         {
-            Log.Warning(
+            logger.LogWarning(
                 "Long filter runtime (so long it caused a timeout!!), guild {guildId}. Might be worth checking for abuse?",
                 guildId);
 
@@ -318,14 +308,14 @@ public partial class MangaService
     /// </remarks>
     private string GetProxiedUrl(string url, string platform)
     {
-        if (!config.PlatformsToProxy.Contains(platform.ToLowerInvariant()))
+        if (!botConfig.PlatformsToProxy.Contains(platform.ToLowerInvariant()))
             return url;
 
-        return config.ProxyUrlEncoding switch
+        return botConfig.ProxyUrlEncoding switch
         {
-            BotConfig.ProxyUrlEncodingFormat.UrlEscaped => config.ProxyUrl.Replace("{{URL}}",
+            BotConfig.ProxyUrlEncodingFormat.UrlEscaped => botConfig.ProxyUrl.Replace("{{URL}}",
                 System.Web.HttpUtility.UrlEncode(url)),
-            BotConfig.ProxyUrlEncodingFormat.Base64 => config.ProxyUrl.Replace("{{URL}}",
+            BotConfig.ProxyUrlEncodingFormat.Base64 => botConfig.ProxyUrl.Replace("{{URL}}",
                 Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(url))),
             _ => throw new NotSupportedException(),
         };
@@ -497,7 +487,7 @@ public partial class MangaService
 
         foreach (var filter in filters)
         {
-            var remaining = config.RegexTimeout - stopwatch.Elapsed;
+            var remaining = botConfig.RegexTimeout - stopwatch.Elapsed;
 
             if (remaining <= TimeSpan.Zero)
             {
@@ -518,7 +508,7 @@ public partial class MangaService
 
         stopwatch.Stop();
 
-        Log.Verbose("Regex ran for: {time}. Guild: {guildId}, Channel: {channelId}", stopwatch.Elapsed, guildId,
+        logger.LogTrace("Regex ran for: {time}. Guild: {guildId}, Channel: {channelId}", stopwatch.Elapsed, guildId,
             channelId);
 
         return true;

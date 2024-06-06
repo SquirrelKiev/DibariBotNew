@@ -5,7 +5,7 @@ using DibariBot.Apis;
 namespace DibariBot.Modules.MDSearch;
 
 [BotBase.Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
-public class SearchService
+public class SearchService(MangaDexApi mdapi, BotConfig config)
 {
     public struct State
     {
@@ -17,18 +17,9 @@ public class SearchService
         public bool isSpoiler;
     }
 
-    private readonly MangaDexApi mangaDexApi;
-    private readonly BotConfig config;
-
-    public SearchService(MangaDexApi mdapi, BotConfig config)
-    {
-        mangaDexApi = mdapi;
-        this.config = config;
-    }
-
     public async Task<MessageContents> GetMessageContents(State state)
     {
-        var res = await mangaDexApi.GetMangas(new Apis.MangaListQueryParams
+        var res = await mdapi.GetMangas(new Apis.MangaListQueryParams
         {
             limit = config.MangaDexSearchLimit,
             offset = state.page * config.MangaDexSearchLimit,

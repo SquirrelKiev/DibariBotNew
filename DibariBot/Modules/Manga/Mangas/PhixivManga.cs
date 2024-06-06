@@ -5,17 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 namespace DibariBot.Modules.Manga;
 
 [Inject(ServiceLifetime.Transient)]
-public class PhixivManga : IManga
+public class PhixivManga(PhixivApi api) : IManga
 {
     private SeriesIdentifier identifier;
 
-    private readonly PhixivApi api;
-    private PhixivInfoSchema artworkInfo;
-
-    public PhixivManga(PhixivApi api)
-    {
-        this.api = api;
-    }
+    private PhixivInfoSchema artworkInfo = null!;
 
     public async Task<IManga> Initialize(SeriesIdentifier id)
     {

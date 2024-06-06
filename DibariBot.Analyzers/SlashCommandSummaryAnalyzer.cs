@@ -18,7 +18,8 @@ public class SlashCommandSummaryAnalyzer : DiagnosticAnalyzer
     private const string Category = "Usage";
 
 #pragma warning disable RS2008 // Enable analyzer release tracking
-    private static DiagnosticDescriptor Rule = new(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: Description);
+    private static readonly DiagnosticDescriptor Rule = 
+        new(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: Description);
 #pragma warning restore RS2008 // Enable analyzer release tracking
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
@@ -53,8 +54,8 @@ public class SlashCommandSummaryAnalyzer : DiagnosticAnalyzer
                 context.ReportDiagnostic(diagnostic);
                 continue;
             }
-        }
 
-        // TODO: check if the summary has the description set
+            // should probably check if the attribute has a description set but this is probably fine
+        }
     }
 }
