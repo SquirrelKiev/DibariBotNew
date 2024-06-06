@@ -5,7 +5,7 @@ namespace DibariBot.Modules.Manga;
 [CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
 [IntegrationType(ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall)]
 public class MangaModule(MangaService mangaHandler) : BotModule
-{
+{ 
     public class JumpModal : IModal
     {
         public string Title => "Jump to Chapter/Page";

@@ -24,6 +24,7 @@ public class PhixivApi(IHttpClientFactory http, ICacheProvider cache, BotConfig 
     }
 }
 
+#nullable disable
 public class PhixivInfoSchema
 {
     public string[] urls;
@@ -38,3 +39,4 @@ public class PhixivAuthorSchema
     public string id;
     public string name;
 }
+#nullable enable

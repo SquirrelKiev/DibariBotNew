@@ -1,4 +1,5 @@
 ﻿using BotBase;
+using Serilog.Events;
 using YamlDotNet.Serialization;
 
 namespace DibariBot
@@ -12,13 +13,13 @@ namespace DibariBot
         public override DatabaseType Database { get; set; } = DatabaseType.Sqlite;
         public override string DatabaseConnectionString { get; set; } = "Data Source=data/DibariBot.db";
         public override string ErrorEmote { get; set; } = "\u2753";
-        public override HashSet<ulong> ManagerUserIds { get; set; } = new()
-        {
-            0ul
-        };
+        public override HashSet<ulong> ManagerUserIds { get; set; } = [0ul];
 
         public override string SeqUrl { get; set; } = "";
         public override string SeqApiKey { get; set; } = "";
+
+        [YamlMember(Description = "The logging level to use.")]
+        public LogEventLevel LogEventLevel { get; set; } = LogEventLevel.Information;
 
         [YamlMember(Description = "The base URL for Cubari requests.\n" +
                                   "Only really should be changed if you're using a self-hosted instance for whatever reason.")]
