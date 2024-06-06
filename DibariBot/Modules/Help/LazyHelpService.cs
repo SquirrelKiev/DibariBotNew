@@ -1,9 +1,5 @@
 ﻿using BotBase;
-using BotBase.Database;
-using DibariBot.Database;
-using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Channels;
 
 namespace DibariBot.Modules.Help;
 
