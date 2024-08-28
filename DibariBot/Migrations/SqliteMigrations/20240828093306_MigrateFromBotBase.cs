@@ -15,11 +15,11 @@ namespace DibariBot.Migrations.SqliteMigrations
                 newName: "GuildConfigs");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_GuildPrefixPreferences",
+                name: "PK_GuildConfig",
                 table: "GuildConfigs");
 
             migrationBuilder.DropIndex(
-                name: "IX_GuildPrefixPreferences_GuildId",
+                name: "IX_GuildConfig_GuildId",
                 table: "GuildConfigs");
 
             migrationBuilder.DropColumn(
@@ -88,12 +88,12 @@ namespace DibariBot.Migrations.SqliteMigrations
                 oldNullable: true);
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_GuildPrefixPreferences",
+                name: "PK_GuildConfig",
                 table: "GuildPrefixPreferences",
                 column: "Id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GuildPrefixPreferences_GuildId",
+                name: "IX_GuildConfig_GuildId",
                 table: "GuildPrefixPreferences",
                 column: "GuildId",
                 unique: true);
