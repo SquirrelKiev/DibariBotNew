@@ -1,6 +1,4 @@
-﻿using BotBase.Database;
-
-namespace DibariBot.Database.Models;
+﻿namespace DibariBot.Database.Models;
 
 public class RegexChannelEntry : DbModel
 {

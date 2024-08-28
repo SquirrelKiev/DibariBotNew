@@ -1,18 +1,14 @@
-﻿using BotBase;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using System.Text;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog.Extensions.Logging;
 using Serilog.Sinks.SystemConsole.Themes;
-using BotBase.Database;
-using BotBase.Modules.About;
-using BotBase.Modules.ConfigCommand;
-using BotBase.Modules.Help;
+using DibariBot.Modules.About;
 using DibariBot.Database;
 using DibariBot.Modules.ConfigCommand.Pages;
 using DibariBot.Modules.ConfigCommand;
 using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Serilog;
@@ -28,7 +24,7 @@ public static class Startup
         Console.OutputEncoding = Encoding.UTF8;
         Log.Logger = new LoggerConfiguration().WriteTo.Console(outputTemplate: "[FALLBACK] [{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}").CreateLogger();
 
-        if (!new BotConfigFactory<BotConfig>().GetConfig(out var botConfig))
+        if (!new BotConfigFactory().GetConfig(out var botConfig))
         {
             Environment.Exit(1);
         }
@@ -71,7 +67,7 @@ public static class Startup
     private static IServiceCollection AddBotServices(this IServiceCollection serviceCollection, BotConfig botConfig)
     {
         serviceCollection
-            .AddSingleton<BotConfigBase>(botConfig)
+            .AddSingleton(botConfig)
             .AddCache(botConfig)
             .AddSingleton(botConfig)
             .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
@@ -94,16 +90,11 @@ public static class Startup
                 DefaultRunMode = Discord.Commands.RunMode.Async
             }))
             .AddSingleton<DbService>()
-            .AddSingleton(x => (DbServiceBase<BotDbContext>)x.GetService<DbService>()!)
             .AddSingleton<CommandHandler>()
-            // for help command
-            .AddSingleton<OverrideTrackerService>()
-            .AddSingleton<HelpService>()
             // about command
             .AddSingleton<AboutService>()
             // config command
-            .AddSingleton<ConfigCommandService>()
-            .AddSingleton(x => (ConfigCommandServiceBase<ConfigPage.Page>)x.GetService<ConfigCommandService>()!);
+            .AddSingleton<ConfigCommandService>();
         ;
 
         serviceCollection.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName)
@@ -131,7 +122,6 @@ public static class Startup
         serviceCollection.Scan(scan => scan.FromAssemblyOf<BotService>()
             .AddClasses(classes => classes.AssignableTo<ConfigPage>())
             .As<ConfigPage>()
-            .As<ConfigPageBase<ConfigPage.Page>>()
             .WithTransientLifetime());
 
         serviceCollection.AddHostedService<BotService>();

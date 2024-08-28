@@ -1,5 +1,4 @@
-﻿using BotBase;
-using DibariBot.Apis;
+﻿using DibariBot.Apis;
 using Newtonsoft.Json.Linq;
 
 namespace DibariBot.Modules.Manga;
@@ -15,7 +14,7 @@ public class CubariManga : IManga
 
     protected readonly CubariApi cubari;
 
-#pragma warning disable CS8618 // null error, technically true but only if Initialize() wasnt called which in that case, it should throw anyway
+#pragma warning disable CS8618 // null error, technically true but only if Initialize() wasn't called which in that case, it should throw anyway
     public CubariManga(CubariApi cubari)
     {
         this.cubari = cubari;
@@ -28,9 +27,13 @@ public class CubariManga : IManga
         ArgumentNullException.ThrowIfNull(id.platform, nameof(id.platform));
         ArgumentNullException.ThrowIfNull(id.series, nameof(id.series));
 
-        string url = $"read/api/{Uri.EscapeDataString(id.platform)}/series/{Uri.EscapeDataString(id.series)}";
+        string url =
+            $"read/api/{Uri.EscapeDataString(id.platform)}/series/{Uri.EscapeDataString(id.series)}";
 
-        var mangaRes = await cubari.Get<CubariMangaSchema>(url, new CacheValueSettings(TimeSpan.FromMinutes(15)));
+        var mangaRes = await cubari.Get<CubariMangaSchema>(
+            url,
+            new CacheValueSettings(TimeSpan.FromMinutes(15))
+        );
 
         Metadata = new MangaMetadata
         {
@@ -39,11 +42,17 @@ public class CubariManga : IManga
             author = mangaRes.author,
             artist = mangaRes.artist,
             tags = Array.Empty<string>(),
-            contentRating = id.platform == "nhentai" ? MangaAttributesSchema.ContentRating.Pornographic : MangaAttributesSchema.ContentRating.Unknown
+            contentRating =
+                id.platform == "nhentai"
+                    ? MangaAttributesSchema.ContentRating.Pornographic
+                    : MangaAttributesSchema.ContentRating.Unknown,
         };
         Groups = mangaRes.groups;
 
-        chapters = new SortedList<string, CubariChapterSchema>(mangaRes.chapters, new ChapterNameComparer());
+        chapters = new SortedList<string, CubariChapterSchema>(
+            mangaRes.chapters,
+            new ChapterNameComparer()
+        );
 
         this.identifier = new SeriesIdentifier(id.platform, mangaRes.slug);
 
@@ -54,10 +63,12 @@ public class CubariManga : IManga
     {
         return identifier;
     }
+
     public virtual Task<MangaMetadata> GetMetadata()
     {
         return Task.FromResult(Metadata);
     }
+
     public virtual string GetUrl(Bookmark bookmark)
     {
         return cubari.GetUrl(identifier, bookmark);
@@ -74,11 +85,14 @@ public class CubariManga : IManga
 
         return new(srcs, Groups[group.Key]);
     }
+
     protected virtual async Task<string[]> GetImageSrcsFromGroup(JToken token)
     {
         ArgumentNullException.ThrowIfNull(token, nameof(token));
 
         // sure hope no one does any weird recursion nonsense :clueless:
+        // wait that might actually be an issue that could crop up
+        // TODO: protect against weird recursion nonsense
         if (token.Type == JTokenType.String)
         {
             string url = token.ToString();
@@ -106,16 +120,19 @@ public class CubariManga : IManga
         // no clue what on earth we've received, bail
         throw new NotSupportedException();
     }
+
     public virtual Task<ChapterMetadata> GetChapterMetadata(string chapter)
     {
         var chapterData = chapters[chapter];
 
-        return Task.FromResult(new ChapterMetadata()
-        {
-            id = chapter,
-            title = chapterData.title,
-            volume = chapterData.volume
-        });
+        return Task.FromResult(
+            new ChapterMetadata()
+            {
+                id = chapter,
+                title = chapterData.title,
+                volume = chapterData.volume,
+            }
+        );
     }
 
     public virtual Task<string?> GetNextChapterKey(string currentChapterKey)
@@ -129,6 +146,7 @@ public class CubariManga : IManga
 
         return Task.FromResult<string?>(chapters.GetKeyAtIndex(nextChapterIndex));
     }
+
     public virtual Task<string?> GetPreviousChapterKey(string currentChapterKey)
     {
         var previousChapterKey = chapters.IndexOfKey(currentChapterKey) - 1;
@@ -150,12 +168,17 @@ public class CubariManga : IManga
     {
         return Task.FromResult(chapters.ContainsKey(chapter));
     }
-
 }
 
 public struct CubariMangaSchema
 {
-    public string slug, title, description, author, artist, cover, series_name;
+    public string slug,
+        title,
+        description,
+        author,
+        artist,
+        cover,
+        series_name;
     public Dictionary<string, string> groups;
     public Dictionary<string, CubariChapterSchema> chapters;
 }
@@ -174,7 +197,8 @@ public struct CubariChapterSchema
 
 public struct CubariImgurSchema
 {
-    public string description, src;
+    public string description,
+        src;
 }
 
 public struct ChapterSrcs

@@ -1,21 +1,34 @@
-﻿using BotBase.Modules;
-using BotBase;
-using BotBase.Modules.ConfigCommand;
-using DibariBot.Modules.ConfigCommand.Pages;
+﻿using DibariBot.Modules.ConfigCommand.Pages;
+using Discord.Interactions;
 
 namespace DibariBot.Modules.ConfigCommand;
 
 [CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
 [IntegrationType(ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall)]
-[RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-[RequireContext(ContextType.DM | ContextType.Group, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-[HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
-public class ConfigCommandModule(ConfigCommandServiceBase<ConfigPage.Page> configService)
-    : ConfigCommandModuleBase<ConfigPage.Page>(configService)
+[DefaultMemberPermissions(GuildPermission.ManageGuild)]
+public class ConfigCommandModule(ConfigCommandService configService) : BotModule
 {
-    [SlashCommand("config", "Pulls up various options for configuring the bot.")]
-    public override Task ConfigSlash()
+    [ComponentInteraction(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE)]
+    public async Task SelectInteraction(string id)
     {
-        return base.ConfigSlash();
+        await DeferAsync();
+
+        var page = StateSerializer.DeserializeObject<ConfigPage.Page>(id)!;
+
+        await ModifyOriginalResponseAsync(await configService.GetMessageContents(new(page: page, data: ""), Context));
+    }
+
+    [ComponentInteraction(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + "*")]
+    public Task SelectInteractionButton(string id)
+    {
+        return SelectInteraction(id);
+    }
+
+    [SlashCommand("config", "Pulls up various options for configuring the bot.")]
+    public async Task ConfigSlash()
+    {
+        await DeferAsync();
+
+        await FollowupAsync(await configService.GetMessageContents(new(), Context));
     }
 }

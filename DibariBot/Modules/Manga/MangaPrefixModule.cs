@@ -1,5 +1,4 @@
-﻿using BotBase;
-using Discord.Commands;
+﻿using Discord.Commands;
 
 namespace DibariBot.Modules.Manga;
 

@@ -9,38 +9,31 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DibariBot.Migrations.PostgresMigrations
 {
-    [DbContext(typeof(PostgresqlContext))]
+    [DbContext(typeof(PostgresContext))]
     partial class PostgresqlContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.2")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("BotBase.Database.GuildPrefixPreference", b =>
+            modelBuilder.Entity("DibariBot.Database.GuildConfig", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
                     b.Property<decimal>("GuildId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Prefix")
-                        .HasColumnType("text");
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
 
-                    b.HasKey("Id");
+                    b.HasKey("GuildId");
 
-                    b.HasIndex("GuildId")
-                        .IsUnique();
-
-                    b.ToTable("GuildPrefixPreferences");
+                    b.ToTable("GuildConfigs");
                 });
 
             modelBuilder.Entity("DibariBot.Database.Models.DefaultManga", b =>

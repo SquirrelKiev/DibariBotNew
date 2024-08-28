@@ -1,9 +1,6 @@
-﻿using BotBase;
-using BotBase.Modules.ConfigCommand;
+﻿namespace DibariBot.Modules.ConfigCommand.Pages;
 
-namespace DibariBot.Modules.ConfigCommand.Pages;
-
-public class HomePage : ConfigPage
+public class HomePage(ConfigCommandService configCommandService) : ConfigPage
 {
     public override Page Id => Page.Help;
 
@@ -13,13 +10,20 @@ public class HomePage : ConfigPage
 
     public override bool EnabledInDMs => true;
 
-    private readonly HomePageImpl<Page> homePageImpl;
-
-    public HomePage(ConfigCommandService configCommandService)
+    public override Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
     {
-        this.homePageImpl = new HomePageImpl<Page>(configCommandService, this);
-    }
+        var embed = new EmbedBuilder()
+            .WithColor(CommandResult.Default);
 
-    public override Task<MessageContents> GetMessageContents(ConfigCommandServiceBase<Page>.State state) =>
-        homePageImpl.GetMessageContents(state);
+        foreach (var page in configCommandService.ConfigPages.Values.Where(page => page.ShouldShow(IsDm())))
+        {
+            embed.AddField(page.Label, page.Description);
+        }
+
+        var components = new ComponentBuilder()
+            .WithSelectMenu(GetPageSelectDropdown(configCommandService.ConfigPages, Id, IsDm()))
+            .WithRedButton();
+
+        return Task.FromResult(new MessageContents("", embed.Build(), components));
+    }
 }

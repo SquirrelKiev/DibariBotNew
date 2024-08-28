@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DibariBot.Migrations.PostgresMigrations
 {
-    [DbContext(typeof(PostgresqlContext))]
+    [DbContext(typeof(PostgresContext))]
     [Migration("20231002195057_RegexFilters")]
     partial class RegexFilters
     {

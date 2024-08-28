@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DibariBot.Migrations.PostgresMigrations
 {
-    [DbContext(typeof(PostgresqlContext))]
+    [DbContext(typeof(PostgresContext))]
     [Migration("20231005223215_SqliteSupport")]
     partial class SqliteSupport
     {

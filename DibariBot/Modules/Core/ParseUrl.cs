@@ -2,7 +2,8 @@
 
 namespace DibariBot.Modules;
 
-#pragma warning disable SYSLIB1045 // Too much regex to be reasonable, performance hit is probably nothing too big. probably
+// TODO: Convert all of this to source-generated regex.
+#pragma warning disable SYSLIB1045
 
 public static class ParseUrl
 {

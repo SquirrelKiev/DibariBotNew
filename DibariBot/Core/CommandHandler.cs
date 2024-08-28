@@ -1,9 +1,7 @@
 ﻿using System.Reflection;
-using BotBase;
-using BotBase.Database;
-using BotBase.Modules.RedButton;
 using DibariBot.Database;
 using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 
@@ -15,15 +13,22 @@ public class CommandHandler(
     InteractionService interactionService,
     CommandService commandService,
     DiscordSocketClient client,
-    BotConfigBase botConfig,
+    BotConfig botConfig,
     IServiceProvider services,
     DbService dbService,
     ILogger<CommandHandler> logger)
 {
     public async Task OnReady(params Assembly[] assemblies)
     {
-        await InitializeInteractionService(assemblies);
-        await InitializeCommandService(assemblies);
+        try
+        {
+            await InitializeInteractionService(assemblies);
+            await InitializeCommandService(assemblies);
+        }
+        catch (Exception e)
+        {
+            logger.LogCritical(e, "Failed to register commands/interactions!");
+        }
     }
 
     #region Prefix Command Handling
@@ -63,11 +68,14 @@ public class CommandHandler(
 
     public async Task<string> GetPrefix(IChannel? channel)
     {
-        var prefix = botConfig.DefaultPrefix;
+        var prefix = GuildConfig.DefaultPrefix;
 
         if (channel is SocketTextChannel textChannel)
         {
-            prefix = await dbService.GetPrefix(textChannel.Guild.Id, botConfig.DefaultPrefix);
+            await using var context = dbService.GetDbContext();
+            var config = await context.GetGuildConfig(textChannel.Guild.Id);
+
+            prefix = config.Prefix;
         }
 
         return prefix;
@@ -173,7 +181,7 @@ public class CommandHandler(
 
     protected async Task InitializeInteractionService(params Assembly[] assemblies)
     {
-        foreach (var assembly in assemblies.Append(typeof(RedButtonModule).Assembly))
+        foreach (var assembly in assemblies)
         {
             var modules = await interactionService.AddModulesAsync(assembly, services);
 

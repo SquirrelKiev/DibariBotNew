@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel;
-using BotBase;
 using DibariBot.Apis;
 
 namespace DibariBot.Modules.MDSearch;
 
-[BotBase.Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
+[DibariBot.Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
 public class SearchService(MangaDexApi mdapi, BotConfig config)
 {
     public struct State

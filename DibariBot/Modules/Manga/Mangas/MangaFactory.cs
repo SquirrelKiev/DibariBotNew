@@ -1,7 +1,4 @@
-﻿using BotBase;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace DibariBot.Modules.Manga;
+﻿namespace DibariBot.Modules.Manga;
 
 [Inject(ServiceLifetime.Singleton)]
 public class MangaFactory
@@ -17,7 +14,7 @@ public class MangaFactory
     {
         Type? mangaType;
 
-        // TODO: ideally i dont have to change anything here to add a new manga/platform
+        // TODO: ideally I dont have to change anything here to add a new manga/platform
         mangaType = identifier.platform switch
         {
             "imgur" or

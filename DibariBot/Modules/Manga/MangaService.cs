@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using DibariBot.Database;
-using BotBase;
 using DibariBot.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -20,7 +19,7 @@ public enum MangaAction
     SendNonEphemeral,
 }
 
-[Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
+[Inject(ServiceLifetime.Singleton)]
 public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig, DbService dbService, ILogger<MangaService> logger)
 {
     public struct State
@@ -67,7 +66,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
                 return new MessageContents(string.Empty, embed:
                     new EmbedBuilder()
                         .WithDescription(
-                            "This server/channel hasn't got a default manga set! Please manually specify the URL.") // TODO: l18n
+                            "This server/channel hasn't got a default manga set! Please manually specify the URL.")
                         .WithColor(CommandResult.Failure)
                         .Build(), null);
             }
@@ -82,7 +81,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
             return new MessageContents(string.Empty, embed:
                 new EmbedBuilder()
                     .WithDescription(
-                        "Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot.") // TODO: l18n
+                        "Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot.")
                     .WithColor(CommandResult.Failure)
                     .Build(), null);
         }
@@ -494,7 +493,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
                 throw new RegexMatchTimeoutException();
             }
 
-            var hydrated = CaptureDryElement().Replace(filter.Template, m =>
+            var hydrated = CaptureTemplatedString().Replace(filter.Template, m =>
                 values.TryGetValue(m.Groups[1].Value, out var replacement) ? replacement : m.Value);
 
             var tripped = Regex.IsMatch(hydrated, filter.Filter, RegexOptions.IgnoreCase, remaining);
@@ -515,6 +514,5 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
     }
 
     [GeneratedRegex(@"\{\{(\w+)\}\}")]
-    // TODO: Better name
-    private static partial Regex CaptureDryElement();
+    private static partial Regex CaptureTemplatedString();
 }

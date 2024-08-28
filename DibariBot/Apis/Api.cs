@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using BotBase;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 

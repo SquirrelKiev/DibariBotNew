@@ -1,5 +1,5 @@
-﻿using BotBase;
-using DibariBot.Modules.Manga;
+﻿using DibariBot.Modules.Manga;
+using Discord.Interactions;
 
 namespace DibariBot.Modules.MDSearch;
 

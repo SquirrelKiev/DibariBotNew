@@ -14,26 +14,21 @@ namespace DibariBot.Migrations.SqliteMigrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
 
-            modelBuilder.Entity("BotBase.Database.GuildPrefixPreference", b =>
+            modelBuilder.Entity("DibariBot.Database.GuildConfig", b =>
                 {
-                    b.Property<uint>("Id")
+                    b.Property<ulong>("GuildId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<ulong>("GuildId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Prefix")
+                        .HasMaxLength(8)
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("GuildId");
 
-                    b.HasIndex("GuildId")
-                        .IsUnique();
-
-                    b.ToTable("GuildPrefixPreferences");
+                    b.ToTable("GuildConfigs");
                 });
 
             modelBuilder.Entity("DibariBot.Database.Models.DefaultManga", b =>

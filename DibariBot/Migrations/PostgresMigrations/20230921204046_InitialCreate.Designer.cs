@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DibariBot.Migrations.PostgresMigrations
 {
-    [DbContext(typeof(PostgresqlContext))]
+    [DbContext(typeof(PostgresContext))]
     [Migration("20230921204046_InitialCreate")]
     partial class InitialCreate
     {

@@ -1,20 +1,16 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
-using BotBase;
-using BotBase.Modules;
-using BotBase.Modules.ConfigCommand;
 using DibariBot.Database.Models;
 using DibariBot.Modules.Manga;
+using Discord.Interactions;
 using Humanizer;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
 
-[RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-[HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
+[DefaultMemberPermissions(GuildPermission.ManageGuild)]
 public partial class RegexFiltersPage(
     MangaService mangaService,
-    ConfigCommandServiceBase<ConfigPage.Page> configCommandService,
-    BotConfig config)
+    ConfigCommandService configCommandService)
     : ConfigPage
 {
     public class SetRegexModal : IModal
@@ -42,9 +38,7 @@ public partial class RegexFiltersPage(
     private const string EMBED_NAME_FILTER_TYPE = "Filter Type";
     private const string EMBED_NAME_SCOPE = "Channel Scope";
 
-    private readonly BotConfig config = config;
-
-    public override async Task<MessageContents> GetMessageContents(ConfigCommandServiceBase<Page>.State state)
+    public override async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
     {
         var embed = new EmbedBuilder().WithColor(CommandResult.Default);
 
@@ -132,7 +126,7 @@ public partial class RegexFiltersPage(
         {
             x.Components = new ComponentBuilder()
                 .WithSelectMenu(GetFilterSelectMenu(ModulePrefixes.CONFIG_FILTERS_REMOVE_FILTER_SELECT, filters))
-                .WithButton("Back", BaseModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + StateSerializer.SerializeObject(Id), ButtonStyle.Secondary)
+                .WithButton("Back", ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + StateSerializer.SerializeObject(Id), ButtonStyle.Secondary)
                 .Build();
         });
     }
@@ -152,7 +146,7 @@ public partial class RegexFiltersPage(
 
         await mangaService.RemoveFilter(filter);
 
-        await ModifyOriginalResponseAsync(await GetMessageContents(new ConfigCommandServiceBase<Page>.State(page: Id)));
+        await ModifyOriginalResponseAsync(await GetMessageContents(new ConfigCommandService.State(page: Id)));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_EDIT_BUTTON)]
@@ -166,7 +160,7 @@ public partial class RegexFiltersPage(
         {
             x.Components = new ComponentBuilder()
                 .WithSelectMenu(GetFilterSelectMenu(ModulePrefixes.CONFIG_FILTERS_EDIT_FILTER_SELECT, filters))
-                .WithButton("Back", BaseModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + StateSerializer.SerializeObject(Id), ButtonStyle.Secondary)
+                .WithButton("Back", ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + StateSerializer.SerializeObject(Id), ButtonStyle.Secondary)
                 .Build();
         });
     }
@@ -259,7 +253,7 @@ public partial class RegexFiltersPage(
         }
 
         await ModifyOriginalResponseAsync(await configCommandService.GetMessageContents(
-            new ConfigCommandServiceBase<Page>.State(page: Id), Context));
+            new ConfigCommandService.State(page: Id), Context));
     }
 
     private MessageContents UpsertConfirmation(RegexFilter filter)
@@ -302,8 +296,6 @@ public partial class RegexFiltersPage(
                         new SelectMenuOptionBuilder()
                             .WithDefault(x == filter.FilterType)
                             .WithLabel("Filter type: " + x.Humanize())
-                            // ehh i could do attributes but this is way easier (if against the whole, easily expandable principle ive been doing)
-                            // TODO: should be reusable tho for like help pages and stuff
                             .WithDescription(x switch
                             {
                                 FilterType.Allow => "If the manga matches the filter, it can be shown.",
@@ -321,8 +313,6 @@ public partial class RegexFiltersPage(
                         new SelectMenuOptionBuilder()
                             .WithDefault(x == filter.ChannelFilterScope)
                             .WithLabel("Channel scope: " + x.Humanize())
-                            // ehh i could do attributes but this is way easier (if against the whole, easily expandable principle ive been doing)
-                            // TODO: should be reusable tho for like help pages and stuff
                             .WithDescription(x switch
                             {
                                 ChannelFilterScope.Include => "The filter will only apply in the specified channels.",
@@ -358,7 +348,7 @@ public partial class RegexFiltersPage(
                 .WithStyle(ButtonStyle.Secondary))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Back")
-                .WithCustomId(BaseModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
+                .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
                               StateSerializer.SerializeObject(StateSerializer.SerializeObject(Id)))
 
                 .WithStyle(ButtonStyle.Danger))

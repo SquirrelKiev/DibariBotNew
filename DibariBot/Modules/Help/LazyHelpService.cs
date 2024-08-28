@@ -1,7 +1,4 @@
-﻿using BotBase;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace DibariBot.Modules.Help;
+﻿namespace DibariBot.Modules.Help;
 
 [Inject(ServiceLifetime.Singleton)]
 public class LazyHelpService
@@ -10,7 +7,9 @@ public class LazyHelpService
     {
         var eb = new EmbedBuilder()
             .WithDescription("Noting that any prefix command parameter wrapped in square brackets is an optional named parameter." +
-                             $"\nUsage is pretty much how the command shows, just without square brackets. e.g.`{prefix}manga ch:123`")
+                             $"\nUsage is pretty much how the command shows, just without square brackets. e.g.`{prefix}manga ch:123`" +
+                             $"\n\n" +
+                             $"https://github.com/SquirrelKiev/DibariBotNew/wiki is also a valuable resource!")
             .WithFields(
             [
                 new EmbedFieldBuilder()

@@ -1,12 +1,9 @@
-﻿using BotBase;
-using BotBase.Database;
-using BotBase.Modules.Help;
-using DibariBot.Database;
+﻿using DibariBot.Database;
 using Discord.Commands;
 
 namespace DibariBot.Modules.Help;
 
-public class HelpPrefixModule(DbService dbService, LazyHelpService helpService, BotConfigBase botConfig)
+public class HelpPrefixModule(DbService dbService, LazyHelpService helpService)
     : PrefixModule
 {
     [Command("help")]
@@ -19,7 +16,12 @@ public class HelpPrefixModule(DbService dbService, LazyHelpService helpService, 
 
         await DeferAsync();
 
-        var prefix = Context.Guild != null ? await dbService.GetPrefix(Context.Guild.Id, botConfig.DefaultPrefix) : botConfig.DefaultPrefix;
+        await using var dbContext = dbService.GetDbContext();
+
+
+        var config = Context.Guild != null ? await dbContext.GetGuildConfig(Context.Guild.Id) : null;
+
+        var prefix = Context.Guild != null ? config!.Prefix : GuildConfig.DefaultPrefix;
         var contents = helpService.GetMessageContents(prefix);
 
         await ReplyAsync(contents);
@@ -27,17 +29,8 @@ public class HelpPrefixModule(DbService dbService, LazyHelpService helpService, 
 
     [Command("help")]
     [ParentModulePrefix(typeof(HelpModule))]
-    public async Task HelpCommand([Remainder] string sink)
+    public Task HelpCommand([Remainder] string sink)
     {
-        // oshi no ko, super lazy """fix"""
-        if (Context.Guild != null && Context.Guild.Id == 695200821910044783ul)
-            return;
-
-        await DeferAsync();
-
-        var prefix = Context.Guild != null ? await dbService.GetPrefix(Context.Guild.Id, botConfig.DefaultPrefix) : botConfig.DefaultPrefix;
-        var contents = helpService.GetMessageContents(prefix);
-
-        await ReplyAsync(contents);
+        return HelpCommand();
     }
 }

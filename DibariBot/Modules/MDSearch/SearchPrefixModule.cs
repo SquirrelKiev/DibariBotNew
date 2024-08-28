@@ -1,6 +1,4 @@
-﻿using BotBase;
-using BotBase.Modules;
-using Discord.Commands;
+﻿using Discord.Commands;
 
 namespace DibariBot.Modules.MDSearch;
 

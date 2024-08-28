@@ -1,2 +1,2 @@
 global using Discord;
-global using Discord.Interactions;
+global using Microsoft.Extensions.DependencyInjection;

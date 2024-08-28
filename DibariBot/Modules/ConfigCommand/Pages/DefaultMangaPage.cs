@@ -1,15 +1,12 @@
 ﻿using DibariBot.Database;
-using BotBase;
-using BotBase.Modules;
-using BotBase.Modules.ConfigCommand;
 using Microsoft.EntityFrameworkCore;
 using DibariBot.Database.Models;
+using Discord.Interactions;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
 
-[RequireUserPermission(GuildPermission.ManageGuild, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-[RequireContext(ContextType.DM | ContextType.Group, Group = BaseModulePrefixes.PERMISSION_GROUP)]
-[HasOverride(Group = BaseModulePrefixes.PERMISSION_GROUP)]
+[DefaultMemberPermissions(GuildPermission.ManageGuild)]
+[CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
 public class DefaultMangaPage : ConfigPage
 {
     public class DefaultMangaSetModal : IModal
@@ -49,16 +46,16 @@ public class DefaultMangaPage : ConfigPage
     public override bool EnabledInDMs => true;
 
     private readonly DbService dbService;
-    private readonly ConfigCommandServiceBase<Page> configCommandService;
+    private readonly ConfigCommandService configCommandService;
 
-    public DefaultMangaPage(DbService db, ConfigCommandServiceBase<Page> configCommandService)
+    public DefaultMangaPage(DbService db, ConfigCommandService configCommandService)
     {
         dbService = db;
         this.configCommandService = configCommandService;
     }
 
     // step 1 - help page/modal open
-    public override async Task<MessageContents> GetMessageContents(ConfigCommandServiceBase<Page>.State state)
+    public override async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
     {
         var embed = GetCurrentDefaultsEmbed(await GetMangaDefaultsList());
 
@@ -138,7 +135,7 @@ public class DefaultMangaPage : ConfigPage
         }
 
         await ModifyOriginalResponseAsync(await GetMessageContents(
-            new ConfigCommandServiceBase<Page>.State(page: Page.DefaultManga)));
+            new ConfigCommandService.State(page: Page.DefaultManga)));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_REMOVE)]
@@ -152,7 +149,7 @@ public class DefaultMangaPage : ConfigPage
         var cancelButton = new ButtonBuilder()
                 .WithLabel("Cancel")
                 .WithStyle(ButtonStyle.Danger)
-                .WithCustomId(BaseModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
+                .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
                     StateSerializer.SerializeObject(StateSerializer.SerializeObject(Id))
                 );
 
@@ -205,7 +202,7 @@ public class DefaultMangaPage : ConfigPage
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot.")
-                .WithColor(CommandResult.Failure); // TODO: l18n
+                .WithColor(CommandResult.Failure);
 
             await ModifyOriginalResponseAsync(new MessageContents(string.Empty, errorEmbed.Build(), null));
             return;
@@ -259,7 +256,7 @@ public class DefaultMangaPage : ConfigPage
 
         components.WithButton(new ButtonBuilder()
             .WithLabel("Cancel")
-            .WithCustomId(BaseModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
+            .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
                 StateSerializer.SerializeObject(StateSerializer.SerializeObject(Id)))
             .WithStyle(ButtonStyle.Danger));
 
@@ -300,6 +297,6 @@ public class DefaultMangaPage : ConfigPage
         }
 
         await ModifyOriginalResponseAsync(
-            await configCommandService.GetMessageContents(new ConfigCommandServiceBase<Page>.State(page: Id), Context));
+            await configCommandService.GetMessageContents(new ConfigCommandService.State(page: Id), Context));
     }
 }

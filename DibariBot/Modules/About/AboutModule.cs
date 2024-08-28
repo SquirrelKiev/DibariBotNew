@@ -1,17 +1,19 @@
-﻿using BotBase;
-using BotBase.Modules.About;
+﻿using Discord.Interactions;
 
 namespace DibariBot.Modules.About;
 
 [CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
 [IntegrationType(ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall)]
-public class AboutModule(AboutService aboutService, OverrideTrackerService overrideTrackerService)
-: AboutModuleImpl(aboutService, overrideTrackerService)
+public class AboutModule(AboutService aboutService) : BotModule
 {
     [SlashCommand("about", "Info about the bot.")]
     [HelpPageDescription("Pulls up info about the bot.")]
-    public override Task AboutSlash()
+    public async Task AboutSlash()
     {
-        return base.AboutSlash();
+        await DeferAsync();
+
+        var contents = aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client), Context.User.Id);
+
+        await FollowupAsync(contents);
     }
 }

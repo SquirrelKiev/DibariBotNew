@@ -1,31 +1,46 @@
-﻿using BotBase;
-using BotBase.Database;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace DibariBot.Database
 {
-    public class DbService : DbServiceBase<BotDbContext>
+    public class DbService(BotConfig botConfig, ILoggerFactory loggerFactory, ILogger<DbService> logger)
     {
-        public DbService(BotConfigBase botConfig) : base(botConfig)
+        public async Task Initialize(bool migrationEnabled)
         {
+            logger.LogDebug("Database migration: {migrationStatus}", migrationEnabled);
+
+            var context = GetDbContext();
+
+            PreMigration(context);
+
+            if (migrationEnabled)
+            {
+                await context.Database.MigrateAsync();
+            }
         }
 
-        public override BotDbContext GetDbContext()
+        public BotDbContext GetDbContext()
         {
-            BotDbContext context;
-
-            switch (botConfig.Database)
+            BotDbContext context = botConfig.Database switch
             {
-                case BotConfig.DatabaseType.Postgresql:
-                    context = new PostgresqlContext(botConfig.DatabaseConnectionString);
-                    break;
-                case BotConfig.DatabaseType.Sqlite:
-                    context = new SqliteContext(botConfig.DatabaseConnectionString);
-                    break;
-                default:
-                    throw new NotSupportedException(botConfig.Database.ToString());
-            }
+                BotConfig.DatabaseType.Postgresql => new PostgresContext(botConfig.DatabaseConnectionString, loggerFactory),
+                BotConfig.DatabaseType.Sqlite => new SqliteContext(botConfig.DatabaseConnectionString, loggerFactory),
+                _ => throw new NotSupportedException(botConfig.Database.ToString())
+            };
 
             return context;
         }
+
+        public async Task ResetDatabase()
+        {
+            await using var dbContext = GetDbContext();
+
+            await dbContext.Database.EnsureDeletedAsync();
+            await dbContext.Database.EnsureCreatedAsync();
+        }
+
+        public void PreMigration(BotDbContext context) { }
     }
 }

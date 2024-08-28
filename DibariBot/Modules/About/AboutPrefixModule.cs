@@ -1,6 +1,4 @@
-﻿using BotBase;
-using BotBase.Modules.About;
-using Discord.Commands;
+﻿using Discord.Commands;
 
 namespace DibariBot.Modules.About;
 
@@ -22,7 +20,7 @@ public class AboutPrefixModule : PrefixModule
 
         await DeferAsync();
 
-        var contents = await aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client), Context.User.Id);
+        var contents = aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client), Context.User.Id);
 
         await ReplyAsync(contents);
     }
