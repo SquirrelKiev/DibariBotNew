@@ -1,6 +1,6 @@
 # DibariBot
 
-> really need a better project name
+> Public Bot can be found [here](https://discord.com/oauth2/authorize?client_id=1125354796115828856)
 
 A Discord bot for reading manga, within Discord.
 
