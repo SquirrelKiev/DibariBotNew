@@ -117,7 +117,7 @@ namespace DibariBot
                                   "Ideally this should be formatted as a hex number. Default for example is 0x5E69A3")]
         public int DefaultEmbedColor { get; set; } = 0x5E69A3;
 
-        [YamlMember(Description = "The color to use for all embeds (if not set by the Guild). \n" +
+        [YamlMember(Description = "The color to use for all error embeds. \n" +
                                   "Ideally this should be formatted as a hex number. Default for example is 0xE74C3C")]
         public int ErrorEmbedColor { get; set; } = 0xE74C3C;
 
