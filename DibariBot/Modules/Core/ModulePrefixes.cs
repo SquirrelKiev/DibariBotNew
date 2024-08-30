@@ -75,10 +75,22 @@ public static class ModulePrefixes
     public const string CONFIG_FILTERS_REMOVE_BASE = $"{CONFIG_FILTERS}r";
     public const string CONFIG_FILTERS_REMOVE_BUTTON = $"{CONFIG_FILTERS_REMOVE_BASE}:";
     public const string CONFIG_FILTERS_REMOVE_FILTER_SELECT = $"{CONFIG_FILTERS_REMOVE_BASE}-s:";
-    
+
     public const string CONFIG_FILTERS_EDIT_BASE = $"{CONFIG_FILTERS}e";
     public const string CONFIG_FILTERS_EDIT_BUTTON = $"{CONFIG_FILTERS_EDIT_BASE}:";
     public const string CONFIG_FILTERS_EDIT_FILTER_SELECT = $"{CONFIG_FILTERS_EDIT_BASE}-s:";
+
+    #endregion
+
+    #region Config - Appearance
+
+    public const string CONFIG_APPEARANCE = "c-a";
+
+    public const string CONFIG_APPEARANCE_CHANGE_COLOR_BASE = $"{CONFIG_APPEARANCE}-cc";
+    public const string CONFIG_APPEARANCE_CHANGE_COLOR_BUTTON = $"{CONFIG_APPEARANCE_CHANGE_COLOR_BASE}-b:";
+
+    public const string CONFIG_APPEARANCE_CHANGE_COLOR_MODAL = $"{CONFIG_APPEARANCE_CHANGE_COLOR_BASE}m";
+    public const string CONFIG_APPEARANCE_CHANGE_COLOR_MODAL_COLOR_TEXTBOX = $"{CONFIG_APPEARANCE_CHANGE_COLOR_MODAL}ct:";
 
     #endregion
 }

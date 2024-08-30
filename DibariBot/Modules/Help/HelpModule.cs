@@ -3,10 +3,13 @@ using Discord.Interactions;
 
 namespace DibariBot.Modules.Help;
 
-[CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
+[CommandContextType(
+    InteractionContextType.Guild,
+    InteractionContextType.BotDm,
+    InteractionContextType.PrivateChannel
+)]
 [IntegrationType(ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall)]
-public class HelpModule(DbService dbService, LazyHelpService helpService)
-    : BotModule
+public class HelpModule(DbService dbService, LazyHelpService helpService) : BotModule
 {
     [SlashCommand("help", "Help! What are all the commands?")]
     [HelpPageDescription("Pulls up this page!")]
@@ -14,12 +17,17 @@ public class HelpModule(DbService dbService, LazyHelpService helpService)
     {
         await DeferAsync();
 
-        await using var dbContext = dbService.GetDbContext();
+        string prefix = GuildConfig.DefaultPrefix;
+        GuildConfig? config = null;
+        if (Context.Guild != null)
+        {
+            await using var dbContext = dbService.GetDbContext();
+            config = await dbContext.GetGuildConfig(Context.Guild.Id);
 
-        var config = await dbContext.GetGuildConfig(Context.Guild.Id);
+            prefix = config.Prefix;
+        }
 
-        var prefix = Context.Guild != null ? config.Prefix : GuildConfig.DefaultPrefix;
-        var contents = helpService.GetMessageContents(prefix);
+        MessageContents contents = helpService.GetMessageContents(prefix, config);
 
         await FollowupAsync(contents);
     }

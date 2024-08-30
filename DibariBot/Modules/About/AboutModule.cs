@@ -12,7 +12,7 @@ public class AboutModule(AboutService aboutService) : BotModule
     {
         await DeferAsync();
 
-        var contents = aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client), Context.User.Id);
+        var contents = await aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client), Context.User.Id, Context.Guild);
 
         await FollowupAsync(contents);
     }

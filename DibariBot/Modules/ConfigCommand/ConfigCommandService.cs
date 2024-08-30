@@ -1,55 +1,106 @@
-﻿using DibariBot.Modules.ConfigCommand.Pages;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace DibariBot.Modules.ConfigCommand;
 
 public class ConfigCommandService(IServiceProvider services)
 {
-    public struct State
+    public struct State(Page page, string data)
     {
-        public ConfigPage.Page page;
-        public string data;
+        public Page page = page;
+        public string data = data;
 
         public State()
-        {
-            page = default;
-            data = string.Empty;
-        }
+            : this(default, string.Empty) { }
 
-        public State(ConfigPage.Page page) : this()
+        public State(Page page)
+            : this()
         {
             this.page = page;
             data = string.Empty;
-        }
-
-        public State(ConfigPage.Page page, string data)
-        {
-            this.page = page;
-            this.data = data;
         }
     }
 
-    public Dictionary<ConfigPage.Page, ConfigPage> ConfigPages
+    public ConfigPageDefinition[] ConfigPages
     {
-        get
-        {
-            return configPages ??= GetConfigPages(services);
-        }
+        get { return configPages ??= GetConfigPageDefinitions(); }
     }
-    private Dictionary<ConfigPage.Page, ConfigPage>? configPages;
+    private ConfigPageDefinition[]? configPages;
 
     public async Task<MessageContents> GetMessageContents(State state, IInteractionContext context)
     {
-        var page = ConfigPages[state.page];
+        var page = ConfigPages.First(x => x.ConfigPageAttribute.Id == state.page);
 
-        var method = page.GetType().GetMethod("SetContext", BindingFlags.Instance | BindingFlags.NonPublic) ?? throw new NullReferenceException("SetContext doesnt exist!");
-        method.Invoke(page, new object[] { context });
+        var instancedPage = (IConfigPage)ActivatorUtilities.CreateInstance(services, page.PageType);
 
-        return await page.GetMessageContents(state);
+        var method =
+            instancedPage
+                .GetType()
+                .GetMethod("SetContext", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new NullReferenceException("SetContext doesn't exist!");
+        method.Invoke(instancedPage, [context]);
+
+        return await instancedPage.GetMessageContents(state);
     }
 
-    public static Dictionary<ConfigPage.Page, ConfigPage> GetConfigPages(IServiceProvider services)
+    public static ConfigPageDefinition[] GetConfigPageDefinitions()
     {
-        return services.GetServices<ConfigPage>().ToDictionary(type => type.Id);
+        var assembly = Assembly.GetExecutingAssembly();
+
+        var types = assembly
+            .GetTypes()
+            .Select(t => new
+            {
+                PageType = t,
+                ConfigPageAttribute = t.GetCustomAttributes<ConfigPageAttribute>(true)
+                    .FirstOrDefault(),
+            })
+            .Where(t1 => t1.ConfigPageAttribute != null)
+            // avoiding nullable issues
+            .Select(x => new ConfigPageDefinition
+            {
+                ConfigPageAttribute = x.ConfigPageAttribute!,
+                PageType = x.PageType,
+            })
+            .OrderBy(x => x.ConfigPageAttribute.Id)
+            .ToArray();
+
+        return types;
     }
+
+    public SelectMenuBuilder GetPageSelectDropdown(Page id, bool isDm)
+    {
+        var dropdown = new SelectMenuBuilder().WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE);
+
+        foreach (var page in FilteredConfigPages(isDm))
+        {
+            dropdown.AddOption(
+                new SelectMenuOptionBuilder()
+                    .WithLabel(page.ConfigPageAttribute.Label)
+                    .WithValue(StateSerializer.SerializeObject(page.ConfigPageAttribute.Id))
+                    .WithDefault(page.ConfigPageAttribute.Id.Equals(id))
+                    .WithDescription(page.ConfigPageAttribute.Description)
+            );
+        }
+
+        return dropdown;
+    }
+
+    public IEnumerable<ConfigPageDefinition> FilteredConfigPages(bool isDm) =>
+        ConfigPages.Where(page =>
+        {
+            var passes = true;
+
+            if (passes && page.ConfigPageAttribute.Conditions.HasFlag(Conditions.NotInDm))
+            {
+                passes = !isDm;
+            }
+
+            return passes;
+        });
+}
+
+public class ConfigPageDefinition
+{
+    public required Type PageType { get; set; }
+    public required ConfigPageAttribute ConfigPageAttribute { get; set; }
 }

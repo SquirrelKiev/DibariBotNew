@@ -8,10 +8,12 @@ using Humanizer;
 namespace DibariBot.Modules.ConfigCommand.Pages;
 
 [DefaultMemberPermissions(GuildPermission.ManageGuild)]
+[ConfigPage(Id, "Regex filters", "Specify filters to limit what mangas can be pulled up.", Conditions.NotInDm)]
 public partial class RegexFiltersPage(
     MangaService mangaService,
-    ConfigCommandService configCommandService)
-    : ConfigPage
+    ConfigCommandService configCommandService,
+    ColorProvider colorProvider)
+    : BotModule, IConfigPage
 {
     public class SetRegexModal : IModal
     {
@@ -24,13 +26,7 @@ public partial class RegexFiltersPage(
         public string Filter { get; set; } = "";
     }
 
-    public override Page Id => Page.RegexFilters;
-
-    public override string Label => "Regex filters";
-
-    public override string Description => "Specify filters to limit what mangas can be pulled up.";
-
-    public override bool EnabledInDMs => false;
+    public const Page Id = Page.RegexFilters;
 
     private const string EMBED_NAME_TEMPLATE = "Template";
     private const string EMBED_NAME_FILTER = "Filter";
@@ -38,9 +34,9 @@ public partial class RegexFiltersPage(
     private const string EMBED_NAME_FILTER_TYPE = "Filter Type";
     private const string EMBED_NAME_SCOPE = "Channel Scope";
 
-    public override async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
+    public async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
     {
-        var embed = new EmbedBuilder().WithColor(CommandResult.Default);
+        var embed = new EmbedBuilder().WithColor(await colorProvider.GetEmbedColor(Context.Guild));
 
         var filters = await mangaService.GetFilters(Context.Guild.Id);
 
@@ -86,7 +82,7 @@ public partial class RegexFiltersPage(
         }
 
         var components = new ComponentBuilder()
-            .WithSelectMenu(GetPageSelectDropdown(configCommandService.ConfigPages, Id, IsDm()))
+            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Id, IsDm()))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Add")
                 .WithCustomId($"{ModulePrefixes.CONFIG_FILTERS_OPEN_MODAL_BUTTON}{0ul}")
@@ -178,7 +174,7 @@ public partial class RegexFiltersPage(
             return;
         }
 
-        await ModifyOriginalResponseAsync(UpsertConfirmation(filter));
+        await ModifyOriginalResponseAsync(await UpsertConfirmation(filter));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_OPEN_MODAL_BUTTON + "*")]
@@ -232,7 +228,7 @@ public partial class RegexFiltersPage(
             filterType: FilterType.Block, channelFilterScope: ChannelFilterScope.Exclude
             );
 
-        var contents = UpsertConfirmation(filter);
+        var contents = await UpsertConfirmation(filter);
 
         await ModifyOriginalResponseAsync(contents);
     }
@@ -248,17 +244,20 @@ public partial class RegexFiltersPage(
 
         if (newId == 0ul)
         {
-            await FollowupAsync("Just noting nothing was actually added or changed as the filter no longer exists.",
-                ephemeral: true);
+            var errorEmbed = new EmbedBuilder()
+                .WithDescription("Just noting nothing was actually added or changed as the filter no longer exists.")
+                .WithColor(colorProvider.GetErrorEmbedColor());
+
+            await FollowupAsync(new MessageContents(errorEmbed), ephemeral: true);
         }
 
         await ModifyOriginalResponseAsync(await configCommandService.GetMessageContents(
             new ConfigCommandService.State(page: Id), Context));
     }
 
-    private MessageContents UpsertConfirmation(RegexFilter filter)
+    private async Task<MessageContents> UpsertConfirmation(RegexFilter filter)
     {
-        var embed = new EmbedBuilder().WithColor(CommandResult.Default);
+        var embed = new EmbedBuilder().WithColor(await colorProvider.GetEmbedColor(Context.Guild));
 
         var channels = filter.RegexChannelEntries;
 
@@ -364,7 +363,7 @@ public partial class RegexFiltersPage(
 
         var filter = await GetRegexFilterFromContext(channels.Select(x => new RegexChannelEntry { ChannelId = x.Id}).ToList());
 
-        await ModifyOriginalResponseAsync(UpsertConfirmation(filter));
+        await ModifyOriginalResponseAsync(await UpsertConfirmation(filter));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_CONFIRMATION_FILTER_TYPE)]
@@ -376,7 +375,7 @@ public partial class RegexFiltersPage(
 
         filter.FilterType = StateSerializer.DeserializeObject<FilterType>(id);
 
-        await ModifyOriginalResponseAsync(UpsertConfirmation(filter));
+        await ModifyOriginalResponseAsync(await UpsertConfirmation(filter));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_FILTERS_CONFIRMATION_CHANNEL_SCOPE)]
@@ -388,7 +387,7 @@ public partial class RegexFiltersPage(
 
         filter.ChannelFilterScope = StateSerializer.DeserializeObject<ChannelFilterScope>(id);
 
-        await ModifyOriginalResponseAsync(UpsertConfirmation(filter));
+        await ModifyOriginalResponseAsync(await UpsertConfirmation(filter));
     }
 
     private async Task<RegexFilter> GetRegexFilterFromContext(List<RegexChannelEntry>? channels = null)

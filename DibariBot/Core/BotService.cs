@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using DibariBot.Database;
+using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -11,7 +13,9 @@ public class BotService(
     BotConfig config,
     DbService dbService,
     ILogger<BotService> logger,
-    CommandHandler commandHandler
+    CommandHandler commandHandler,
+    InteractionService interactionService,
+    CommandService commandService
 ) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -34,6 +38,9 @@ public class BotService(
         client.Log += Client_Log;
 
         client.Ready += Client_Ready;
+
+        interactionService.Log += Client_Log;
+        commandService.Log += Client_Log;
 
         await client.LoginAsync(TokenType.Bot, config.BotToken);
         await client.StartAsync();

@@ -14,7 +14,7 @@ public class SearchModule(SearchService search, MangaService mangaService) : Bot
     {
         await DeferAsync(ephemeral);
 
-        await FollowupAsync(await search.GetMessageContents(new SearchService.State() { query = query, isSpoiler = spoiler}));
+        await FollowupAsync(await search.GetMessageContents(new SearchService.State() { query = query, isSpoiler = spoiler}, Context.Guild));
     }
 
     [ComponentInteraction(ModulePrefixes.MANGADEX_SEARCH_BUTTON_PREFIX + "*")]
@@ -24,7 +24,7 @@ public class SearchModule(SearchService search, MangaService mangaService) : Bot
 
         var state = StateSerializer.DeserializeObject<SearchService.State>(id);
 
-        await ModifyOriginalResponseAsync(await search.GetMessageContents(state));
+        await ModifyOriginalResponseAsync(await search.GetMessageContents(state, Context.Guild));
     }
 
     [ComponentInteraction(ModulePrefixes.MANGADEX_SEARCH_DROPDOWN_PREFIX + "*")]

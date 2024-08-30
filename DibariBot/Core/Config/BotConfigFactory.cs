@@ -22,6 +22,7 @@ public class BotConfigFactory
 
         var deserializer = new DeserializerBuilder()
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .IgnoreUnmatchedProperties()
             .Build();
 
         Directory.CreateDirectory(DataDir);

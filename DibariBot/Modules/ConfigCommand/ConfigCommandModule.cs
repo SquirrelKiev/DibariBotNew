@@ -13,9 +13,9 @@ public class ConfigCommandModule(ConfigCommandService configService) : BotModule
     {
         await DeferAsync();
 
-        var page = StateSerializer.DeserializeObject<ConfigPage.Page>(id)!;
+        var page = StateSerializer.DeserializeObject<Page>(id);
 
-        await ModifyOriginalResponseAsync(await configService.GetMessageContents(new(page: page, data: ""), Context));
+        await ModifyOriginalResponseAsync(await configService.GetMessageContents(new ConfigCommandService.State(page: page, data: ""), Context));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON + "*")]
@@ -29,6 +29,6 @@ public class ConfigCommandModule(ConfigCommandService configService) : BotModule
     {
         await DeferAsync();
 
-        await FollowupAsync(await configService.GetMessageContents(new(), Context));
+        await FollowupAsync(await configService.GetMessageContents(new ConfigCommandService.State(), Context));
     }
 }

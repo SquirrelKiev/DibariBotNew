@@ -2,13 +2,17 @@
 using Microsoft.EntityFrameworkCore;
 using DibariBot.Database.Models;
 using Discord.Interactions;
+using Discord;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
 
 [DefaultMemberPermissions(GuildPermission.ManageGuild)]
 [CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
-public class DefaultMangaPage : ConfigPage
+[ConfigPage(Id, "Default manga", "Change the manga that opens when no URL is specified. Can be per-server and per-channel.", Conditions.None)]
+public class DefaultMangaPage(DbService db, ConfigCommandService configCommandService, ColorProvider colorProvider) : BotModule, IConfigPage
 {
+    public const Page Id = Page.DefaultManga;
+
     public class DefaultMangaSetModal : IModal
     {
         public string Title => "Set Default Manga - Step 1";
@@ -37,30 +41,13 @@ public class DefaultMangaPage : ConfigPage
         }
     }
 
-    public override Page Id => Page.DefaultManga;
-
-    public override string Label => "Default manga";
-
-    public override string Description => "Change the manga that opens when no URL is specified. Can be per-server and per-channel.";
-
-    public override bool EnabledInDMs => true;
-
-    private readonly DbService dbService;
-    private readonly ConfigCommandService configCommandService;
-
-    public DefaultMangaPage(DbService db, ConfigCommandService configCommandService)
-    {
-        dbService = db;
-        this.configCommandService = configCommandService;
-    }
-
     // step 1 - help page/modal open
-    public override async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
+    public async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
     {
-        var embed = GetCurrentDefaultsEmbed(await GetMangaDefaultsList());
+        var embed = await GetCurrentDefaultsEmbed(await GetMangaDefaultsList());
 
         var components = new ComponentBuilder()
-            .WithSelectMenu(GetPageSelectDropdown(configCommandService.ConfigPages, Id, IsDm()))
+            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Page.DefaultManga, IsDm()))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Set")
                 .WithCustomId($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_SET}")
@@ -76,7 +63,7 @@ public class DefaultMangaPage : ConfigPage
 
     private async Task<DefaultManga[]> GetMangaDefaultsList()
     {
-        await using var dbContext = dbService.GetDbContext();
+        await using var dbContext = db.GetDbContext();
 
         var guildId = (Context.Guild?.Id) ?? 0ul;
 
@@ -93,9 +80,9 @@ public class DefaultMangaPage : ConfigPage
         return defaults;
     }
 
-    private static EmbedBuilder GetCurrentDefaultsEmbed(DefaultManga[] defaults)
+    private async Task<EmbedBuilder> GetCurrentDefaultsEmbed(DefaultManga[] defaults)
     {
-        var embed = new EmbedBuilder().WithColor(CommandResult.Default);
+        var embed = new EmbedBuilder().WithColor(await colorProvider.GetEmbedColor(Context.Guild));
 
         if (defaults.Length > 0)
         {
@@ -119,7 +106,7 @@ public class DefaultMangaPage : ConfigPage
 
         ulong channelId = ulong.Parse(id);
 
-        await using var context = dbService.GetDbContext();
+        await using var context = db.GetDbContext();
 
         var guildId = Context.Guild?.Id ?? 0ul;
 
@@ -145,7 +132,7 @@ public class DefaultMangaPage : ConfigPage
 
         var defaults = await GetMangaDefaultsList();
 
-        var embed = GetCurrentDefaultsEmbed(defaults);
+        var embed = await GetCurrentDefaultsEmbed(defaults);
         var cancelButton = new ButtonBuilder()
                 .WithLabel("Cancel")
                 .WithStyle(ButtonStyle.Danger)
@@ -202,7 +189,7 @@ public class DefaultMangaPage : ConfigPage
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot.")
-                .WithColor(CommandResult.Failure);
+                .WithColor(await colorProvider.GetEmbedColor(Context.Guild));
 
             await ModifyOriginalResponseAsync(new MessageContents(string.Empty, errorEmbed.Build(), null));
             return;
@@ -214,7 +201,7 @@ public class DefaultMangaPage : ConfigPage
             channelId = Context.Channel.Id;
         }
 
-        await ModifyOriginalResponseAsync(ConfirmPromptContents(new ConfirmState(parsedUrl.Value, channelId)));
+        await ModifyOriginalResponseAsync(await ConfirmPromptContents(new ConfirmState(parsedUrl.Value, channelId)));
     }
 
     [ComponentInteraction(ModulePrefixes.CONFIG_DEFAULT_MANGA_SET_CHANNEL_INPUT + "*")]
@@ -223,16 +210,16 @@ public class DefaultMangaPage : ConfigPage
         // should be doing UpdateAsync but i have no clue how to get that kekw
         await DeferAsync();
         await ModifyOriginalResponseAsync(
-            ConfirmPromptContents(
+            await ConfirmPromptContents(
                 new ConfirmState(StateSerializer.DeserializeObject<SeriesIdentifier>(id),
                 channel.Length > 0 ? channel[0].Id : 0ul)));
     }
 
-    private MessageContents ConfirmPromptContents(ConfirmState confirmState)
+    private async Task<MessageContents> ConfirmPromptContents(ConfirmState confirmState)
     {
         var embed = new EmbedBuilder()
             .WithDescription($"Set the default manga for **{(confirmState.channelId == 0ul ? "the server" : $"<#{confirmState.channelId}>")}** as **{confirmState.series}**?")
-            .WithColor(CommandResult.Default);
+            .WithColor(await colorProvider.GetEmbedColor(Context.Guild));
 
         var components = new ComponentBuilder();
 
@@ -280,7 +267,7 @@ public class DefaultMangaPage : ConfigPage
 
         // TODO: keep an eye on this to see if they implement it
         // Why is this not a thing yet: https://github.com/dotnet/efcore/issues/4526
-        await using (var context = dbService.GetDbContext())
+        await using (var context = db.GetDbContext())
         {
             var exists = await context.DefaultMangas.FirstOrDefaultAsync(x => x.GuildId == toAdd.GuildId && x.ChannelId == toAdd.ChannelId);
 

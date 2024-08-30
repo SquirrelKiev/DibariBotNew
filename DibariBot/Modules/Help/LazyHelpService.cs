@@ -1,9 +1,12 @@
-﻿namespace DibariBot.Modules.Help;
+﻿using DibariBot.Database;
+using Discord;
+
+namespace DibariBot.Modules.Help;
 
 [Inject(ServiceLifetime.Singleton)]
-public class LazyHelpService
+public class LazyHelpService(ColorProvider colorProvider)
 {
-    public MessageContents GetMessageContents(string prefix)
+    public MessageContents GetMessageContents(string prefix, GuildConfig? guild)
     {
         var eb = new EmbedBuilder()
             .WithDescription("Noting that any prefix command parameter wrapped in square brackets is an optional named parameter." +
@@ -36,7 +39,7 @@ public class LazyHelpService
                     .WithValue($"Pulls up into about the bot\n**Prefix versions**\n`{prefix}about`"),
 
                 ])
-            .WithColor(CommandResult.Default);
+            .WithColor(colorProvider.GetEmbedColor(guild));
 
         return new MessageContents(eb);
     }

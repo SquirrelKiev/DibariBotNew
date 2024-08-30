@@ -1,4 +1,5 @@
 ﻿using DibariBot.Database;
+using Discord;
 using Discord.Interactions;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
@@ -11,17 +12,12 @@ public class SetPrefixModal : IModal
     public string Prefix { get; set; } = "";
 }
 
-public class PrefixPage(ConfigCommandService configCommandService, DbService dbService) : ConfigPage
+[ConfigPage(Id, "Prefix", "What prefix to use for prefix commands.", Conditions.NotInDm)]
+public class PrefixPage(ConfigCommandService configCommandService, DbService dbService, ColorProvider colorProvider) : BotModule, IConfigPage
 {
-    public override Page Id => Page.Prefix;
-    
-    public override string Label => "Prefix";
+    public const Page Id = Page.Prefix;
 
-    public override string Description => "What prefix to use for prefix commands.";
-
-    public override bool EnabledInDMs => false;
-
-    public override async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
+    public async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
     {
         await using var dbContext = dbService.GetDbContext();
 
@@ -32,10 +28,10 @@ public class PrefixPage(ConfigCommandService configCommandService, DbService dbS
             .WithFields(new EmbedFieldBuilder()
                 .WithName("Prefix")
                 .WithValue($"`{prefix}`"))
-            .WithColor(CommandResult.Default);
+            .WithColor(colorProvider.GetEmbedColor(config));
 
         var components = new ComponentBuilder()
-            .WithSelectMenu(GetPageSelectDropdown(configCommandService.ConfigPages, Id, IsDm()))
+            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Id, IsDm()))
             .WithButton("Change Prefix", ModulePrefixes.CONFIG_PREFIX_MODAL_BUTTON, ButtonStyle.Secondary)
             .WithRedButton();
 

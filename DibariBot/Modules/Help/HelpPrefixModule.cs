@@ -16,13 +16,17 @@ public class HelpPrefixModule(DbService dbService, LazyHelpService helpService)
 
         await DeferAsync();
 
-        await using var dbContext = dbService.GetDbContext();
+        string prefix = GuildConfig.DefaultPrefix;
+        GuildConfig? config = null;
+        if (Context.Guild != null)
+        {
+            await using var dbContext = dbService.GetDbContext();
+            config = await dbContext.GetGuildConfig(Context.Guild.Id);
 
+            prefix = config.Prefix;
+        }
 
-        var config = Context.Guild != null ? await dbContext.GetGuildConfig(Context.Guild.Id) : null;
-
-        var prefix = Context.Guild != null ? config!.Prefix : GuildConfig.DefaultPrefix;
-        var contents = helpService.GetMessageContents(prefix);
+        MessageContents contents = helpService.GetMessageContents(prefix, config);
 
         await ReplyAsync(contents);
     }

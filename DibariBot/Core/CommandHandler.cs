@@ -123,10 +123,10 @@ public class CommandHandler(
 
     #region Interaction Handling
 
-    protected static Task InteractionExecuted(ICommandInfo cmdInfo, IInteractionContext ctx, Discord.Interactions.IResult res)
+    protected async Task InteractionExecuted(ICommandInfo cmdInfo, IInteractionContext ctx, Discord.Interactions.IResult res)
     {
         if (res.IsSuccess)
-            return Task.CompletedTask;
+            return;
 
         var messageBody = $"{res.Error}, {res.ErrorReason}";
 
@@ -137,14 +137,12 @@ public class CommandHandler(
 
         if (ctx.Interaction.HasResponded)
         {
-            ctx.Interaction.ModifyOriginalResponseAsync(new MessageContents(messageBody, embed: null, null));
+            await ctx.Interaction.ModifyOriginalResponseAsync(new MessageContents(messageBody, embed: null, null));
         }
         else
         {
-            ctx.Interaction.RespondAsync(messageBody, ephemeral: true);
+            await ctx.Interaction.RespondAsync(messageBody, ephemeral: true);
         }
-
-        return Task.CompletedTask;
     }
 
 

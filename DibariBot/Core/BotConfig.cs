@@ -38,9 +38,6 @@ namespace DibariBot
         [YamlMember(Description = "An optional API key for Seq. Empty string is interpreted as no API key.")]
         public string SeqApiKey { get; set; } = "";
 
-        [YamlMember(Description = "The default config for the bot.")]
-        public string DefaultPrefix { get; set; } = "m.";
-
         [YamlMember(Description = "The logging level to use.")]
         public LogEventLevel LogEventLevel { get; set; } = LogEventLevel.Information;
 
@@ -115,6 +112,14 @@ namespace DibariBot
                 Value = "https://github.com/SquirrelKiev/DibariBotNew"
             }
         ];
+
+        [YamlMember(Description = "The color to use for all embeds (if not set by the Guild).\n" +
+                                  "Ideally this should be formatted as a hex number. Default for example is 0x5E69A3")]
+        public int DefaultEmbedColor { get; set; } = 0x5E69A3;
+
+        [YamlMember(Description = "The color to use for all embeds (if not set by the Guild). \n" +
+                                  "Ideally this should be formatted as a hex number. Default for example is 0xE74C3C")]
+        public int ErrorEmbedColor { get; set; } = 0xE74C3C;
 
         public struct AboutField
         {

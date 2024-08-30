@@ -1,4 +1,5 @@
-﻿using Discord.Interactions;
+﻿using DibariBot.Database;
+using Discord.Interactions;
 using Discord.WebSocket;
 
 namespace DibariBot;

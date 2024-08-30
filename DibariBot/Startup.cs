@@ -119,11 +119,6 @@ public static class Startup
             .WithTransientLifetime()
         );
 
-        serviceCollection.Scan(scan => scan.FromAssemblyOf<BotService>()
-            .AddClasses(classes => classes.AssignableTo<ConfigPage>())
-            .As<ConfigPage>()
-            .WithTransientLifetime());
-
         serviceCollection.AddHostedService<BotService>();
 
         return serviceCollection;

@@ -8,6 +8,7 @@ namespace DibariBot;
 // > because that order varies. However, starting with .NET 7, the ordering is deterministic based upon the metadata ordering in the assembly.
 // https://learn.microsoft.com/en-us/dotnet/api/system.type.getfields?view=net-7.0
 // cant make this up, this code is only deterministic in net 7 lol. prefer this new system to alphabetically sorting it or whatever though
+// TODO: Move this to a CSV-based implementation
 public static class StateSerializer
 {
     const char SEPARATOR = '|';

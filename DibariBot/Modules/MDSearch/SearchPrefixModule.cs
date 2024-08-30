@@ -21,7 +21,7 @@ public class SearchPrefixModule(SearchService search) : PrefixModule
 
         await DeferAsync();
 
-        await ReplyAsync(await search.GetMessageContents(new SearchService.State { query = query, isSpoiler = args.Spoiler }));
+        await ReplyAsync(await search.GetMessageContents(new SearchService.State { query = query, isSpoiler = args.Spoiler }, Context.Guild));
     }
 
     [Command("search")]
@@ -34,6 +34,6 @@ public class SearchPrefixModule(SearchService search) : PrefixModule
 
         await DeferAsync();
 
-        await ReplyAsync(await search.GetMessageContents(new SearchService.State { query = query, isSpoiler = false }));
+        await ReplyAsync(await search.GetMessageContents(new SearchService.State { query = query, isSpoiler = false }, Context.Guild));
     }
 }

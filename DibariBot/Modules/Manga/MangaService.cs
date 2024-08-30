@@ -20,7 +20,7 @@ public enum MangaAction
 }
 
 [Inject(ServiceLifetime.Singleton)]
-public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig, DbService dbService, ILogger<MangaService> logger)
+public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig, DbService dbService, ILogger<MangaService> logger, ColorProvider colorProvider)
 {
     public struct State
     {
@@ -55,6 +55,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
     {
         if (string.IsNullOrWhiteSpace(url))
         {
+            // this could probably be re-used
             await using var contextDefaults = dbService.GetDbContext();
 
             var exists =
@@ -67,7 +68,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
                     new EmbedBuilder()
                         .WithDescription(
                             "This server/channel hasn't got a default manga set! Please manually specify the URL.")
-                        .WithColor(CommandResult.Failure)
+                        .WithColor(colorProvider.GetErrorEmbedColor())
                         .Build(), null);
             }
 
@@ -82,7 +83,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
                 new EmbedBuilder()
                     .WithDescription(
                         "Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot.")
-                    .WithColor(CommandResult.Failure)
+                    .WithColor(colorProvider.GetErrorEmbedColor())
                     .Build(), null);
         }
 
@@ -106,7 +107,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
             var errorEmbed = new EmbedBuilder()
                 .WithDescription(
                     $"Failed to get manga. `{ex.Message}`\n`{state.identifier.platform}/{state.identifier.series}`")
-                .WithColor(CommandResult.Failure)
+                .WithColor(colorProvider.GetErrorEmbedColor())
                 .Build();
 
             logger.LogWarning(ex, "Failed to get manga.");
@@ -116,13 +117,15 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
 
         var metadata = await manga.GetMetadata();
 
+        await using var context = dbService.GetDbContext();
+
         try
         {
-            if (guildId != 0ul && !await IsMangaAllowed(guildId, channelId, metadata, manga.GetIdentifier()))
+            if (guildId != 0ul && !await IsMangaAllowed(guildId, channelId, metadata, manga.GetIdentifier(), context))
             {
                 var errorEmbed = new EmbedBuilder()
                     .WithDescription("Manga disallowed by server rules.")
-                    .WithColor(CommandResult.Failure)
+                    .WithColor(colorProvider.GetErrorEmbedColor())
                     .Build();
 
                 return new MessageContents(string.Empty, errorEmbed);
@@ -136,7 +139,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
 
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("Filter took too long to process.")
-                .WithColor(CommandResult.Failure)
+                .WithColor(colorProvider.GetErrorEmbedColor())
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
@@ -148,7 +151,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("No chapters found.")
-                .WithColor(CommandResult.Failure)
+                .WithColor(colorProvider.GetErrorEmbedColor())
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
@@ -162,7 +165,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("Chapter not found.")
-                .WithColor(CommandResult.Failure)
+                .WithColor(colorProvider.GetErrorEmbedColor())
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
@@ -203,11 +206,11 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
         {
             pages = await manga.GetImageSrcs(bookmark.chapter);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription($"Failed to get chapter {bookmark.chapter}: `{ex.Message}`")
-                .WithColor(CommandResult.Failure)
+                .WithColor(colorProvider.GetErrorEmbedColor())
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
@@ -217,7 +220,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription($"page {bookmark.page + 1} doesn't exist in chapter {bookmark.chapter}!")
-                .WithColor(CommandResult.Failure)
+                .WithColor(colorProvider.GetErrorEmbedColor())
                 .Build();
 
             return new MessageContents(string.Empty, errorEmbed, null);
@@ -233,6 +236,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
         bool disableLeftPage = disableLeftChapter && bookmark.page <= 0;
         bool disableRightPage = disableRightChapter && bookmark.page >= pages.srcs.Length;
 
+        var guildConfig = guildId == 0ul ? null : await context.GetGuildConfig(guildId);
 
         var embed = new EmbedBuilder()
             .WithTitle(string.IsNullOrWhiteSpace(chapterData.title) ? $"Chapter {bookmark.chapter}" : chapterData.title)
@@ -244,7 +248,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
                     .WithText($"{metadata.title.Truncate(50)}, by {author}.\n" +
                               $"Group: {pages.group}")
             )
-            .WithColor(CommandResult.Default)
+            .WithColor(colorProvider.GetEmbedColor(guildConfig))
             .Build();
 
         var newState = new State(MangaAction.Open, state.identifier, bookmark, state.isSpoiler);
@@ -402,10 +406,8 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
 
     /// <param name="guildId">ID of the guild.</param>
     /// <param name="channelId">Channel ID. will only grab the filters that apply to the current channel.</param>
-    public async Task<RegexFilter[]> GetFilters(ulong guildId, ulong channelId)
+    public async Task<RegexFilter[]> GetFilters(ulong guildId, ulong channelId, BotDbContext context)
     {
-        await using var context = dbService.GetDbContext();
-
         var filterQuery = context.RegexFilters
             .Where(rf =>
                 // The filter is for the current guild
@@ -437,9 +439,9 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
     }
 
     public async Task<bool> IsMangaAllowed(ulong guildId, ulong channelId, MangaMetadata metadata,
-        SeriesIdentifier identifier)
+        SeriesIdentifier identifier, BotDbContext context)
     {
-        var filters = await GetFilters(guildId, channelId);
+        var filters = await GetFilters(guildId, channelId, context);
 
         var values = new Dictionary<string, string>
         {

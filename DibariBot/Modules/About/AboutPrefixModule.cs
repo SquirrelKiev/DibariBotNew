@@ -2,15 +2,8 @@
 
 namespace DibariBot.Modules.About;
 
-public class AboutPrefixModule : PrefixModule
+public class AboutPrefixModule(AboutService aboutService) : PrefixModule
 {
-    private readonly AboutService aboutService;
-
-    public AboutPrefixModule(AboutService aboutService)
-    {
-        this.aboutService = aboutService;
-    }
-
     [Command("about")]
     [ParentModulePrefix(typeof(AboutModule))]
     public async Task AboutCommand()
@@ -20,7 +13,7 @@ public class AboutPrefixModule : PrefixModule
 
         await DeferAsync();
 
-        var contents = aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client), Context.User.Id);
+        var contents = await aboutService.GetMessageContents(await AboutService.GetPlaceholders(Context.Client), Context.User.Id, Context.Guild);
 
         await ReplyAsync(contents);
     }

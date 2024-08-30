@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel;
 using DibariBot.Apis;
+using Discord;
 
 namespace DibariBot.Modules.MDSearch;
 
 [DibariBot.Inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton)]
-public class SearchService(MangaDexApi mdapi, BotConfig config)
+public class SearchService(MangaDexApi mdapi, BotConfig config, ColorProvider colorProvider)
 {
     public struct State
     {
@@ -16,7 +17,7 @@ public class SearchService(MangaDexApi mdapi, BotConfig config)
         public bool isSpoiler;
     }
 
-    public async Task<MessageContents> GetMessageContents(State state)
+    public async Task<MessageContents> GetMessageContents(State state, IGuild? guild)
     {
         var res = await mdapi.GetMangas(new Apis.MangaListQueryParams
         {
@@ -35,12 +36,12 @@ public class SearchService(MangaDexApi mdapi, BotConfig config)
         {
             var errorEmbed = new EmbedBuilder()
                 .WithDescription("No results found!")
-                .WithColor(CommandResult.Default);
+                .WithColor(colorProvider.GetErrorEmbedColor());
 
             return new MessageContents(string.Empty, errorEmbed.Build(), null);
         }
 
-        var embed = new EmbedBuilder().WithColor(CommandResult.Default);
+        var embed = new EmbedBuilder().WithColor(await colorProvider.GetEmbedColor(guild));
 
         foreach (var mangaSchema in res.data)
         {

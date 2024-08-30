@@ -1,0 +1,51 @@
+﻿using DibariBot.Database;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace DibariBot.Migrations.SqliteMigrations
+{
+    /// <inheritdoc />
+    public partial class EmbedColorConfig : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AlterColumn<string>(
+                name: "Prefix",
+                table: "GuildConfigs",
+                type: "TEXT",
+                maxLength: 8,
+                nullable: false,
+                defaultValue: GuildConfig.DefaultPrefix,
+                oldClrType: typeof(string),
+                oldType: "TEXT",
+                oldMaxLength: 8,
+                oldNullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "EmbedColor",
+                table: "GuildConfigs",
+                type: "INTEGER",
+                nullable: true);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "EmbedColor",
+                table: "GuildConfigs");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Prefix",
+                table: "GuildConfigs",
+                type: "TEXT",
+                maxLength: 8,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "TEXT",
+                oldMaxLength: 8);
+        }
+    }
+}
