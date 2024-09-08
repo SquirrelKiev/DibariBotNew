@@ -56,7 +56,8 @@ namespace DibariBot.Migrations.PostgresMigrations
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Manga")
-                        .HasColumnType("text");
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -64,6 +65,34 @@ namespace DibariBot.Migrations.PostgresMigrations
                         .IsUnique();
 
                     b.ToTable("DefaultMangas");
+                });
+
+            modelBuilder.Entity("DibariBot.Database.Models.MangaCommandAlias", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<string>("Manga")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("SlashCommandName")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId");
+
+                    b.ToTable("MangaCommandAliases");
                 });
 
             modelBuilder.Entity("DibariBot.Database.Models.RegexChannelEntry", b =>

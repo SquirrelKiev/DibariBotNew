@@ -46,6 +46,16 @@ public class BotService(
         await client.StartAsync();
     }
 
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        if (ExecuteTask == null)
+            return;
+
+        await client.LogoutAsync();
+        await client.StopAsync();
+
+        await base.StopAsync(cancellationToken);
+    }
     private Task Client_Log(LogMessage message)
     {
         var level = message.Severity switch

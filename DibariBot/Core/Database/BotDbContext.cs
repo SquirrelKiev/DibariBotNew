@@ -9,8 +9,8 @@ namespace DibariBot.Database
         public DbSet<DefaultManga> DefaultMangas { get; set; }
         public DbSet<RegexFilter> RegexFilters { get; set; }
         public DbSet<RegexChannelEntry> RegexChannelEntries { get; set; }
-        
         public DbSet<GuildConfig> GuildConfigs { get; set; }
+        public DbSet<MangaCommandAlias> MangaCommandAliases { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -30,6 +30,9 @@ namespace DibariBot.Database
 
             modelBuilder.Entity<RegexChannelEntry>()
                 .HasIndex(x => new { x.ChannelId, x.RegexFilterId });
+
+            modelBuilder.Entity<MangaCommandAlias>()
+                .HasIndex(x => x.GuildId);
         }
     }
 }

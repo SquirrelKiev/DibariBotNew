@@ -57,6 +57,7 @@ namespace DibariBot
         [YamlMember(Description = "How many results to show per page when using the search command.")]
         public int MangaDexSearchLimit { get; set; } = 5;
 
+        // why is this a config value?
         [YamlMember(Description = "How long a manga title should be before it is truncated.")]
         public int MaxTitleLength { get; set; } = 50;
 

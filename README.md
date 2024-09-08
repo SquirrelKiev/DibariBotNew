@@ -2,9 +2,7 @@
 
 > Public Bot can be found [here](https://discord.com/oauth2/authorize?client_id=1125354796115828856)
 
-A Discord bot for reading manga, within Discord.
-
-Useful for quickly pulling up pages for reference in discussions, but can technically be used to read an entire manga from back to front.
+A Discord bot for quickly and easily referencing manga pages in discussions.
 
 ## Supported platforms
 - [x] [MangaDex](https://mangadex.org/) (Via [Cubari.moe](https://cubari.moe/), plus some extra custom handling)

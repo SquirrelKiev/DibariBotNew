@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Serilog;
-using ILogger = Serilog.ILogger;
 
 namespace DibariBot.Database
 {
@@ -12,8 +10,6 @@ namespace DibariBot.Database
             logger.LogDebug("Database migration: {migrationStatus}", migrationEnabled);
 
             var context = GetDbContext();
-
-            PreMigration(context);
 
             if (migrationEnabled)
             {
@@ -40,7 +36,5 @@ namespace DibariBot.Database
             await dbContext.Database.EnsureDeletedAsync();
             await dbContext.Database.EnsureCreatedAsync();
         }
-
-        public void PreMigration(BotDbContext context) { }
     }
 }

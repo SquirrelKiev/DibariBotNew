@@ -1,15 +1,8 @@
 ﻿namespace DibariBot.Modules.Manga;
 
 [Inject(ServiceLifetime.Singleton)]
-public class MangaFactory
+public class MangaFactory(IServiceProvider services)
 {
-    private readonly IServiceProvider services;
-
-    public MangaFactory(IServiceProvider services)
-    {
-        this.services = services;
-    }
-
     public async Task<IManga?> GetManga(SeriesIdentifier identifier)
     {
         Type? mangaType;

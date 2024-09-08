@@ -1,9 +1,15 @@
-﻿namespace DibariBot.Database.Models;
+﻿using System.ComponentModel.DataAnnotations;
 
+namespace DibariBot.Database.Models;
+
+// TODO: remove this nullable disable
 #nullable disable
 public class DefaultManga : DbModel
 {
+    public const int MaxMangaLength = 256;
+
     public required ulong GuildId { get; set; }
     public required ulong ChannelId { get; set; } = 0;
-    public string Manga { get; set; } // this should really be set as a value but I don't want efcore db gen to assume this is a not required field on the database side
+    [MaxLength(MaxMangaLength)]
+    public string Manga { get; set; }
 }

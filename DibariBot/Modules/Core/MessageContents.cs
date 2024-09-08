@@ -21,34 +21,27 @@ public struct MessageContents
         this.components = components?.Build();
     }
 
-    public MessageContents(string body = "", Embed? embed = null, ComponentBuilder? components = null)
+    public MessageContents(string body = "", Embed? embed = null, ComponentBuilder? components = null, bool redButton = true)
     {
         this.body = body;
         embeds = embed == null ? null : [embed];
 
-        if (AddRedButtonDefault)
+        if (AddRedButtonDefault && redButton)
             components ??= new ComponentBuilder().WithRedButton();
 
         if (components != null)
             this.components = components.Build();
     }
 
-    public MessageContents(EmbedBuilder embed, ComponentBuilder? components = null, string body = "")
+    public MessageContents(EmbedBuilder embed, ComponentBuilder? components = null, string body = "", bool redButton = true)
     {
         this.body = body;
         embeds = new[] { embed.Build() };
 
-        if (AddRedButtonDefault)
+        if (AddRedButtonDefault && redButton)
             components ??= new ComponentBuilder().WithRedButton();
 
         if (components != null)
             this.components = components.Build();
-    }
-
-    public MessageContents SetEmbed(Embed embed)
-    {
-        embeds = new[] { embed };
-
-        return this;
     }
 }

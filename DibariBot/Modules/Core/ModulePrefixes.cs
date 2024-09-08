@@ -1,5 +1,6 @@
 ﻿namespace DibariBot.Modules;
 
+// TODO: Change variable names ToBeThisSortOfStyle
 public static class ModulePrefixes
 {
     public const string RED_BUTTON = "rb:";
@@ -91,6 +92,21 @@ public static class ModulePrefixes
 
     public const string CONFIG_APPEARANCE_CHANGE_COLOR_MODAL = $"{CONFIG_APPEARANCE_CHANGE_COLOR_BASE}m";
     public const string CONFIG_APPEARANCE_CHANGE_COLOR_MODAL_COLOR_TEXTBOX = $"{CONFIG_APPEARANCE_CHANGE_COLOR_MODAL}ct:";
+
+    #endregion
+
+    #region Config - Manga Aliases
+
+    public const string CONFIG_ALIASES = "c-ma";
+
+    public const string CONFIG_ALIASES_ADD_BASE = $"{CONFIG_ALIASES}-a";
+    public const string CONFIG_ALIASES_ADD_BUTTON = $"{CONFIG_ALIASES_ADD_BASE}b:";
+    public const string CONFIG_ALIASES_REMOVE = $"{CONFIG_ALIASES}-r";
+    public const string CONFIG_ALIASES_REMOVE_SELECT = $"{CONFIG_ALIASES_REMOVE}s:";
+    public const string CONFIG_ALIASES_REMOVE_BUTTON = $"{CONFIG_ALIASES_REMOVE}b:";
+    public const string CONFIG_ALIASES_ADD_MODAL = $"{CONFIG_ALIASES_ADD_BASE}m";
+    public const string CONFIG_ALIASES_ADD_MODAL_URL_TEXT_BOX = $"{CONFIG_ALIASES_ADD_BASE}-u:";
+    public const string CONFIG_ALIASES_ADD_MODAL_ALIAS_TEXT_BOX = $"{CONFIG_ALIASES_ADD_BASE}-a:";
 
     #endregion
 }

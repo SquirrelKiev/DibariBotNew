@@ -7,7 +7,6 @@ using Humanizer;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
 
-[DefaultMemberPermissions(GuildPermission.ManageGuild)]
 [ConfigPage(Id, "Regex filters", "Specify filters to limit what mangas can be pulled up.", Conditions.NotInDm)]
 public partial class RegexFiltersPage(
     MangaService mangaService,
@@ -38,6 +37,7 @@ public partial class RegexFiltersPage(
     {
         var embed = new EmbedBuilder().WithColor(await colorProvider.GetEmbedColor(Context.Guild));
 
+        // TODO: This needs paginating
         var filters = await mangaService.GetFilters(Context.Guild.Id);
 
         if (filters.Length > 0)
@@ -396,12 +396,12 @@ public partial class RegexFiltersPage(
 
         var embed = ogRes.Embeds.First(x => x.Type == EmbedType.Rich);
 
-        var template = CodeBlockMatcher().Match(embed.Fields.First(x => x.Name == EMBED_NAME_TEMPLATE).Value).Groups[1].Value;
-        var filter = CodeBlockMatcher().Match(embed.Fields.First(x => x.Name == EMBED_NAME_FILTER).Value).Groups[1].Value;
+        var template = CompiledRegex.CodeBlockMatcher().Match(embed.Fields.First(x => x.Name == EMBED_NAME_TEMPLATE).Value).Groups[1].Value;
+        var filter = CompiledRegex.CodeBlockMatcher().Match(embed.Fields.First(x => x.Name == EMBED_NAME_FILTER).Value).Groups[1].Value;
         var filterType = embed.Fields.First(x => x.Name == EMBED_NAME_FILTER_TYPE).Value.DehumanizeTo<FilterType>();
         var scope = embed.Fields.First(x => x.Name == EMBED_NAME_SCOPE).Value.DehumanizeTo<ChannelFilterScope>();
 
-        channels ??= ChannelMatcher().Matches(embed.Fields.First(x => x.Name == EMBED_NAME_CHANNELS).Value).Select(x => new RegexChannelEntry
+        channels ??= CompiledRegex.ChannelMatcher().Matches(embed.Fields.First(x => x.Name == EMBED_NAME_CHANNELS).Value).Select(x => new RegexChannelEntry
         {
             ChannelId = ulong.Parse(x.Groups[1].Value)
         }).ToList();
@@ -413,10 +413,4 @@ public partial class RegexFiltersPage(
             template: template, filterType: filterType, channelFilterScope: scope,
             regexChannelEntries: channels);
     }
-
-    [GeneratedRegex(@"<#(\d+)>")]
-    private static partial Regex ChannelMatcher();
-
-    [GeneratedRegex(@"```([^`]*)```")]
-    private static partial Regex CodeBlockMatcher();
 }

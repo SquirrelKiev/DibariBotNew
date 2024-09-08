@@ -15,7 +15,8 @@ public enum Page
     DefaultManga,
     RegexFilters,
     Prefix,
-    Appearance
+    Appearance,
+    MangaAlias
 }
 
 [Flags]

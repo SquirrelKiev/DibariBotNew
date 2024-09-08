@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics.Contracts;
-using System.Text.RegularExpressions;
 using DibariBot.Database;
-using Discord;
 using Discord.Interactions;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
@@ -11,7 +9,7 @@ public partial class AppearancePage(ConfigCommandService configCommandService, D
     : BotModule,
         IConfigPage
 {
-    public class SetColorRegex : IModal
+    public class SetColorModal : IModal
     {
         public string Title => "Set Embed Color";
 
@@ -62,7 +60,7 @@ public partial class AppearancePage(ConfigCommandService configCommandService, D
 
         var guildConfig = await context.GetGuildConfig(Context.Guild.Id);
 
-        await RespondWithModalAsync<SetColorRegex>(
+        await RespondWithModalAsync<SetColorModal>(
             ModulePrefixes.CONFIG_APPEARANCE_CHANGE_COLOR_MODAL,
             modifyModal: x =>
             {
@@ -80,7 +78,7 @@ public partial class AppearancePage(ConfigCommandService configCommandService, D
     }
 
     [ModalInteraction(ModulePrefixes.CONFIG_APPEARANCE_CHANGE_COLOR_MODAL)]
-    public async Task ModalResponse(SetColorRegex modal)
+    public async Task ModalResponse(SetColorModal modal)
     {
         await DeferAsync();
 

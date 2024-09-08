@@ -42,7 +42,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
             this.isSpoiler = isSpoiler;
         }
 
-        public State WithAction(MangaAction interactionType)
+        public MangaService.State WithAction(MangaAction interactionType)
         {
             action = interactionType;
 
@@ -87,14 +87,14 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
                     .Build(), null);
         }
 
-        var state = new State(MangaAction.Open, series.Value, new Bookmark(chapter, page - 1), isSpoiler);
+        var state = new MangaService.State(MangaAction.Open, series.Value, new Bookmark(chapter, page - 1), isSpoiler);
 
         var contents = await GetMangaMessage(guildId, channelId, state, ephemeral);
 
         return contents;
     }
 
-    public async Task<MessageContents> GetMangaMessage(ulong guildId, ulong channelId, State state, bool ephemeral)
+    public async Task<MessageContents> GetMangaMessage(ulong guildId, ulong channelId, MangaService.State state, bool ephemeral)
     {
         IManga manga;
         try
@@ -251,7 +251,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
             .WithColor(colorProvider.GetEmbedColor(guildConfig))
             .Build();
 
-        var newState = new State(MangaAction.Open, state.identifier, bookmark, state.isSpoiler);
+        var newState = new MangaService.State(MangaAction.Open, state.identifier, bookmark, state.isSpoiler);
 
         var components = new ComponentBuilder()
                 //.WithButton(
@@ -495,7 +495,7 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
                 throw new RegexMatchTimeoutException();
             }
 
-            var hydrated = CaptureTemplatedString().Replace(filter.Template, m =>
+            var hydrated = CompiledRegex.CaptureTemplatedString().Replace(filter.Template, m =>
                 values.TryGetValue(m.Groups[1].Value, out var replacement) ? replacement : m.Value);
 
             var tripped = Regex.IsMatch(hydrated, filter.Filter, RegexOptions.IgnoreCase, remaining);
@@ -514,7 +514,4 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
 
         return true;
     }
-
-    [GeneratedRegex(@"\{\{(\w+)\}\}")]
-    private static partial Regex CaptureTemplatedString();
 }

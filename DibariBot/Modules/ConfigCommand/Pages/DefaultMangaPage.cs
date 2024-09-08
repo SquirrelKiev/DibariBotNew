@@ -6,8 +6,6 @@ using Discord;
 
 namespace DibariBot.Modules.ConfigCommand.Pages;
 
-[DefaultMemberPermissions(GuildPermission.ManageGuild)]
-[CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
 [ConfigPage(Id, "Default manga", "Change the manga that opens when no URL is specified. Can be per-server and per-channel.", Conditions.None)]
 public class DefaultMangaPage(DbService db, ConfigCommandService configCommandService, ColorProvider colorProvider) : BotModule, IConfigPage
 {
@@ -44,6 +42,7 @@ public class DefaultMangaPage(DbService db, ConfigCommandService configCommandSe
     // step 1 - help page/modal open
     public async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
     {
+        // TODO: This needs paginating
         var embed = await GetCurrentDefaultsEmbed(await GetMangaDefaultsList());
 
         var components = new ComponentBuilder()

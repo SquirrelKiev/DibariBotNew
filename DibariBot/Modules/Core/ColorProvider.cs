@@ -21,8 +21,9 @@ public class ColorProvider(BotConfig config, DbService dbService)
 
     public Color GetEmbedColor(GuildConfig? guildConfig)
     {
-        // the compiler doesn't complain with the const here for some reason?
-        return guildConfig?.EmbedColor == null ? new Color((uint)config.DefaultEmbedColor) : new Color((uint)guildConfig.EmbedColor);
+        return guildConfig?.EmbedColor == null
+            ? new Color((uint)config.DefaultEmbedColor)
+            : new Color((uint)guildConfig.EmbedColor);
     }
 
     public Color GetErrorEmbedColor()

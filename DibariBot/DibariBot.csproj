@@ -5,8 +5,13 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<ApplicationIcon>Dibari.ico</ApplicationIcon>
 		<!--<GenerateDocumentationFile>true</GenerateDocumentationFile>-->
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Include="Dibari.ico" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Discord.Net.Commands" Version="3.15.3" />
@@ -32,7 +37,7 @@
 		<PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
 		<PackageReference Include="Serilog.Sinks.Seq" Version="8.0.0" />
-		<PackageReference Include="YamlDotNet" Version="16.0.0" />
+		<PackageReference Include="YamlDotNet" Version="16.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -91,9 +91,7 @@ public static class Startup
             }))
             .AddSingleton<DbService>()
             .AddSingleton<CommandHandler>()
-            // about command
             .AddSingleton<AboutService>()
-            // config command
             .AddSingleton<ConfigCommandService>();
         ;
 
