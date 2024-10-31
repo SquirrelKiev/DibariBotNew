@@ -56,7 +56,13 @@ public class BotService(
 
         await base.StopAsync(cancellationToken);
     }
+    
     private Task Client_Log(LogMessage message)
+    {
+        return Client_Log(logger, message);
+    }
+    
+    public static Task Client_Log(ILogger logger, LogMessage message)
     {
         var level = message.Severity switch
         {
@@ -71,13 +77,26 @@ public class BotService(
 
         if (message.Exception is not null)
         {
-            logger.Log(
-                level,
-                message.Exception,
-                "{Source} | {Message}",
-                message.Source,
-                message.Message
-            );
+            if (message.Exception.GetType() == typeof(GatewayReconnectException))
+            {
+                logger.Log(
+                    LogLevel.Trace,
+                    message.Exception,
+                    "{Source} | {Message}",
+                    message.Source,
+                    message.Exception.Message
+                );
+            }
+            else
+            {
+                logger.Log(
+                    level,
+                    message.Exception,
+                    "{Source} | {Message}",
+                    message.Source,
+                    message.Message
+                );
+            }
         }
         else
         {

@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Reflection;
+﻿using System.Reflection;
 using DibariBot.Database;
 using DibariBot.Database.Models;
 using DibariBot.Modules;
@@ -10,7 +9,6 @@ using Discord.Rest;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 // ReSharper disable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
 
@@ -28,13 +26,20 @@ public class CommandHandler(
     ILogger<CommandHandler> logger
 )
 {
+    private bool runOnce = false;
+    
     public async Task OnReady(params Assembly[] assemblies)
     {
+        if (runOnce)
+            return;
+        
         try
         {
             await using var context = dbService.GetDbContext();
             await InitializeInteractionService(assemblies, context);
             await InitializeCommandService(assemblies, context);
+
+            runOnce = true;
             //await RegisterAllGuildSlashes(context);
         }
         catch (Exception e)
