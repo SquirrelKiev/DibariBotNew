@@ -1,4 +1,4 @@
-# DibariBot
+# <p align="center"><img src="/DibariBot/shizuka.png" width="32px" height="32px"/> DibariBot</p>
 
 > Public Bot can be found [here](https://discord.com/oauth2/authorize?client_id=1125354796115828856)
 
