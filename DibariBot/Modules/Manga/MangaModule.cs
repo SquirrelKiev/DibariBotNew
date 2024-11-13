@@ -27,7 +27,7 @@ public class MangaModule(MangaService mangaHandler) : BotModule
     {
         await DeferAsync(ephemeral);
 
-        var contents = await mangaHandler.MangaCommand(Context.Guild?.Id ?? 0ul, GetParentChannel().Id,
+        var contents = await mangaHandler.MangaCommand(Context.Guild?.Id ?? 0ul, GetParentChannel()?.Id ?? 0ul,
             url, chapter, page, ephemeral, spoiler);
 
         await FollowupAsync(contents, ephemeral);

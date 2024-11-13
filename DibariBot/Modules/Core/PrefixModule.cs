@@ -13,7 +13,7 @@ public abstract class PrefixModule : ModuleBase<SocketCommandContext>
 
     protected Task DeferAsync() => Context.Channel.TriggerTypingAsync();
 
-    protected virtual IChannel GetParentChannel()
+    protected virtual IChannel? GetParentChannel()
     {
         IChannel channel = Context.Channel;
 

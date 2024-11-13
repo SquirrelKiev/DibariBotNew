@@ -21,7 +21,7 @@ public abstract class BotModule : InteractionModuleBase
         return Context.Interaction.ModifyOriginalResponseAsync(contents, options);
     }
 
-    protected virtual IChannel GetParentChannel()
+    protected virtual IChannel? GetParentChannel()
     {
         IChannel channel = Context.Channel;
 

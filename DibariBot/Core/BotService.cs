@@ -94,7 +94,7 @@ public class BotService(
                     message.Exception,
                     "{Source} | {Message}",
                     message.Source,
-                    message.Message
+                    message.Message ?? message.Exception.Message
                 );
             }
         }

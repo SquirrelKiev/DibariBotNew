@@ -38,7 +38,7 @@ public class SearchModule(SearchService search, MangaService mangaService) : Bot
 
         var isEphemeral = (ogRes.Flags & MessageFlags.Ephemeral) != 0;
 
-        await ModifyOriginalResponseAsync(await mangaService.MangaCommand(Context.Guild?.Id ?? 0ul, GetParentChannel().Id,
+        await ModifyOriginalResponseAsync(await mangaService.MangaCommand(Context.Guild?.Id ?? 0ul, GetParentChannel()?.Id ?? 0ul,
             new SeriesIdentifier("mangadex", dexId).ToString(), ephemeral: isEphemeral, isSpoiler: state.isSpoiler));
     }
 }

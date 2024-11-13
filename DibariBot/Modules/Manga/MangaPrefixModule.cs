@@ -58,7 +58,7 @@ public class MangaPrefixModule(MangaService mangaHandler, DbService dbService) :
             }
         }
 
-        var contents = await mangaHandler.MangaCommand(Context.Guild?.Id ?? 0ul, GetParentChannel().Id,
+        var contents = await mangaHandler.MangaCommand(Context.Guild?.Id ?? 0ul, GetParentChannel()?.Id ?? 0ul,
             url, chapter, page, isSpoiler: spoiler);
 
         await ReplyAsync(contents);
