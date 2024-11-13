@@ -64,16 +64,22 @@ public class DefaultMangaPage(DbService db, ConfigCommandService configCommandSe
     {
         await using var dbContext = db.GetDbContext();
 
-        var guildId = (Context.Guild?.Id) ?? 0ul;
+        var guildId = Context.Guild?.Id ?? 0ul;
 
         DefaultManga[] defaults;
-        if (guildId == 0ul)
+        var channelId = Context.Channel?.Id ?? 0ul;
+        
+        if (guildId == 0ul && channelId != 0ul)
         {
-            defaults = await dbContext.DefaultMangas.Where(x => x.ChannelId == Context.Channel.Id).ToArrayAsync();
+            defaults = await dbContext.DefaultMangas.Where(x => x.ChannelId == channelId).ToArrayAsync();
+        }
+        else if(guildId != 0ul)
+        {
+            defaults = await dbContext.DefaultMangas.Where(x => x.GuildId == guildId).ToArrayAsync();
         }
         else
         {
-            defaults = await dbContext.DefaultMangas.Where(x => x.GuildId == guildId).ToArrayAsync();
+            defaults = [];
         }
 
         return defaults;
