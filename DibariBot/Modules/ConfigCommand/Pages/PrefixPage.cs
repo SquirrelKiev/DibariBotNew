@@ -31,7 +31,7 @@ public class PrefixPage(ConfigCommandService configCommandService, DbService dbS
             .WithColor(colorProvider.GetEmbedColor(config));
 
         var components = new ComponentBuilder()
-            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Id, IsDm()))
+            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Id, IsUserInstallInteraction()))
             .WithButton("Change Prefix", ModulePrefixes.CONFIG_PREFIX_MODAL_BUTTON, ButtonStyle.Secondary)
             .WithRedButton();
 

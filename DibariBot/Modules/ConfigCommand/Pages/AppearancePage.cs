@@ -42,7 +42,7 @@ public partial class AppearancePage(ConfigCommandService configCommandService, D
             .WithColor(colorProvider.GetEmbedColor(guildConfig));
 
         var components = new ComponentBuilder()
-            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Id, IsDm()))
+            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Id, IsUserInstallInteraction()))
             .WithButton(
                 "Embed Color",
                 ModulePrefixes.CONFIG_APPEARANCE_CHANGE_COLOR_BUTTON,

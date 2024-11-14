@@ -62,7 +62,7 @@ public class MangaAliasPage(
         var eb = await GetEmbed(context, entries);
 
         var cb = new ComponentBuilder()
-            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Id, IsDm()))
+            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Id, IsUserInstallInteraction()))
             .WithButton("Add", ModulePrefixes.CONFIG_ALIASES_ADD_BUTTON, ButtonStyle.Secondary)
             .WithButton(
                 "Remove",

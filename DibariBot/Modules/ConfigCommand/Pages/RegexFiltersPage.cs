@@ -82,7 +82,7 @@ public partial class RegexFiltersPage(
         }
 
         var components = new ComponentBuilder()
-            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Id, IsDm()))
+            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Id, IsUserInstallInteraction()))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Add")
                 .WithCustomId($"{ModulePrefixes.CONFIG_FILTERS_OPEN_MODAL_BUTTON}{0ul}")

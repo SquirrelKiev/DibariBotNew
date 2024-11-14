@@ -10,13 +10,13 @@ public class HomePage(ConfigCommandService configCommandService, ColorProvider c
         var embed = new EmbedBuilder()
             .WithColor(await colorProvider.GetEmbedColor(Context.Guild));
 
-        foreach (var page in configCommandService.FilteredConfigPages(IsDm()))
+        foreach (var page in configCommandService.FilteredConfigPages(IsUserInstallInteraction()))
         {
             embed.AddField(page.ConfigPageAttribute.Label, page.ConfigPageAttribute.Description);
         }
 
         var components = new ComponentBuilder()
-            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Page.Help, IsDm()))
+            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Page.Help, IsUserInstallInteraction()))
             .WithRedButton();
 
         return await Task.FromResult(new MessageContents("", embed.Build(), components));

@@ -42,11 +42,20 @@ public class DefaultMangaPage(DbService db, ConfigCommandService configCommandSe
     // step 1 - help page/modal open
     public async Task<MessageContents> GetMessageContents(ConfigCommandService.State state)
     {
+        if (IsUserInstallInteraction() && !IsDm())
+        {
+            var errorEmbed = new EmbedBuilder()
+                .WithDescription("You don't have permission to use this here. Try DMs.")
+                .WithColor(colorProvider.GetErrorEmbedColor());
+            
+            return new MessageContents(errorEmbed);
+        }
+        
         // TODO: This needs paginating
         var embed = await GetCurrentDefaultsEmbed(await GetMangaDefaultsList());
 
         var components = new ComponentBuilder()
-            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Page.DefaultManga, IsDm()))
+            .WithSelectMenu(configCommandService.GetPageSelectDropdown(Page.DefaultManga, IsUserInstallInteraction()))
             .WithButton(new ButtonBuilder()
                 .WithLabel("Set")
                 .WithCustomId($"{ModulePrefixes.CONFIG_DEFAULT_MANGA_SET}")
@@ -203,7 +212,7 @@ public class DefaultMangaPage(DbService db, ConfigCommandService configCommandSe
         var channelId = 0ul;
         if (Context.Guild == null)
         {
-            channelId = Context.Channel.Id;
+            channelId = Context.Channel?.Id ?? 0ul;
         }
 
         await ModifyOriginalResponseAsync(await ConfirmPromptContents(new ConfirmState(parsedUrl.Value, channelId)));
@@ -222,6 +231,19 @@ public class DefaultMangaPage(DbService db, ConfigCommandService configCommandSe
 
     private async Task<MessageContents> ConfirmPromptContents(ConfirmState confirmState)
     {
+        if (confirmState.channelId == 0ul && Context.Guild == null)
+        {
+            var errorEmbed = new EmbedBuilder()
+                .WithDescription("Both channel and guild aren't able to be grabbed? That's not right.");
+            
+            return new MessageContents(string.Empty, errorEmbed.Build(), new ComponentBuilder()
+                .WithButton(new ButtonBuilder()
+                    .WithLabel("Go Back")
+                    .WithCustomId(ModulePrefixes.CONFIG_PAGE_SELECT_PAGE_BUTTON +
+                                  StateSerializer.SerializeObject(StateSerializer.SerializeObject(Id)))
+                    .WithStyle(ButtonStyle.Secondary)));
+        }
+        
         var embed = new EmbedBuilder()
             .WithDescription($"Set the default manga for **{(confirmState.channelId == 0ul ? "the server" : $"<#{confirmState.channelId}>")}** as **{confirmState.series}**?")
             .WithColor(await colorProvider.GetEmbedColor(Context.Guild));
@@ -270,11 +292,13 @@ public class DefaultMangaPage(DbService db, ConfigCommandService configCommandSe
             Manga = state.series.ToString()
         };
 
-        // TODO: keep an eye on this to see if they implement it
-        // Why is this not a thing yet: https://github.com/dotnet/efcore/issues/4526
-        await using (var context = db.GetDbContext())
+        // TODO: keep an eye on https://github.com/dotnet/efcore/issues/4526 to see if they implement it
+        if (toAdd.GuildId != 0ul || toAdd.ChannelId != 0ul)
         {
-            var exists = await context.DefaultMangas.FirstOrDefaultAsync(x => x.GuildId == toAdd.GuildId && x.ChannelId == toAdd.ChannelId);
+            await using var context = db.GetDbContext();
+            
+            var exists = await context.DefaultMangas.FirstOrDefaultAsync(x =>
+                x.GuildId == toAdd.GuildId && x.ChannelId == toAdd.ChannelId);
 
             if (exists != null)
             {

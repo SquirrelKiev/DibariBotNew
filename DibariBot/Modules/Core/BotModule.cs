@@ -33,8 +33,13 @@ public abstract class BotModule : InteractionModuleBase
         return channel;
     }
 
-    public virtual bool IsDm()
+    public bool IsUserInstallInteraction()
     {
-        return Context.Guild == null;
+        return Context.Interaction.IntegrationOwners.All(x => x.Key != ApplicationIntegrationType.GuildInstall);
+    }
+
+    public bool IsDm()
+    {
+        return Context.Interaction.IsDMInteraction;
     }
 }
