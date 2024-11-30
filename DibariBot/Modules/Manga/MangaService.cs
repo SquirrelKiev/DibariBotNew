@@ -82,7 +82,8 @@ public partial class MangaService(MangaFactory mangaFactory, BotConfig botConfig
             return new MessageContents(string.Empty, embed:
                 new EmbedBuilder()
                     .WithDescription(
-                        "Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot.")
+                        "Unsupported/invalid URL. Please make sure you're using a link that is supported by the bot. " +
+                        "[A full list can be found here.](https://github.com/SquirrelKiev/DibariBotNew/wiki/Manga)")
                     .WithColor(colorProvider.GetErrorEmbedColor())
                     .Build(), null);
         }
