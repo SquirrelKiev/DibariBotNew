@@ -99,7 +99,7 @@ public static class ParseUrl
             seriesIdentifier.series = Regex.Match(url, @"(?:\/[a-zA-Z0-9]+)?\/artworks\/([a-zA-Z0-9]+)")?.Groups[1].Value;
         }
 
-        if (seriesIdentifier.platform == null)
+        if (seriesIdentifier.platform == null || seriesIdentifier.series == null)
             return null;
         
         return seriesIdentifier;
